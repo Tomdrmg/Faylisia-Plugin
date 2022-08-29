@@ -1,0 +1,66 @@
+name: Faylisia
+version: '${project.version}'
+main: fr.blockincraft.faylisia.Faylisia
+api-version: 1.13
+prefix: Faylisia
+authors: [ Blockincraft ]
+website: faylis.xyz
+depend: [ ProtocolLib ]
+commands:
+  break:
+    description: Allow breaking
+    permission: faylisia.command.break
+  class:
+    description: Open the menu to select a class
+    permission: faylisia.command.class
+  spawn:
+    description: Teleport player to spawn
+    permission: faylisia.command.spawn
+  menu:
+    description: Open the server main menu
+    permission: faylisia.command.menu
+  items:
+    description: Custom items commands
+    permission: faylisia.command.items
+  ranks:
+    description: Rank commands
+    permission: faylisia.command.ranks
+permissions:
+  faylisia.command.break:
+    default: op
+  faylisia.command.ranks:
+    default: op
+  faylisia.command.class:
+    default: true
+  faylisia.command.spawn:
+    default: true
+  faylisia.command.menu:
+    default: true
+  faylisia.command.items:
+    default: true
+  faylisia.chat_color:
+    default: op
+  faylisia.chat_gradient_color:
+    default: op
+  faylisia.chat_hex_color:
+    default: op
+  faylisia.break:
+    default: op
+  faylisia.ranks.edit:
+    default: op
+  faylisia.ranks.get:
+    default: op
+  faylisia.class:
+    default: true
+  faylisia.spawn.teleport_others:
+    default: op
+  faylisia.spawn.teleport:
+    default: true
+  faylisia.menu.open:
+    default: true
+  faylisia.items.give:
+    default: op
+  faylisia.items.menu:
+    default: true
+  faylisia.items.recipe:
+    default: true
