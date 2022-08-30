@@ -1,5 +1,6 @@
 package fr.blockincraft.faylisia.configurable;
 
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -63,6 +64,11 @@ public enum Messages {
     RECEIVE_FROM_AN_ITEM("receive_from_an_item", "%prefix% &d%player_name%&a vous a donné un '%item%&a'."),
     RECEIVE_FROM_MULTIPLE_ITEMS("receive_from_multiple_items", "%prefix% &d%player_name%&a vous a donné %amount% '%item%&a'."),
 
+    //Discord messages
+    MESSAGE_WAS_BEEN_SEND("message_was_been_send", "%prefix% &aLe message à bien était envoyé dans le salon &d%channel% &a(%channel_id%)."),
+    GUILD_NOT_FOUND("guild_not_found", "%prefix% &cLe serveur discord n'a pas était trouvé!"),
+    CHANNEL_NOT_FOUND("channel_not_found", "%prefix% &cLe salon discord n'a pas était trouvé!"),
+
     //State messages
     YOU_ARE_DIED("you_are_died", "%prefix% &cVous êtes mort!");
 
@@ -81,7 +87,7 @@ public enum Messages {
     }
 
     public String get() {
-        return ChatColor.translateAlternateColorCodes('&', (config == null ? defaultValue : config.getString(path, defaultValue))
+        return ColorsUtils.translateAll(config == null ? defaultValue : config.getString(path, defaultValue)
                 .replace("%prefix%", this == PREFIX || this == BAR ? "" : PREFIX.get())
                 .replace("%bar%", this == PREFIX || this == BAR ? "" : BAR.get())
         );
@@ -94,7 +100,7 @@ public enum Messages {
             lang = lang.replace(entry.getKey(), entry.getValue());
         }
 
-        return ChatColor.translateAlternateColorCodes('&', lang
+        return ColorsUtils.translateAll(lang
                 .replace("%prefix%", this == PREFIX ? "" : PREFIX.get())
                 .replace("%bar%", this == BAR ? "" : BAR.get())
         );

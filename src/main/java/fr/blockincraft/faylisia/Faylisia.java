@@ -9,6 +9,7 @@ import com.comphenix.protocol.wrappers.*;
 import fr.blockincraft.faylisia.api.RequestHandler;
 import fr.blockincraft.faylisia.commands.*;
 import fr.blockincraft.faylisia.configurable.Messages;
+import fr.blockincraft.faylisia.configurable.Provider;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.core.entity.CustomPlayer;
 import fr.blockincraft.faylisia.entity.CustomEntity;
@@ -23,10 +24,12 @@ import fr.blockincraft.faylisia.player.Classes;
 import fr.blockincraft.faylisia.displays.ScoreboardManager;
 import fr.blockincraft.faylisia.task.*;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.bukkit.*;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eclipse.jetty.server.Server;
@@ -48,6 +51,7 @@ public final class Faylisia extends JavaPlugin {
 
     private SessionFactory sessionFactory;
     private Server apiServer;
+    private JDA discordBot;
 
     private Registry registry;
     private ScoreboardManager scoreBoardManager;
@@ -63,6 +67,10 @@ public final class Faylisia extends JavaPlugin {
 
     public SessionFactory getSessionFactory() {
         return sessionFactory;
+    }
+
+    public JDA getDiscordBot() {
+        return discordBot;
     }
 
     public Registry getRegistry() {
@@ -165,6 +173,12 @@ public final class Faylisia extends JavaPlugin {
             return;
         }
 
+        if (!initDiscordBot()) {
+            this.getLogger().log(Level.SEVERE, "Cannot start Discord Bot server, stopping.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+
         //Initialize gamerules in all worlds
         initGameRules();
         //Remove all vanilla recipes
@@ -204,6 +218,11 @@ public final class Faylisia extends JavaPlugin {
         if (ranksCommand != null) {
             ranksCommand.setExecutor(new RanksExecutor());
             ranksCommand.setTabCompleter(new RanksCompleter());
+        }
+        PluginCommand discordCommand = Bukkit.getPluginCommand("discord");
+        if (discordCommand != null) {
+            discordCommand.setExecutor(new DiscordExecutor());
+            discordCommand.setTabCompleter(new DiscordCompleter());
         }
 
         //Start tasks
@@ -287,6 +306,18 @@ public final class Faylisia extends JavaPlugin {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean initDiscordBot() {
+        try {
+            discordBot = JDABuilder.createDefault(Provider.token, GatewayIntent.GUILD_MEMBERS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES)
+                    .setActivity(Activity.playing("Faylisia"))
+                    .build();
+
+            return true;
+        } catch (Exception e) {
             return false;
         }
     }

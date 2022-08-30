@@ -13,9 +13,9 @@ public class CustomPlayer {
     @Id
     private UUID player;
 
-    @Enumerated(value = EnumType.ORDINAL)
+    @Enumerated(value = EnumType.STRING)
     private Classes classes;
-    @Enumerated(value = EnumType.ORDINAL)
+    @Enumerated(value = EnumType.STRING)
     private Ranks rank;
     @Column(name = "can_break")
     private boolean canBreak;

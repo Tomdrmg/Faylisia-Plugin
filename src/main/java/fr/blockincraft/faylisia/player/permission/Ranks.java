@@ -42,6 +42,8 @@ public enum Ranks {
                     .set("minecraft.command.time", PermissionState.FALSE)
                     .set("minecraft.command.msg", PermissionState.FALSE)
                     .set("minecraft.command.weather", PermissionState.FALSE)
+                    .set("faylisia.command.discord", PermissionState.FALSE)
+                    .set("faylisia.discord", PermissionState.FALSE)
                     .build()
     ),
     BUILDER(2,

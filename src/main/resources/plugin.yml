@@ -25,6 +25,9 @@ commands:
   ranks:
     description: Rank commands
     permission: faylisia.command.ranks
+  discord:
+    description: Discord commands
+    permission: faylisia.command.discord
 permissions:
   faylisia.command.break:
     default: op
@@ -38,6 +41,10 @@ permissions:
     default: true
   faylisia.command.items:
     default: true
+  faylisia.command.discord:
+    default: op
+  faylisia.discord:
+    default: op
   faylisia.chat_color:
     default: op
   faylisia.chat_gradient_color:
