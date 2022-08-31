@@ -294,18 +294,17 @@ public class GameListeners implements Listener {
         Handlers[] armorSlotHandlers = customPlayer.getArmorSlotHandlers();
         Handlers[] othersHandlers = customPlayer.getOthersHandlers();
 
-        Material material = e.getClickedBlock() == null ? null : e.getClickedBlock().getType();
         boolean isRightClick = e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK;
 
-        if (mainHandHandlers != null) mainHandHandlers.onInteract(e.getPlayer(), material, true, false, isRightClick, e.getHand());
+        if (mainHandHandlers != null) mainHandHandlers.onInteract(e.getPlayer(), e.getClickedBlock(), true, false, isRightClick, e.getHand());
         for (Handlers handlers : armorSetHandlers) {
-            handlers.onInteract(e.getPlayer(), material, false, true, isRightClick, e.getHand());
+            handlers.onInteract(e.getPlayer(), e.getClickedBlock(), false, true, isRightClick, e.getHand());
         }
         for (Handlers handlers : armorSlotHandlers) {
-            handlers.onInteract(e.getPlayer(), material, false, true, isRightClick, e.getHand());
+            handlers.onInteract(e.getPlayer(), e.getClickedBlock(), false, true, isRightClick, e.getHand());
         }
         for (Handlers handlers : othersHandlers) {
-            handlers.onInteract(e.getPlayer(), material, false, false, isRightClick, e.getHand());
+            handlers.onInteract(e.getPlayer(), e.getClickedBlock(), false, false, isRightClick, e.getHand());
         }
 
         if (e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.CRAFTING_TABLE) {

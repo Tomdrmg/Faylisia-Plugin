@@ -1,6 +1,9 @@
 package fr.blockincraft.faylisia;
 
+import fr.blockincraft.faylisia.core.dto.DiscordTicketDTO;
+import fr.blockincraft.faylisia.core.entity.DiscordTicket;
 import fr.blockincraft.faylisia.core.service.CustomPlayerService;
+import fr.blockincraft.faylisia.core.service.DiscordTicketService;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.entity.CustomEntityType;
 import fr.blockincraft.faylisia.items.CustomItem;
@@ -9,22 +12,27 @@ import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.map.Shape;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Registry {
+    private static final Logger logger = Faylisia.getInstance().getLogger();
     private static final CustomPlayerService customPlayerService = new CustomPlayerService();
+    private static final DiscordTicketService ticketService = new DiscordTicketService();
 
     private final Map<UUID, CustomPlayerDTO> players = new HashMap<>();
     private final Map<String, CustomItem> itemsById = new HashMap<>();
@@ -39,11 +47,93 @@ public class Registry {
     private final List<Region> regions = new ArrayList<>();
     private Region defaultRegion = null;
 
+    private final Map<Long, DiscordTicketDTO> tickets = new HashMap<>();
+    private final Map<String, Member> tokensToMember = new HashMap<>();
+
+    public String createToken(Member member) {
+        Random r = new SecureRandom();
+        char[] content = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ()[]{}:/-+=#@".toCharArray();
+
+        int length = r.nextInt(6) + 15;
+
+        StringBuilder sb;
+
+        do {
+            sb = new StringBuilder();
+            for (int i = 0; i < length; i++) {
+                sb.append(content[r.nextInt(content.length)]);
+            }
+        } while (tokensToMember.containsKey(sb.toString()));
+
+        String token = sb.toString();
+
+        tokensToMember.put(token, member);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                tokensToMember.remove(token);
+            }
+        }, 120000);
+
+        return token;
+    }
+
+    public boolean hasToken(Member member) {
+        return tokensToMember.containsValue(member);
+    }
+
+    public Member validateToken(String token) {
+        if (!tokensToMember.containsKey(token)) return null;
+
+        Member account = tokensToMember.get(token);
+        tokensToMember.remove(token);
+
+        return account;
+    }
+
     public void init() {
         for (CustomPlayerDTO customPlayer : customPlayerService.getAllCustomPlayer()) {
-            Faylisia.getInstance().getLogger().log(Level.INFO, "Load player data of " + customPlayer.getPlayer());
+            logger.log(Level.INFO, "Load player data of " + customPlayer.getPlayer());
             players.put(customPlayer.getPlayer(), customPlayer);
         }
+        for (DiscordTicketDTO ticket : ticketService.getAllDiscordTickets()) {
+            logger.log(Level.INFO, "Load ticket in channel " + ticket.getChannelId() + " of user " + ticket.getUserId());
+            tickets.put(ticket.getChannelId(), ticket);
+        }
+    }
+
+    public Map<Long, DiscordTicketDTO> getTickets() {
+        return new HashMap<>(tickets);
+    }
+
+    public DiscordTicketDTO getTicketInChannel(long channelId) {
+        return tickets.get(channelId);
+    }
+
+    public void createTicket(DiscordTicketDTO dto) {
+        tickets.put(dto.getChannelId(), dto);
+        ticketService.persistDiscordTicket(dto);
+    }
+
+    public void mergeTicket(DiscordTicketDTO dto) {
+        ticketService.mergeDiscordTicket(dto);
+    }
+
+    public void removeTicket(DiscordTicketDTO dto) {
+        tickets.remove(dto.getChannelId());
+        ticketService.removeDiscordTicket(dto);
+    }
+
+    public List<DiscordTicketDTO> getTicketsOf(long userId) {
+        List<DiscordTicketDTO> tickets = new ArrayList<>();
+
+        this.tickets.forEach((channel, ticket) -> {
+            if (ticket.getUserId() == userId) {
+                tickets.add(ticket);
+            }
+        });
+
+        return tickets;
     }
 
     public Map<UUID, CustomPlayerDTO> getPlayers() {

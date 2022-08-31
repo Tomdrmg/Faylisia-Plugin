@@ -22,6 +22,7 @@ public class DiscordCompleter implements TabCompleter {
             if (args.length == 2) {
                 if ("rules".toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))) completion.add("rules");
                 if ("tickets".toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))) completion.add("tickets");
+                if ("link".toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))) completion.add("link");
             }
         }
 

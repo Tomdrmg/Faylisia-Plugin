@@ -9,13 +9,15 @@ import com.comphenix.protocol.wrappers.*;
 import fr.blockincraft.faylisia.api.RequestHandler;
 import fr.blockincraft.faylisia.commands.*;
 import fr.blockincraft.faylisia.configurable.Messages;
-import fr.blockincraft.faylisia.configurable.Provider;
+import fr.blockincraft.faylisia.configurable.DiscordData;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.core.entity.CustomPlayer;
+import fr.blockincraft.faylisia.core.entity.DiscordTicket;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.entity.Entities;
 import fr.blockincraft.faylisia.items.Items;
 import fr.blockincraft.faylisia.listeners.ChatListeners;
+import fr.blockincraft.faylisia.listeners.DiscordListeners;
 import fr.blockincraft.faylisia.listeners.GameListeners;
 import fr.blockincraft.faylisia.listeners.MenuListener;
 import fr.blockincraft.faylisia.map.Regions;
@@ -160,6 +162,13 @@ public final class Faylisia extends JavaPlugin {
         //Create of registry
         registry = new Registry();
         registry.init();
+
+        //Try to make the discord bot ready
+        if (!initDiscordBot()) {
+            this.getLogger().log(Level.SEVERE, "Cannot start Discord Bot server, stopping.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
     }
 
     @Override
@@ -169,12 +178,6 @@ public final class Faylisia extends JavaPlugin {
         //Try to start api web server
         if (!startServer()) {
             this.getLogger().log(Level.SEVERE, "Cannot start API server, stopping.");
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        if (!initDiscordBot()) {
-            this.getLogger().log(Level.SEVERE, "Cannot start Discord Bot server, stopping.");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
@@ -224,6 +227,10 @@ public final class Faylisia extends JavaPlugin {
             discordCommand.setExecutor(new DiscordExecutor());
             discordCommand.setTabCompleter(new DiscordCompleter());
         }
+        PluginCommand linkCommand = Bukkit.getPluginCommand("link");
+        if (linkCommand != null) {
+            linkCommand.setExecutor(new LinkExecutor());
+        }
 
         //Start tasks
         ScoreboardRefreshTask.startTask();
@@ -231,6 +238,7 @@ public final class Faylisia extends JavaPlugin {
         ActionBarTask.startTask();
         TabHeaderFooterTask.startTask();
         EntityQuitRegionTask.startTask();
+        EntityTargetTask.startTask();
 
         initialized = true;
     }
@@ -257,6 +265,13 @@ public final class Faylisia extends JavaPlugin {
         }
         sessionFactory = null;
 
+        try {
+            discordBot.shutdown();
+            discordBot = null;
+        } catch (Throwable ignored) {
+
+        }
+
         //Stop api web server
         try {
             apiServer.stop();
@@ -280,6 +295,7 @@ public final class Faylisia extends JavaPlugin {
             configuration.configure();
 
             configuration.addAnnotatedClass(CustomPlayer.class);
+            configuration.addAnnotatedClass(DiscordTicket.class);
 
             StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
             sessionFactory = configuration.buildSessionFactory(serviceRegistry);
@@ -312,9 +328,11 @@ public final class Faylisia extends JavaPlugin {
 
     public boolean initDiscordBot() {
         try {
-            discordBot = JDABuilder.createDefault(Provider.token, GatewayIntent.GUILD_MEMBERS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES)
+            discordBot = JDABuilder.createDefault(DiscordData.token, GatewayIntent.GUILD_MEMBERS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES)
                     .setActivity(Activity.playing("Faylisia"))
                     .build();
+
+            discordBot.addEventListener(new DiscordListeners());
 
             return true;
         } catch (Exception e) {

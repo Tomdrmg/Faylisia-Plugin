@@ -2,7 +2,7 @@ package fr.blockincraft.faylisia.commands;
 
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.configurable.Messages;
-import fr.blockincraft.faylisia.configurable.Provider;
+import fr.blockincraft.faylisia.configurable.DiscordData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.MessageBuilder;
@@ -39,13 +39,13 @@ public class DiscordExecutor implements CommandExecutor {
 
         if (args.length == 2 && args[0].equalsIgnoreCase("send")) {
             if (args[1].equalsIgnoreCase("rules")) {
-                Guild guild = discordBot.getGuildById(Provider.guildId);
+                Guild guild = discordBot.getGuildById(DiscordData.guildId);
                 if (guild == null) {
                     sender.sendMessage(Messages.GUILD_NOT_FOUND.get());
                     return true;
                 }
 
-                TextChannel channel = discordBot.getTextChannelById(Provider.rulesId);
+                TextChannel channel = guild.getTextChannelById(DiscordData.rulesId);
                 if (channel == null) {
                     sender.sendMessage(Messages.CHANNEL_NOT_FOUND.get());
                     return true;
@@ -54,22 +54,24 @@ public class DiscordExecutor implements CommandExecutor {
                 channel.sendMessage(new MessageBuilder("")
                         .setEmbeds(
                                 new EmbedBuilder()
-                                        .setAuthor("Faylisia")
+                                        .setFooter(DiscordData.footer, DiscordData.footerUrl)
                                         .setTitle("**Règles**")
-                                        .setDescription("")
+                                        .setDescription("""
+                                                """)
                                         .setColor(0x9525b8)
                                         .build()
                         )
                         .build()
-                ).submit();
+                ).queue();
+                return true;
             } else if (args[1].equalsIgnoreCase("tickets")) {
-                Guild guild = discordBot.getGuildById(Provider.guildId);
+                Guild guild = discordBot.getGuildById(DiscordData.guildId);
                 if (guild == null) {
                     sender.sendMessage(Messages.GUILD_NOT_FOUND.get());
                     return true;
                 }
 
-                TextChannel channel = discordBot.getTextChannelById(Provider.ticketsId);
+                TextChannel channel = guild.getTextChannelById(DiscordData.ticketsId);
                 if (channel == null) {
                     sender.sendMessage(Messages.CHANNEL_NOT_FOUND.get());
                     return true;
@@ -78,23 +80,94 @@ public class DiscordExecutor implements CommandExecutor {
                 channel.sendMessage(new MessageBuilder("")
                         .setEmbeds(
                                 new EmbedBuilder()
-                                        .setAuthor("Faylisia")
+                                        .setFooter(DiscordData.footer, DiscordData.footerUrl)
                                         .setTitle("**Tickets**")
-                                        .setDescription("")
+                                        .setDescription("""
+                                                Si tu a besoins d'aide ou une question, tu peux créer
+                                                un ticket en cliquant sur le boutton en dessous.""")
                                         .setColor(0x9525b8)
                                         .build()
                         )
                         .setActionRows(ActionRow.of(
                                 new ButtonImpl(
-                                        "create_ticket",
-                                        "Nouveau",
-                                        ButtonStyle.PRIMARY,
+                                        DiscordData.newTicketIdButton,
+                                        "Nouveau Ticket",
+                                        ButtonStyle.SUCCESS,
                                         false,
-                                        Emoji.fromEmote("Frog_fk", 753797501982867456L, false)
+                                        Emoji.fromEmote("minecraft-1", 850781198577041438L, true)
                                 )
                         ))
                         .build()
-                ).submit();
+                ).queue(message -> {
+                    Map<String, String> parameters = new HashMap<>();
+
+                    parameters.put("%channel%", channel.getName());
+                    parameters.put("%channel_id%", channel.getId());
+
+                    sender.sendMessage(Messages.MESSAGE_WAS_BEEN_SEND.get(parameters));
+                }, throwable -> {
+                    sender.sendMessage(Messages.ERROR_WHEN_SENDING_MESSAGE.get());
+                });
+
+
+                return true;
+            } else if (args[1].equalsIgnoreCase("link")) {
+                Guild guild = discordBot.getGuildById(DiscordData.guildId);
+                if (guild == null) {
+                    sender.sendMessage(Messages.GUILD_NOT_FOUND.get());
+                    return true;
+                }
+
+                TextChannel channel = guild.getTextChannelById(DiscordData.linkId);
+                if (channel == null) {
+                    sender.sendMessage(Messages.CHANNEL_NOT_FOUND.get());
+                    return true;
+                }
+
+                channel.sendMessage(new MessageBuilder("")
+                        .setEmbeds(
+                                new EmbedBuilder()
+                                        .setFooter(DiscordData.footer, DiscordData.footerUrl)
+                                        .setTitle("**Link**")
+                                        .setDescription("""
+                                                Pour accéder à certaines fonctionnalité du discord,
+                                                tu doit lié ton compte minecraft à ton compte MC.
+                                                Pour le lié ton compte il faut que tu clique sur le
+                                                bouton 'Lier mon compte' puis que tu execute la
+                                                command '/link <ton_token>'.""")
+                                        .setColor(0x9525b8)
+                                        .build()
+                        )
+                        .setActionRows(ActionRow.of(
+                                new ButtonImpl(
+                                        DiscordData.linkIdButton,
+                                        "Lier mon compte",
+                                        ButtonStyle.PRIMARY,
+                                        false,
+                                        Emoji.fromEmote("minecraft-1", 850781198577041438L, true)
+                                ),
+                                new ButtonImpl(
+                                        DiscordData.unlinkIdButton,
+                                        "Délier mon compte",
+                                        ButtonStyle.SECONDARY,
+                                        false,
+                                        Emoji.fromEmote("minecraft-1", 850781198577041438L, true)
+                                )
+                        ))
+                        .build()
+                ).queue(message -> {
+                    Map<String, String> parameters = new HashMap<>();
+
+                    parameters.put("%channel%", channel.getName());
+                    parameters.put("%channel_id%", channel.getId());
+
+                    sender.sendMessage(Messages.MESSAGE_WAS_BEEN_SEND.get(parameters));
+                }, throwable -> {
+                    sender.sendMessage(Messages.ERROR_WHEN_SENDING_MESSAGE.get());
+                });
+
+
+                return true;
             }
         }
 

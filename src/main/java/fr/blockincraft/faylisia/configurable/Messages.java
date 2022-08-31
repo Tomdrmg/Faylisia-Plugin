@@ -65,9 +65,17 @@ public enum Messages {
     RECEIVE_FROM_MULTIPLE_ITEMS("receive_from_multiple_items", "%prefix% &d%player_name%&a vous a donné %amount% '%item%&a'."),
 
     //Discord messages
-    MESSAGE_WAS_BEEN_SEND("message_was_been_send", "%prefix% &aLe message à bien était envoyé dans le salon &d%channel% &a(%channel_id%)."),
+    MESSAGE_WAS_BEEN_SEND("message_was_been_send", "%prefix% &aLe message à bien était envoyé dans le salon &d#%channel% &a(<%channel_id%>)."),
+    ERROR_WHEN_SENDING_MESSAGE("error_when_sending_message", "%prefix% &cLe message n'a pas pu être envoyé."),
     GUILD_NOT_FOUND("guild_not_found", "%prefix% &cLe serveur discord n'a pas était trouvé!"),
     CHANNEL_NOT_FOUND("channel_not_found", "%prefix% &cLe salon discord n'a pas était trouvé!"),
+    ACCOUNT_UNLINKED("account_unlinked", "%prefix% &aTon compte a bien était délié du compte discord &d%account_name%#%account_tag%&a."),
+
+    //Link command messages
+    INVALID_TOKEN("invalid_token", "%prefix% &cLe token est invalide!"),
+    ALREADY_LINK("already_link", "%prefix% &cVous êtes déja lié a un compte (%account_name%#%account_tag%)! Si vous pensez qu'il s'avère être une erreur, veuillez ouvrir un ticket sur le serveur discord: &ddiscord.faylis.xyz&c."),
+    USER_HAS_LEAVE_THE_SERVER("player_has_leave_the_server", "%prefix% &cL'utilisateur a quitté le serveur discord!"),
+    SUCCESS_LINK("success_link", "%prefix% &aVous avez bien lié votre compte à '&d%account_name%#%account_tag%&a'."),
 
     //State messages
     YOU_ARE_DIED("you_are_died", "%prefix% &cVous êtes mort!");
@@ -87,7 +95,7 @@ public enum Messages {
     }
 
     public String get() {
-        return ColorsUtils.translateAll(config == null ? defaultValue : config.getString(path, defaultValue)
+        return ColorsUtils.translateAll((config == null ? defaultValue : config.getString(path, defaultValue))
                 .replace("%prefix%", this == PREFIX || this == BAR ? "" : PREFIX.get())
                 .replace("%bar%", this == PREFIX || this == BAR ? "" : BAR.get())
         );
@@ -101,8 +109,8 @@ public enum Messages {
         }
 
         return ColorsUtils.translateAll(lang
-                .replace("%prefix%", this == PREFIX ? "" : PREFIX.get())
-                .replace("%bar%", this == BAR ? "" : BAR.get())
+                .replace("%prefix%", this == PREFIX || this == BAR ? "" : PREFIX.get())
+                .replace("%bar%", this == PREFIX || this == BAR ? "" : BAR.get())
         );
     }
 }

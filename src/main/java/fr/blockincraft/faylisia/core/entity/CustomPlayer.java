@@ -20,6 +20,8 @@ public class CustomPlayer {
     @Column(name = "can_break")
     private boolean canBreak;
     private String name;
+    @Column(name = "discord_user_id")
+    private Long discordUserId;
 
     public CustomPlayer() {
 
@@ -31,6 +33,7 @@ public class CustomPlayer {
         this.rank = dto.getRank();
         this.canBreak = dto.getCanBreak();
         this.name = dto.getName();
+        this.discordUserId = dto.getDiscordUserId();
     }
 
     public UUID getPlayer() {
@@ -51,5 +54,9 @@ public class CustomPlayer {
 
     public String getName() {
         return name;
+    }
+
+    public Long getDiscordUserId() {
+        return discordUserId;
     }
 }

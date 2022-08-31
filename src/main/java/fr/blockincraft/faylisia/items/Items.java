@@ -32,7 +32,7 @@ public class Items {
                         public double getStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
                             return stat == Stats.DEFENSE && inArmorSlot ? value + 100 : value;
                         }
-                    }, "&7Vous gagnez &a+100 &7de défense", "&7quand il est actif."
+                    }, "&7Vous gagnez &c+100 &7de défense", "&7quand il est actif."
                     ),
                     new ArmorSet.Bonus(
                             "Hulk Power", 4, new Handlers() {

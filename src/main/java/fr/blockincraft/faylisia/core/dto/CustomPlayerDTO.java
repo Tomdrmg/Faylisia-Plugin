@@ -33,6 +33,7 @@ public class CustomPlayerDTO {
     private Ranks rank = Ranks.PLAYER;
     private boolean canBreak = false;
     private String name;
+    private Long discordUserId;
 
     private final UUID player;
     private final Map<Stats, Double> stats = new HashMap<>();
@@ -47,6 +48,7 @@ public class CustomPlayerDTO {
         refreshStats();
         setEffectiveHealth(maxEffectiveHealth);
         setMagicalReserve((long) getStat(Stats.MAGICAL_RESERVE));
+        discordUserId = null;
     }
 
     public CustomPlayerDTO(CustomPlayer model) {
@@ -55,6 +57,7 @@ public class CustomPlayerDTO {
         this.rank = model.getRank();
         this.canBreak = model.getCanBreak();
         this.name = model.getName();
+        this.discordUserId = model.getDiscordUserId();
     }
 
     public Handlers getMainHandHandler() {
@@ -400,7 +403,7 @@ public class CustomPlayerDTO {
         long previousMaxEffectiveHealth = this.maxEffectiveHealth;
         this.maxEffectiveHealth = (long) (getStat(Stats.HEALTH) * (1 + getStat(Stats.DEFENSE) / 100));
         if (this.effectiveHealth > 0) {
-            this.setEffectiveHealth(previousMaxEffectiveHealth / this.effectiveHealth * this.maxEffectiveHealth);
+            this.setEffectiveHealth(this.effectiveHealth / previousMaxEffectiveHealth * this.maxEffectiveHealth);
         }
 
         player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(100);
@@ -690,6 +693,15 @@ public class CustomPlayerDTO {
 
     public void setName(String name) {
         this.name = name;
+        registry.applyModification(this);
+    }
+
+    public Long getDiscordUserId() {
+        return discordUserId;
+    }
+
+    public void setDiscordUserId(Long discordUserId) {
+        this.discordUserId = discordUserId;
         registry.applyModification(this);
     }
 }

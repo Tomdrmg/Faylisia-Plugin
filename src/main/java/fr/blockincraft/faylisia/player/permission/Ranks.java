@@ -86,11 +86,13 @@ public enum Ranks {
                     .set("faylisia.command.menu", PermissionState.TRUE)
                     .set("faylisia.command.items", PermissionState.TRUE)
                     .set("faylisia.command.spawn", PermissionState.TRUE)
+                    .set("faylisia.command.link", PermissionState.TRUE)
                     .set("faylisia.class", PermissionState.TRUE)
                     .set("faylisia.items.menu", PermissionState.TRUE)
                     .set("faylisia.items.recipe", PermissionState.TRUE)
                     .set("faylisia.spawn.teleport", PermissionState.TRUE)
                     .set("faylisia.menu.open", PermissionState.TRUE)
+                    .set("faylisia.link", PermissionState.TRUE)
                     .build()
     );
 

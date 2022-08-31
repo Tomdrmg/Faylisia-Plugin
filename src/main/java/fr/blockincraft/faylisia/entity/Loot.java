@@ -57,7 +57,7 @@ public class Loot {
     public ItemStack[] generateFor(Player player) {
         CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
         int probability = this.probability;
-        boolean rare = 100 / on * probability <= 5;
+        boolean rare = 100.0 / on * probability <= 5;
         if (rare) {
             long luck = (long) customPlayer.getStat(Stats.LUCK);
             probability *= 1 + luck / 100;
@@ -69,19 +69,34 @@ public class Loot {
         Handlers[] othersHandlers = customPlayer.getOthersHandlers();
 
         if (mainHandHandler != null) {
-            probability = mainHandHandler.getLootProbability(player, item, probability, rare, true, false);
+            probability = mainHandHandler.getLootProbability(player, item, probability, this.rolls, rare, true, false);
         }
         for (Handlers handlers : armorSetHandlers) {
-            probability = handlers.getLootProbability(player, item, probability, rare, false, true);
+            probability = handlers.getLootProbability(player, item, probability, this.rolls, rare, false, true);
         }
         for (Handlers handlers : armorSlotHandlers) {
-            probability = handlers.getLootProbability(player, item, probability, rare, false, true);
+            probability = handlers.getLootProbability(player, item, probability, this.rolls, rare, false, true);
         }
         for (Handlers handlers : othersHandlers) {
-            probability = handlers.getLootProbability(player, item, probability, rare, false, false);
+            probability = handlers.getLootProbability(player, item, probability, this.rolls, rare, false, false);
         }
 
         List<ItemStack> loots = new ArrayList<>();
+
+        int rolls = this.rolls;
+
+        if (mainHandHandler != null) {
+            rolls = mainHandHandler.getLootRolls(player, item, probability, rolls, rare, true, false);
+        }
+        for (Handlers handlers : armorSetHandlers) {
+            rolls = handlers.getLootRolls(player, item, probability, rolls, rare, false, true);
+        }
+        for (Handlers handlers : armorSlotHandlers) {
+            rolls = handlers.getLootRolls(player, item, probability, rolls, rare, false, true);
+        }
+        for (Handlers handlers : othersHandlers) {
+            rolls = handlers.getLootRolls(player, item, probability, rolls, rare, false, false);
+        }
 
         for (int i = 0; i < rolls; i++) {
             int r = random.nextInt(on);
@@ -89,16 +104,16 @@ public class Loot {
             if (r < probability) {
                 int amount = this.amount.getAmount();
                 if (mainHandHandler != null) {
-                    amount = mainHandHandler.getLootAmount(player, item, probability, amount, rare, true, false);
+                    amount = mainHandHandler.getLootAmount(player, item, probability, amount, rolls, rare, true, false);
                 }
                 for (Handlers handlers : armorSetHandlers) {
-                    amount = handlers.getLootAmount(player, item, probability, amount, rare, false, true);
+                    amount = handlers.getLootAmount(player, item, probability, amount, rolls, rare, false, true);
                 }
                 for (Handlers handlers : armorSlotHandlers) {
-                    amount = handlers.getLootAmount(player, item, probability, amount, rare, false, true);
+                    amount = handlers.getLootAmount(player, item, probability, amount, rolls, rare, false, true);
                 }
                 for (Handlers handlers : othersHandlers) {
-                    amount = handlers.getLootAmount(player, item, probability, amount, rare, false, false);
+                    amount = handlers.getLootAmount(player, item, probability, amount, rolls, rare, false, false);
                 }
 
                 while (amount > item.getMaterial().getMaxStackSize()) {
@@ -111,6 +126,8 @@ public class Loot {
                 }
             }
         }
+
+        System.out.println(probability);
 
         return loots.toArray(new ItemStack[0]);
     }

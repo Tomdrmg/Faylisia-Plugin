@@ -28,6 +28,9 @@ commands:
   discord:
     description: Discord commands
     permission: faylisia.command.discord
+  link:
+    description: Command to link acount with discord
+    permission: faylisia.command.link
 permissions:
   faylisia.command.break:
     default: op
@@ -43,6 +46,10 @@ permissions:
     default: true
   faylisia.command.discord:
     default: op
+  faylisia.command.link:
+    default: true
+  faylisia.link:
+    default: true
   faylisia.discord:
     default: op
   faylisia.chat_color:

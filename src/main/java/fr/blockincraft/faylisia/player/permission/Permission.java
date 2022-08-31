@@ -63,6 +63,8 @@ public class Permission {
             "faylisia.command.items",
             "faylisia.command.spawn",
             "faylisia.command.discord",
+            "faylisia.command.link",
+            "faylisia.link",
             "faylisia.discord",
             "faylisia.chat_color",
             "faylisia.chat_gradient_color",
