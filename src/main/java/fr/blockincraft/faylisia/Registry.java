@@ -302,9 +302,9 @@ public class Registry {
      * @return associated {@link CustomItem} / null if it doesn't have
      */
     @Nullable
-    public CustomItem getCustomItemByItemStack(@Nonnull ItemStack itemStack) {
-        // Check if item isn't AIR
-        if (itemStack.getType() == Material.AIR) return null;
+    public CustomItem getCustomItemByItemStack(ItemStack itemStack) {
+        // Check if item isn't null and isn't AIR
+        if (itemStack == null || itemStack.getType() == Material.AIR) return null;
 
         // Check if item has meta
         ItemMeta meta = itemStack.getItemMeta();
