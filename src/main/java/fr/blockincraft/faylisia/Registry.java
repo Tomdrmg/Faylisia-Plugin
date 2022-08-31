@@ -1,7 +1,6 @@
 package fr.blockincraft.faylisia;
 
 import fr.blockincraft.faylisia.core.dto.DiscordTicketDTO;
-import fr.blockincraft.faylisia.core.entity.DiscordTicket;
 import fr.blockincraft.faylisia.core.service.CustomPlayerService;
 import fr.blockincraft.faylisia.core.service.DiscordTicketService;
 import fr.blockincraft.faylisia.entity.CustomEntity;
@@ -12,28 +11,41 @@ import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.map.Shape;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * This class is the Registry of the plugin, when it was enabled, all data is stored here <br/>
+ * {@link Faylisia} class initialize it with the init() method and store the instance <br/>
+ * Differences between DTO and object are explained in {@link CustomPlayerDTO} and {@link DiscordTicketDTO}
+ */
 public class Registry {
+    // Initialize plugin unique elements
     private static final Logger logger = Faylisia.getInstance().getLogger();
     private static final CustomPlayerService customPlayerService = new CustomPlayerService();
     private static final DiscordTicketService ticketService = new DiscordTicketService();
 
+    // Initialize registry in-game data
+    // Custom players are stored in database
+    // Others are created when plugin start
     private final Map<UUID, CustomPlayerDTO> players = new HashMap<>();
     private final Map<String, CustomItem> itemsById = new HashMap<>();
     private final List<CustomItem> items = new ArrayList<>();
@@ -47,10 +59,41 @@ public class Registry {
     private final List<Region> regions = new ArrayList<>();
     private Region defaultRegion = null;
 
+    // Initialize registry discord data
+    // Tickets are stored in database
+    // Tokens aren't stored because they expire after two minutes,
+    // and we consider that they are expired after a restart
     private final Map<Long, DiscordTicketDTO> tickets = new HashMap<>();
     private final Map<String, Member> tokensToMember = new HashMap<>();
 
-    public String createToken(Member member) {
+    /**
+     * This method is called to initialize data, it loads data from the mysql database
+     */
+    public void init() {
+        // Initialize custom players
+        for (CustomPlayerDTO customPlayer : customPlayerService.getAllCustomPlayer()) {
+            logger.log(Level.INFO, "Load player data of " + customPlayer.getPlayer());
+            players.put(customPlayer.getPlayer(), customPlayer);
+        }
+
+        // Initialize discord tickets
+        for (DiscordTicketDTO ticket : ticketService.getAllDiscordTickets()) {
+            logger.log(Level.INFO, "Load ticket in channel " + ticket.getChannelId() + " of user " + ticket.getUserId());
+            tickets.put(ticket.getChannelId(), ticket);
+        }
+    }
+
+    /**
+     * This method create a token to link a {@link Member} to a {@link CustomPlayerDTO} <br/>
+     * Token can contain digits, lowercase/uppercase letters and some special characters, its length is between 15 and 20 <br/>
+     * The token is store and can be validated by the validateToken() method but never get <br/>
+     * The token expire two minutes after her creation
+     * @param member {@link Member} associated to the token
+     * @return token
+     */
+    @Nonnull
+    public String createToken(@Nonnull Member member) {
+        // Create random instance, content array and token length
         Random r = new SecureRandom();
         char[] content = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ()[]{}:/-+=#@".toCharArray();
 
@@ -58,6 +101,8 @@ public class Registry {
 
         StringBuilder sb;
 
+        // Generate a new token and restart if token already exist
+        // This may not cause problems even if we have a lot of members
         do {
             sb = new StringBuilder();
             for (int i = 0; i < length; i++) {
@@ -65,9 +110,12 @@ public class Registry {
             }
         } while (tokensToMember.containsKey(sb.toString()));
 
+        // Keep the token
         String token = sb.toString();
 
+        // Save it in this registry
         tokensToMember.put(token, member);
+        // Schedule a new task to remove it two minutes after
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -78,52 +126,82 @@ public class Registry {
         return token;
     }
 
-    public boolean hasToken(Member member) {
+    /**
+     * Return if a {@link Member} already have a token
+     * @param member {@link Member} to check
+     * @return if he has a token
+     */
+    public boolean hasToken(@Nonnull Member member) {
         return tokensToMember.containsValue(member);
     }
 
-    public Member validateToken(String token) {
+    /**
+     * This method return if the token is valid, then if it was valid it will be considered like used and will be deleted
+     * @param token token to check
+     * @return associated {@link Member} / null if invalid token
+     */
+    @Nullable
+    public Member validateToken(@Nonnull String token) {
+        // Check if token is valid
         if (!tokensToMember.containsKey(token)) return null;
 
+        // Then keep account and remove it of this registry
         Member account = tokensToMember.get(token);
         tokensToMember.remove(token);
 
         return account;
     }
 
-    public void init() {
-        for (CustomPlayerDTO customPlayer : customPlayerService.getAllCustomPlayer()) {
-            logger.log(Level.INFO, "Load player data of " + customPlayer.getPlayer());
-            players.put(customPlayer.getPlayer(), customPlayer);
-        }
-        for (DiscordTicketDTO ticket : ticketService.getAllDiscordTickets()) {
-            logger.log(Level.INFO, "Load ticket in channel " + ticket.getChannelId() + " of user " + ticket.getUserId());
-            tickets.put(ticket.getChannelId(), ticket);
-        }
-    }
-
+    /**
+     * @return all {@link DiscordTicketDTO} with their associated {@link Channel} id
+     */
+    @Nonnull
     public Map<Long, DiscordTicketDTO> getTickets() {
         return new HashMap<>(tickets);
     }
 
+    /**
+     * Return {@link DiscordTicketDTO} stored in {@link Channel}
+     * @param channelId id of {@link Channel} to check
+     * @return {@link DiscordTicketDTO} stored in the {@link Channel} or null
+     */
+    @Nullable
     public DiscordTicketDTO getTicketInChannel(long channelId) {
         return tickets.get(channelId);
     }
 
-    public void createTicket(DiscordTicketDTO dto) {
+    /**
+     * This method register a {@link DiscordTicketDTO} in this registry and in database
+     * @param dto {@link DiscordTicketDTO} to register
+     */
+    public void createTicket(@Nonnull DiscordTicketDTO dto) {
         tickets.put(dto.getChannelId(), dto);
         ticketService.persistDiscordTicket(dto);
     }
 
-    public void mergeTicket(DiscordTicketDTO dto) {
+    /**
+     * This method update a {@link DiscordTicketDTO} in database
+     * @param dto {@link DiscordTicketDTO} to update
+     */
+    public void updateTicket(@Nonnull DiscordTicketDTO dto) {
         ticketService.mergeDiscordTicket(dto);
     }
 
-    public void removeTicket(DiscordTicketDTO dto) {
+    /**
+     * This method delete a {@link DiscordTicketDTO} in this registry and in database
+     * @param dto {@link DiscordTicketDTO} to remove
+     */
+    public void removeTicket(@Nonnull DiscordTicketDTO dto) {
         tickets.remove(dto.getChannelId());
         ticketService.removeDiscordTicket(dto);
     }
 
+    /**
+     * This method return all {@link DiscordTicketDTO} of a discord {@link User}
+     * @param userId discord {@link User} id
+     * @return all {@link DiscordTicketDTO} of user
+     */
+    @Nonnull
     public List<DiscordTicketDTO> getTicketsOf(long userId) {
         List<DiscordTicketDTO> tickets = new ArrayList<>();
 
@@ -136,39 +214,80 @@ public class Registry {
         return tickets;
     }
 
+    /**
+     * @return all {@link CustomPlayerDTO} with their associated {@link UUID}
+     */
+    @Nonnull
     public Map<UUID, CustomPlayerDTO> getPlayers() {
         return new HashMap<>(players);
     }
 
-    public CustomPlayerDTO getPlayer(UUID player) {
+    /**
+     * This method return {@link CustomPlayerDTO} of a bukkit {@link Player} {@link UUID}
+     * @param player bukkit {@link Player} {@link UUID}
+     * @return {@link CustomPlayerDTO} associated / null if he doesn't exist
+     */
+    @Nullable
+    public CustomPlayerDTO getPlayer(@Nonnull UUID player) {
         return players.get(player);
     }
 
-    public CustomPlayerDTO registerPlayer(UUID player) {
+    /**
+     * This method create and register a {@link CustomPlayerDTO} from the bukkit {@link Player} {@link UUID} <br/>
+     * It will me register in this registry and in database
+     * @param player bukkit {@link Player} {@link UUID}
+     * @return {@link CustomPlayerDTO} instance created
+     */
+    @Nonnull
+    public CustomPlayerDTO registerPlayer(@Nonnull UUID player) {
         CustomPlayerDTO dto = new CustomPlayerDTO(player);
 
         customPlayerService.persistCustomPlayer(dto);
         players.put(player, dto);
-        return getPlayer(player);
+        return dto;
     }
 
-    public CustomPlayerDTO getOrRegisterPlayer(UUID player) {
-        return getPlayer(player) == null ? registerPlayer(player) : getPlayer(player);
+    /**
+     * This method return {@link CustomPlayerDTO} of a bukkit {@link Player} {@link UUID} and if it doesn't exist, it was register and get
+     * @param player bukkit {@link Player} {@link UUID}
+     * @return {@link CustomPlayerDTO} instance associated
+     */
+    @Nonnull
+    public CustomPlayerDTO getOrRegisterPlayer(@Nonnull UUID player) {
+        CustomPlayerDTO pl = getPlayer(player);
+        return pl == null ? registerPlayer(player) : pl;
     }
 
-    public void applyModification(CustomPlayerDTO dto) {
+    /**
+     * This method apply change of a {@link CustomPlayerDTO} in database
+     * @param dto edited {@link CustomPlayerDTO}
+     */
+    public void applyModification(@Nonnull CustomPlayerDTO dto) {
         customPlayerService.mergeCustomPlayer(dto);
     }
 
+    /**
+     * @return all {@link CustomItem}
+     */
+    @Nonnull
     public List<CustomItem> getItems() {
         return new ArrayList<>(items);
     }
 
-    public boolean itemIdUsed(String id) {
+    /**
+     * This method check if an item id is used or no
+     * @param id id to check
+     * @return if it was used
+     */
+    public boolean itemIdUsed(@Nonnull String id) {
         return itemsById.containsKey(id);
     }
 
-    public void registerItem(CustomItem item) {
+    /**
+     * This method register a {@link CustomItem} in this registry and in database
+     * @param item {@link CustomItem} to register
+     */
+    public void registerItem(@Nonnull CustomItem item) {
         itemsById.put(item.getId(), item);
         items.add(item);
         Categories category = item.getCategory();
@@ -177,138 +296,260 @@ public class Registry {
         }
     }
 
-    public CustomItem getByItemStack(ItemStack itemStack) {
-        if (itemStack == null) return null;
+    /**
+     * This method read bukkit {@link ItemStack} data to found custom item associated
+     * @param itemStack bukkit {@link ItemStack} to check
+     * @return associated {@link CustomItem} / null if it doesn't have
+     */
+    @Nullable
+    public CustomItem getCustomItemByItemStack(@Nonnull ItemStack itemStack) {
+        // Check if item isn't AIR
         if (itemStack.getType() == Material.AIR) return null;
 
-        PersistentDataContainer data = itemStack.getItemMeta().getPersistentDataContainer();
+        // Check if item has meta
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta == null) return null;
 
-        if (data.has(CustomItem.idKey, PersistentDataType.STRING)) {
-            String id = data.get(CustomItem.idKey, PersistentDataType.STRING);
-            return itemsById.get(id);
-        }
+        // Check if item has custom item id data
+        PersistentDataContainer data = meta.getPersistentDataContainer();
+        if (!data.has(CustomItem.idKey, PersistentDataType.STRING)) return null;
 
-        return null;
+        // Then read custom item id and return associated custom item
+        String id = data.get(CustomItem.idKey, PersistentDataType.STRING);
+        return itemsById.get(id);
     }
 
+    /**
+     * @return all {@link CustomItem} and their associated id
+     */
+    @Nonnull
     public Map<String, CustomItem> getItemsById() {
         return new HashMap<>(itemsById);
     }
 
-    public void refreshItems(PlayerInventory inventory) {
+    /**
+     * This method actualize name and lore of {@link CustomItem} stored in a {@link PlayerInventory} <br/>
+     * Used to prevent bad bukkit {@link ItemStack} in case of custom item change
+     * @param inventory {@link PlayerInventory} to scan
+     */
+    public void refreshItems(@Nonnull PlayerInventory inventory) {
+        // For each item stack in player inventory
         for (ItemStack itemStack : inventory.getContents()) {
+            // Check if item isn't null and isn't AIR
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
-            CustomItem ci = getByItemStack(itemStack);
-            if (ci != null) {
-                ItemStack model = ci.getAsItemStack();
+            // Get custom item from it and check if it's null
+            CustomItem ci = getCustomItemByItemStack(itemStack);
+            if (ci == null) continue;
 
-                ItemMeta isMeta = itemStack.getItemMeta();
-                ItemMeta ciMeta = model.getItemMeta();
+            // Get an example of the custom item
+            ItemStack model = ci.getAsItemStack();
 
-                if (ciMeta.hasCustomModelData()) isMeta.setCustomModelData(ciMeta.getCustomModelData());
-                isMeta.setDisplayName(ciMeta.getDisplayName());
-                isMeta.setLore(ciMeta.getLore());
+            // Get meta of example and item stack and check if they are null
+            ItemMeta isMeta = itemStack.getItemMeta();
+            ItemMeta ciMeta = model.getItemMeta();
+            if (ciMeta == null || isMeta == null) continue;
 
-                itemStack.setItemMeta(isMeta);
-            }
+            // Change custom model data if example has one
+            if (ciMeta.hasCustomModelData()) isMeta.setCustomModelData(ciMeta.getCustomModelData());
+            // Update the display name
+            isMeta.setDisplayName(ciMeta.getDisplayName());
+            // Update the lore
+            isMeta.setLore(ciMeta.getLore());
+
+            // Replace the item meta
+            itemStack.setItemMeta(isMeta);
         }
     }
 
+    /**
+     * @return all {@link ArmorSet}
+     */
+    @Nonnull
     public List<ArmorSet> getArmorSets() {
         return new ArrayList<>(armorSets);
     }
 
-    public boolean armorSetIdUsed(String id) {
+    /**
+     * This method check if an {@link ArmorSet} id was already used
+     * @param id id to check
+     * @return if id was already used
+     */
+    public boolean armorSetIdUsed(@Nonnull String id) {
         return armorSetsById.containsKey(id);
     }
 
-    public void registerArmorSet(ArmorSet armorSet) {
+    /**
+     * This method register an {@link ArmorSet} in this registry and database
+     * @param armorSet {@link ArmorSet} to register
+     */
+    public void registerArmorSet(@Nonnull ArmorSet armorSet) {
         armorSetsById.put(armorSet.getId(), armorSet);
         armorSets.add(armorSet);
     }
 
+    /**
+     * @return all {@link CustomEntityType}
+     */
+    @Nonnull
     public List<CustomEntityType> getEntityTypes() {
         return new ArrayList<>(entityTypes);
     }
 
-    public boolean entityTypeIdUsed(String id) {
+    /**
+     * This method check if a {@link CustomEntityType} id was already used
+     * @param id id to check
+     * @return if id was already used
+     */
+    public boolean entityTypeIdUsed(@Nonnull String id) {
         return entityTypesById.containsKey(id);
     }
 
-    public void registerEntityType(CustomEntityType entityType) {
+    /**
+     * This method register a {@link CustomEntityType} in this registry and in database
+     * @param entityType {@link CustomEntityType} to register
+     */
+    public void registerEntityType(@Nonnull CustomEntityType entityType) {
         entityTypes.add(entityType);
         entityTypesById.put(entityType.getId(), entityType);
     }
 
-    public CustomEntity getCustomEntityByEntity(Entity entity) {
+    /**
+     * This method return {@link CustomEntity} associated to the bukkit {@link Entity}
+     * @param entity bukkit {@link Entity}
+     * @return associated {@link CustomEntity} / null if he doesn't have
+     */
+    @Nullable
+    public CustomEntity getCustomEntityByEntity(@Nonnull Entity entity) {
         return entitiesByEntity.get(entity);
     }
 
+    /**
+     * @return all {@link CustomEntity}
+     */
+    @Nonnull
     public List<CustomEntity> getEntities() {
         return new ArrayList<>(entities);
     }
 
-    public void addEntity(CustomEntity entity) {
+    /**
+     * This method add a {@link CustomEntity} in this registry
+     * @param entity {@link CustomEntity} to add
+     */
+    public void addEntity(@Nonnull CustomEntity entity) {
         entities.add(entity);
         entitiesByEntity.put(entity.getEntity(), entity);
     }
 
-    public void removeEntity(CustomEntity entity) {
+    /**
+     * This method remove a {@link CustomEntity} in this registry
+     * @param entity {@link CustomEntity} to remove
+     */
+    public void removeEntity(@Nonnull CustomEntity entity) {
         entities.remove(entity);
         entitiesByEntity.remove(entity.getEntity());
     }
 
+    /**
+     * @return all {@link ArmorSet} with their associated id
+     */
+    @Nonnull
     public Map<String, ArmorSet> getArmorSetsById() {
         return new HashMap<>(armorSetsById);
     }
 
-    public boolean regionIdUsed(String id) {
+    /**
+     * This method check if a {@link Region} id was already used
+     * @param id id to check
+     * @return if id was already used
+     */
+    public boolean regionIdUsed(@Nonnull String id) {
         return regionsById.containsKey(id);
     }
 
+    /**
+     * @return all {@link Region} with their associated id
+     */
+    @Nonnull
     public Map<String, Region> getRegionsById() {
         return regionsById;
     }
 
+    /**
+     * @return all {@link Region}
+     */
+    @Nonnull
     public List<Region> getRegions() {
         return regions;
     }
 
-    public void registerRegion(Region region) {
+    /**
+     * This method register a {@link Region} in this registry and in database
+     * @param region {@link Region} to register
+     */
+    public void registerRegion(@Nonnull Region region) {
         regionsById.put(region.getId(), region);
         regions.add(region);
     }
 
-    public Region getRegionAt(int x, int y, int z, World world) {
-        if (world == null) return null;
-
+    /**
+     * This method get {@link Region} at a position
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     * @param world world of the position
+     * @return last sub {@link Region} of the position
+     */
+    @Nonnull
+    public Region getRegionAt(int x, int y, int z, @Nonnull World world) {
+        // Get default region at start because default region cover all server
         Region region = defaultRegion;
+        // Each time try to check if region has subregions
         outer: while (region.hasSubRegion()) {
+            // For each subregion we check if they contain position
             for (Region subRegion : region.getSubRegion(false)) {
+                // To do that we try in all shapes
                 for (Shape shape : subRegion.getAreas()) {
+                    // Check if position is in
                     if (shape.contain(x, y, z, world)) {
+                        // If yes restart the while with the subregion
                         region = subRegion;
                         continue outer;
                     }
                 }
             }
 
+            // If no subregions contain position then break
             break;
         }
 
         return region;
     }
 
-    public Region getRegionAt(Location location) {
+    /**
+     * This method get {@link Region} at a position
+     * @param location position
+     * @return last sub {@link Region} of the position / null if world is null
+     */
+    @Nullable
+    public Region getRegionAt(@Nonnull Location location) {
+        if (location.getWorld() == null) return null;
         return getRegionAt(location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getWorld());
     }
 
-    public boolean isInRegion(Region region, int x, int y, int z, World world, boolean strict) {
+    /**
+     * This method check if a position is in a {@link Region}
+     * @param region region to check
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     * @param world world to check
+     * @param strict true if it can't be a subregion of the region to check
+     * @return if position is in region
+     */
+    public boolean isInRegion(@Nonnull Region region, int x, int y, int z, @Nonnull World world, boolean strict) {
         Region regionIn = getRegionAt(x, y, z, world);
-
         if (regionIn == region) return true;
-
 
         if (!strict) {
             List<Region> allRegion = region.getSubRegion(true);
@@ -318,12 +559,23 @@ public class Registry {
 
         return false;
     }
-
-    public boolean isInRegion(Region region, Location location, boolean strict) {
+    /**
+     * This method check if a position is in a {@link Region}
+     * @param region region to check
+     * @param location position
+     * @param strict true if it can't be a subregion of the region to check
+     * @return if position is in region
+     */
+    public boolean isInRegion(@Nonnull Region region, @Nonnull Location location, boolean strict) {
+        if (location.getWorld() == null) return false;
         return this.isInRegion(region, location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getWorld(), strict);
     }
 
-    public void setDefaultRegion(Region defaultRegion) {
+    /**
+     * This method set the default {@link Region} of server
+     * @param defaultRegion default {@link Region}
+     */
+    public void setDefaultRegion(@Nonnull Region defaultRegion) {
         this.defaultRegion = defaultRegion;
     }
 }

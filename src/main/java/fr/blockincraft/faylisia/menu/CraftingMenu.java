@@ -161,7 +161,7 @@ public class CraftingMenu extends ChestMenu {
                                                 if (slot == null || slot.getType() == Material.AIR) {
                                                     maxToAdd += itemModel.getMaxStackSize();
                                                 } else {
-                                                    CustomItem inventoryItem = registry.getByItemStack(slot);
+                                                    CustomItem inventoryItem = registry.getCustomItemByItemStack(slot);
                                                     if (inventoryItem != null && inventoryItem.getId().equals(item.getId())) {
                                                         maxToAdd += itemModel.getMaxStackSize() - slot.getAmount();
                                                     }

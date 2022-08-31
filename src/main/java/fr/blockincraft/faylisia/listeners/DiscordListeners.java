@@ -213,7 +213,7 @@ public class DiscordListeners extends ListenerAdapter {
                 }
 
                 ticket.close();
-                registry.mergeTicket(ticket);
+                registry.updateTicket(ticket);
 
                 channel.getManager().setParent(category).queue();
                 for (PermissionOverride perm : channel.getMemberPermissionOverrides()) {

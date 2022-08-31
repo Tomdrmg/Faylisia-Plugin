@@ -7,6 +7,7 @@ import com.comphenix.protocol.injector.PacketFilterManager;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import fr.blockincraft.faylisia.Faylisia;
+import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
@@ -16,12 +17,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -29,18 +32,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Utilities methods to interact with players
+ */
 public class PlayerUtils {
+    // Initialize plugin unique elements
     private static final ProtocolManager protocolManager = Faylisia.getInstance().getProtocolManager();
     private static final SecureRandom random = new SecureRandom();
 
-    public static final void giveOrDrop(Player player, ItemStack itemStack) {
-        if (itemStack == null || itemStack.getType() == Material.AIR) return;
-        if (player == null) return;
+    /**
+     * Give a bukkit {@link ItemStack} to a player or drop it if {@link PlayerInventory} is full
+     * @param player {@link Player} player which will receive items
+     * @param itemStack bukkit {@link ItemStack} to give
+     */
+    public static void giveOrDrop(@Nonnull Player player, @Nonnull ItemStack itemStack) {
+        // Check if bukkit item stack is AIR
+        if (itemStack.getType() == Material.AIR) return;
 
+        // Get inventory
         PlayerInventory inventory = player.getInventory();
 
+        // Calculate how many items we can add in inventory
         int maxToAdd = 0;
-
         for (ItemStack slot : inventory.getStorageContents()) {
             if (slot == null || slot.getType() == Material.AIR) {
                 maxToAdd = itemStack.getAmount();
@@ -56,18 +69,28 @@ public class PlayerUtils {
             }
         }
 
+        // Create a copy of the bukkit item stack
         ItemStack copy = itemStack.clone();
         copy.setAmount(maxToAdd);
         inventory.addItem(copy);
 
+        // If we need to add more items we drop them
         if (itemStack.getAmount() - maxToAdd > 0) {
             itemStack.setAmount(itemStack.getAmount() - maxToAdd);
-            Item item = player.getLocation().getWorld().dropItem(player.getLocation(), itemStack);
+            Item item = player.getWorld().dropItem(player.getLocation(), itemStack);
             item.setOwner(player.getUniqueId());
         }
     }
 
-    public static void spawnDamageIndicator(long damage, boolean critic, Player player, Location location) {
+    /**
+     * Spawn a client side only {@link ArmorStand} with custom name to show damage dealt to an {@link CustomEntity}
+     * @param damage damage dealt
+     * @param critic if hit is critic (to change display)
+     * @param player bukkit {@link Player} which will see the {@link ArmorStand}
+     * @param location location of the {@link ArmorStand} will spawn
+     */
+    public static void spawnDamageIndicator(long damage, boolean critic, @Nonnull Player player, @Nonnull Location location) {
+        // Create the name of entity with colors and commas
         StringBuilder sb = new StringBuilder();
         sb.append(damage);
         int l = sb.length();
@@ -80,10 +103,13 @@ public class PlayerUtils {
             }
         }
 
+        // Create new location with random values
         Location finalLocation = location.add((double) (random.nextInt(100) - 1) / 100, ((double) (random.nextInt(100) - 1) / 100) + 0.5, (double) (random.nextInt(100) - 1) / 100);
 
+        // Generate entity id
         int id = (int) (Math.random() * Integer.MAX_VALUE);
 
+        // Create packet to spawn entity
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.SPAWN_ENTITY);
 
         // Entity ID
@@ -106,30 +132,41 @@ public class PlayerUtils {
         // Set type
         packet.getEntityTypeModifier().write(0, EntityType.ARMOR_STAND);
 
+        // Create second packet to change entity metadata
         PacketContainer metadataPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
 
+        // Apply all data
         WrappedDataWatcher metadata = new WrappedDataWatcher();
         metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 0x20);
         metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true)), Optional.of(WrappedChatComponent.fromText(ChatColor.translateAlternateColorCodes('&', (critic ? "&6⁂ " : "") + sb)).getHandle()));
         metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, WrappedDataWatcher.Registry.get(Boolean.class)), true);
         metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), (byte) (0x01 | 0x08 | 0x10)); //isSmall, noBasePlate, set Marker
 
+        // Add data in packet
         metadataPacket.getWatchableCollectionModifier().write(0, metadata.getWatchableObjects());
 
+        // Set entity id
         metadataPacket.getIntegers().write(0, id);
 
         try {
+            // Send packets
             protocolManager.sendServerPacket(player, packet);
             protocolManager.sendServerPacket(player, metadataPacket);
+
+            // Then create a new packet to remove entity after 0.5 seconds
             Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
+                // Create packet to remove entity
                 PacketContainer removePacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
                 List<Integer> ids = new ArrayList<>();
 
+                // Add entity id
                 ids.add(id);
 
+                // Set ids
                 removePacket.getIntLists().write(0, ids);
 
                 try {
+                    // Send packet
                     protocolManager.sendServerPacket(player, removePacket);
                 } catch (InvocationTargetException ex) {
                     ex.printStackTrace();

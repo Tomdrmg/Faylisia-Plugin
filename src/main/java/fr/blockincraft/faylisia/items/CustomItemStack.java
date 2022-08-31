@@ -25,7 +25,7 @@ public class CustomItemStack {
     }
 
     public static CustomItemStack fromItemStack(ItemStack model) {
-        CustomItem item = Faylisia.getInstance().getRegistry().getByItemStack(model);
+        CustomItem item = Faylisia.getInstance().getRegistry().getCustomItemByItemStack(model);
         if (item == null) return null;
         int amount = model.getAmount();
 

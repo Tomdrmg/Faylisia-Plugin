@@ -45,7 +45,7 @@ public class ArmorSet {
 
         if (id == null || id.isEmpty()) throw new InvalidBuildException("Id cannot be null or empty!");
         if (!idPattern.matcher(id).matches()) throw new InvalidBuildException("Id can only contains pattern [a-z1-9_-]!");
-        if (registry.itemIdUsed(id)) throw new InvalidBuildException("Id already used!");
+        if (registry.armorSetIdUsed(id)) throw new InvalidBuildException("Id already used!");
 
         registered = true;
         registry.registerArmorSet(this);
