@@ -32,13 +32,20 @@ public class DiscordListeners extends ListenerAdapter {
     private static final JDA discordBot = Faylisia.getInstance().getDiscordBot();
     private static final Registry registry = Faylisia.getInstance().getRegistry();
 
+    /**
+     * When bot is ready, actualize stored data, roles and channels
+     */
     @Override
     public void onReady(@NotNull ReadyEvent event) {
+        // Retrieve guild
+        // Return if guild doesn't exist
         Guild guild = discordBot.getGuildById(DiscordData.guildId);
         if (guild == null) {
             return;
         }
 
+        // Get player role and apply it
+        // In case of user join discord when bot is off
         Role playerRole = guild.getRoleById(DiscordData.playerRoleId);
         if (playerRole != null) {
             for (Member member : guild.getMembers()) {
@@ -57,6 +64,8 @@ public class DiscordListeners extends ListenerAdapter {
             }
         }
 
+        // Get linked role and apply it or remove it for members which are linked or unlinked during bot is off
+        // Theoretically impossible but in case of data was changed directly in database
         Role linkedRole = guild.getRoleById(DiscordData.linkedRoleId);
         registry.getPlayers().forEach((id, custom) -> {
             if (custom.getDiscordUserId() != null) {
@@ -71,23 +80,28 @@ public class DiscordListeners extends ListenerAdapter {
         });
     }
 
+    /**
+     * When a member join, add it the player role and send a welcome message
+     */
     @Override
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
         Guild guild = discordBot.getGuildById(DiscordData.guildId);
 
         if (guild != null && event.getGuild() == guild) {
+            // Add player role
             Role playerRole = guild.getRoleById(DiscordData.playerRoleId);
             if (playerRole != null) {
                 guild.addRoleToMember(event.getMember(), playerRole).queue();
             }
 
+            // Get channel and send welcome message
             TextChannel channel = guild.getTextChannelById(DiscordData.welcomeId);
             if (channel != null) {
                 channel.sendMessage(new MessageBuilder("")
                         .setEmbeds(
                                 new EmbedBuilder()
                                         .setColor(0x4ef542)
-                                        .setImage(event.getMember().getAvatarUrl())
+                                        .setThumbnail(event.getMember().getAvatarUrl())
                                         .setDescription("Bienvenue <@" + event.getMember().getIdLong() + ">!")
                                         .setTitle("Bienvenue")
                                         .setFooter(DiscordData.footer, DiscordData.footerUrl)
@@ -99,11 +113,15 @@ public class DiscordListeners extends ListenerAdapter {
         }
     }
 
+    /**
+     * When a member quit, send a quit message and unlink his in game account
+     */
     @Override
     public void onGuildMemberRemove(@NotNull GuildMemberRemoveEvent event) {
         Guild guild = discordBot.getGuildById(DiscordData.guildId);
 
         if (guild != null && event.getGuild() == guild) {
+            // Get channel and send message
             TextChannel channel = guild.getTextChannelById(DiscordData.welcomeId);
             if (channel != null) {
                 channel.sendMessage(new MessageBuilder("")
@@ -120,6 +138,7 @@ public class DiscordListeners extends ListenerAdapter {
                 ).queue();
             }
 
+            // Unlink in game account
             registry.getPlayers().forEach((id, custom) -> {
                 if (custom.getDiscordUserId() != null && custom.getDiscordUserId() == event.getUser().getIdLong()) {
                     custom.setDiscordUserId(null);
@@ -128,6 +147,9 @@ public class DiscordListeners extends ListenerAdapter {
         }
     }
 
+    /**
+     * When a button is clicked do the associated action
+     */
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         if (event.getButton().getId() == null) return;
@@ -141,6 +163,7 @@ public class DiscordListeners extends ListenerAdapter {
 
         if (interaction.isFromGuild() && member != null && guild != null && guild.getIdLong() == DiscordData.guildId) {
             if (button.getId().equals(DiscordData.newTicketIdButton)) {
+                // Check if player already have a ticket not closed
                 for (DiscordTicketDTO ticket : registry.getTicketsOf(member.getIdLong())) {
                     if (!ticket.isClosed()) {
                         event.reply("Tu a déja ouvert un ticket <#" + ticket.getChannelId() + ">, ferme le pour pouvoir en créer un nouveau.")
@@ -151,6 +174,7 @@ public class DiscordListeners extends ListenerAdapter {
                 }
 
                 Category category = guild.getCategoryById(DiscordData.ticketsCategoryId);
+                // Check if we found ticket category
                 if (category == null) {
                     event.reply("Une erreur c'est produite durant la création du ticket.")
                             .setEphemeral(true)
@@ -158,14 +182,17 @@ public class DiscordListeners extends ListenerAdapter {
                     return;
                 }
 
+                // Create the channel
                 guild.createTextChannel("Ticket de " + member.getEffectiveName(), category)
                         .syncPermissionOverrides()
                         .addPermissionOverride(member, 137439464512L, 0L)
                         .addRolePermissionOverride(DiscordData.ticketsRoleId, 532576463936L, 0L)
                         .queue(channelIn -> {
+                            // After creation, register ticket in registry and database
                             DiscordTicketDTO dto = new DiscordTicketDTO(channelIn.getIdLong(), member.getIdLong());
                             registry.createTicket(dto);
 
+                            // Send support message
                             channelIn.sendMessage(new MessageBuilder("<@&" + DiscordData.ticketsRoleId + ">")
                                     .setEmbeds(
                                             new EmbedBuilder()
@@ -189,6 +216,7 @@ public class DiscordListeners extends ListenerAdapter {
                                     .build()
                             ).queue();
 
+                            // Reply interaction
                             event.reply("Ton ticket à bien était créer <#" + channelIn.getIdLong() + ">.")
                                     .setEphemeral(true)
                                     .queue();
@@ -197,6 +225,7 @@ public class DiscordListeners extends ListenerAdapter {
                                 .queue());
             } else if (button.getId().equals(DiscordData.closeTicketIdButton)) {
                 Category category = guild.getCategoryById(DiscordData.closedTicketsCategoryId);
+                // Check if we found closed ticket category
                 if (category == null) {
                     event.reply("Une erreur c'est produite durant la fermeture du ticket.")
                             .setEphemeral(true)
@@ -205,6 +234,7 @@ public class DiscordListeners extends ListenerAdapter {
                 }
 
                 DiscordTicketDTO ticket = registry.getTicketInChannel(channel.getIdLong());
+                // Check if we found ticket
                 if (ticket == null) {
                     event.reply("Le ticket est introuvable.")
                             .setEphemeral(true)
@@ -212,13 +242,16 @@ public class DiscordListeners extends ListenerAdapter {
                     return;
                 }
 
+                // Close ticket
                 ticket.close();
                 registry.updateTicket(ticket);
 
+                // Move ticket to closed ticket category
                 channel.getManager().setParent(category).queue();
                 for (PermissionOverride perm : channel.getMemberPermissionOverrides()) {
                     perm.delete().queue();
                 }
+                // Update button from close to delete
                 interaction.editButton(new ButtonImpl(
                                 DiscordData.deleteTicketIdButton,
                                 "Supprimer le Ticket",
@@ -229,6 +262,7 @@ public class DiscordListeners extends ListenerAdapter {
                 ).queue();
             } else if (button.getId().equals(DiscordData.deleteTicketIdButton)) {
                 DiscordTicketDTO ticket = registry.getTicketInChannel(channel.getIdLong());
+                // Check if we found ticket
                 if (ticket == null) {
                     event.reply("Le ticket est introuvable.")
                             .setEphemeral(true)
@@ -236,17 +270,20 @@ public class DiscordListeners extends ListenerAdapter {
                     return;
                 }
 
+                // Delete it
                 registry.removeTicket(ticket);
                 channel.delete().reason("Suppression du ticket").queue();
             } else if (button.getId().equals(DiscordData.linkIdButton)) {
                 AtomicReference<String> linkedName = new AtomicReference<>(null);
 
+                // Get linked account name
                 registry.getPlayers().forEach((id, custom) -> {
                     if (custom.getDiscordUserId() != null && custom.getDiscordUserId() == member.getIdLong()) {
                         linkedName.set(custom.getName());
                     }
                 });
 
+                // Check if account already link
                 if (linkedName.get() != null) {
                     event.reply("Tu a déja lié ton compte au joueur '" + linkedName.get() + "', si tu veux le lié a un autre joueur il te faut dabord le délié.")
                             .setEphemeral(true)
@@ -254,6 +291,7 @@ public class DiscordListeners extends ListenerAdapter {
                     return;
                 }
 
+                // Check if user already has a token
                 if (registry.hasToken(member)) {
                     event.reply("Tu a déja lié un token en cours, il va expirer deux minutes après sa création, tu pourra alors en créer un nouveau.")
                             .setEphemeral(true)
@@ -261,20 +299,24 @@ public class DiscordListeners extends ListenerAdapter {
                     return;
                 }
 
+                // Create a token
                 String token = registry.createToken(member);
 
+                // Send token
                 event.reply("Voici ton token: " + token + ", pour lié ton compte execute la commande '/link " + token + "' en jeu. Attention le token expire dans deux minutes, il faudra en créer un nouveau.")
                         .setEphemeral(true)
                         .queue();
             } else if (button.getId().equals(DiscordData.unlinkIdButton)) {
                 AtomicReference<CustomPlayerDTO> customPlayer = new AtomicReference<>(null);
 
+                // Get linked account or null if not linked
                 registry.getPlayers().forEach((id, custom) -> {
                     if (custom.getDiscordUserId() != null && custom.getDiscordUserId() == member.getIdLong()) {
                         customPlayer.set(custom);
                     }
                 });
 
+                // Check if account is link
                 if (customPlayer.get() == null) {
                     event.reply("Ton compte discord n'est lié à aucun compte Minecraft.")
                             .setEphemeral(true)
@@ -282,9 +324,11 @@ public class DiscordListeners extends ListenerAdapter {
                     return;
                 }
 
+                // Unlink account
                 CustomPlayerDTO customPl = customPlayer.get();
                 customPl.setDiscordUserId(null);
 
+                // Send message to in game player if he is online
                 Player player = Bukkit.getPlayer(customPl.getPlayer());
                 if (player != null) {
                     Map<String, String> parameters = new HashMap<>();
@@ -295,11 +339,13 @@ public class DiscordListeners extends ListenerAdapter {
                     player.sendMessage(Messages.ACCOUNT_UNLINKED.get(parameters));
                 }
 
+                // Remove linked role
                 Role role = guild.getRoleById(DiscordData.linkedRoleId);
                 if (role != null) {
                     guild.removeRoleFromMember(member, role).queue();
                 }
 
+                // Reset discord pseudo
                 guild.modifyNickname(member, member.getUser().getName()).queue();
                 event.reply("Ton compte discord n'est maintenant plus lié à aucun compte Minecraft.")
                         .setEphemeral(true)

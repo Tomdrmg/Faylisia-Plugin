@@ -1,5 +1,13 @@
 package fr.blockincraft.faylisia.player;
 
+import org.bukkit.ChatColor;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
+
+/**
+ * This enum contain all stats of players except effective health, magical reserve (not the max but the stored) and damages
+ */
 public enum Stats {
     HEALTH(0, "Santé Maximale", 'c', '\uE001', '\uE012', 100.0, -1.0),
     VITALITY(1, "Vitalité", 'c', '\uE002', '\uE013', 2.0, 100.0),
@@ -22,7 +30,16 @@ public enum Stats {
     public final double defaultValue;
     public final double maxValue;
 
-    Stats(int index, String name, char color, char icon, char bigIcon, double defaultValue, double maxValue) {
+    /**
+     * @param index index to order them on display
+     * @param name display name of the stat
+     * @param color color char to use {@link ChatColor}
+     * @param icon icon representing the stat
+     * @param bigIcon bigger icon version
+     * @param defaultValue default value of this stat
+     * @param maxValue limit value for this stat
+     */
+    Stats(int index, @NotNull String name, char color, char icon, char bigIcon, double defaultValue, double maxValue) {
         this.index = index;
         this.name = name;
         this.icon = icon;

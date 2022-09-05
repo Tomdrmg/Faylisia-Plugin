@@ -1,5 +1,7 @@
 package fr.blockincraft.faylisia.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,8 +18,8 @@ public class FileUtils {
      * @throws IOException if we can't create a {@link FileInputStream}
      * @throws NoSuchAlgorithmException if SHA-1 algorithm wasn't found
      */
-    @Nonnull
-    public static byte[] calcSHA1(@Nonnull File file) throws IOException, NoSuchAlgorithmException {
+    @NotNull
+    public static byte[] calcSHA1(@NotNull File file) throws IOException, NoSuchAlgorithmException {
         FileInputStream fileInputStream = new FileInputStream(file);
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
         DigestInputStream digestInputStream = new DigestInputStream(fileInputStream, digest);
@@ -33,7 +35,7 @@ public class FileUtils {
     /**
      * @return server resource pack as {@link File}
      */
-    @Nonnull
+    @NotNull
     public static File getResourcePack() {
         return new File("resource_pack.zip");
     }

@@ -5,6 +5,7 @@ import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.menu.viewer.ItemsViewerMenu;
 import fr.blockincraft.faylisia.menu.viewer.RecipeViewerMenu;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
@@ -72,12 +73,12 @@ public class ItemsExecutor implements CommandExecutor {
 
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (!multiple) {
-                            PlayerUtils.giveOrDrop(target, item.getAsItemStack());
+                            PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
                             if (target != player) {
                                 target.sendMessage(Messages.RECEIVE_FROM_AN_ITEM.get(parameters));
                             }
                         } else {
-                            PlayerUtils.giveOrDrop(target, item.getAsItemStack(amount));
+                            PlayerUtils.giveOrDrop(target, new CustomItemStack(item, amount).getAsItemStack());
                             if (target != player) {
                                 target.sendMessage(Messages.RECEIVE_FROM_MULTIPLE_ITEMS.get(parameters));
                             }
@@ -97,7 +98,7 @@ public class ItemsExecutor implements CommandExecutor {
                     parameters.put("%item%", item.getName());
 
                     if (args.length == 3) {
-                        PlayerUtils.giveOrDrop(target, item.getAsItemStack());
+                        PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
 
                         if (target == player) {
                             player.sendMessage(Messages.GIVE_SELF_AN_ITEM.get(parameters));
@@ -111,7 +112,7 @@ public class ItemsExecutor implements CommandExecutor {
                         Integer amount = getInteger(args[3], sender);
                         if (amount == null) return true;
 
-                        PlayerUtils.giveOrDrop(target, item.getAsItemStack(amount));
+                        PlayerUtils.giveOrDrop(target, new CustomItemStack(item, amount).getAsItemStack());
 
                         parameters.put("%amount%", String.valueOf(amount));
                         if (target == player) {
@@ -150,12 +151,12 @@ public class ItemsExecutor implements CommandExecutor {
 
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (args.length == 3) {
-                            PlayerUtils.giveOrDrop(target, item.getAsItemStack());
+                            PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
                         } else {
                             Integer amount = getInteger(args[3], sender);
                             if (amount == null) return true;
 
-                            PlayerUtils.giveOrDrop(target, item.getAsItemStack(amount));
+                            PlayerUtils.giveOrDrop(target, new CustomItemStack(item, amount).getAsItemStack());
                         }
                     }
                 } else {
@@ -166,12 +167,12 @@ public class ItemsExecutor implements CommandExecutor {
                     if (item == null) return true;
 
                     if (args.length == 3) {
-                        PlayerUtils.giveOrDrop(target, item.getAsItemStack());
+                        PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
                     } else {
                         Integer amount = getInteger(args[3], sender);
                         if (amount == null) return true;
 
-                        PlayerUtils.giveOrDrop(target, item.getAsItemStack(amount));
+                        PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
                     }
                 }
             }

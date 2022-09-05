@@ -6,6 +6,7 @@ import fr.blockincraft.faylisia.items.StatsItem;
 import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,17 +54,17 @@ public class WeaponItem extends CustomItem implements DamageItem, StatsItem {
     }
 
     @Override
-    public double getStat(Stats stat) {
+    public double getStat(@NotNull Stats stat) {
         return stats.get(stat);
     }
 
     @Override
-    public boolean hasStat(Stats stat) {
+    public boolean hasStat(@NotNull Stats stat) {
         return stats.get(stat) != null;
     }
 
     @Override
-    public Map<Stats, Double> getStats() {
+    public @NotNull Map<Stats, Double> getStats() {
         return new HashMap<>(stats);
     }
 

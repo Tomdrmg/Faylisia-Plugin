@@ -91,8 +91,7 @@ public class CraftingRecipe implements Recipe {
 
                 if (recipeItem == null) return null;
 
-                if (!patternItem.getItem().getId().equals(recipeItem.getItem().getId()) || recipeItem.getAmount() < patternItem.getAmount())
-                    return null;
+                if (!patternItem.isSimilar(recipeItem) || recipeItem.getAmount() < patternItem.getAmount()) return null;
             }
 
             return pattern;
@@ -373,8 +372,7 @@ public class CraftingRecipe implements Recipe {
 
             if (recipeItem == null) return false;
 
-            if (!patternItem.getItem().getId().equals(recipeItem.getItem().getId()) || recipeItem.getAmount() < patternItem.getAmount())
-                return false;
+            if (!patternItem.isSimilar(recipeItem) || recipeItem.getAmount() < patternItem.getAmount()) return false;
         }
 
         return true;

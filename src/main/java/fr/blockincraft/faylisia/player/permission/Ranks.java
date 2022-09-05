@@ -1,9 +1,13 @@
 package fr.blockincraft.faylisia.player.permission;
 
 import fr.blockincraft.faylisia.Faylisia;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 
 public enum Ranks {
@@ -105,7 +109,17 @@ public enum Ranks {
     public final char accentColor;
     public final Permission[] permissions;
 
-    Ranks(int index, String name, String displayName, String playerName, String chatName, char mainColor, char accentColor, Permission... permissions) {
+    /**
+     * @param index index to order ranks in tab and for sub ranks
+     * @param name name of the rank
+     * @param displayName display name of the rank (with colors)
+     * @param playerName player name when have this rank (to apply colors)
+     * @param chatName chat name (player name + display name in other var to apply gradient on two)
+     * @param mainColor main color char to use {@link ChatColor}
+     * @param accentColor accent color char to use {@link ChatColor}
+     * @param permissions all permissions and their state to applied of player (default = false)
+     */
+    Ranks(int index, @NotNull String name, @NotNull String displayName, @NotNull String playerName, @NotNull String chatName, char mainColor, char accentColor, @Nullable Permission... permissions) {
         this.index = index;
         this.name = name;
         this.displayName = displayName;
@@ -116,6 +130,11 @@ public enum Ranks {
         this.permissions = permissions == null ? new Permission[0] : permissions;
     }
 
+    /**
+     * Get all ranks that are below this rank
+     * @return sub ranks
+     */
+    @NotNull
     public List<Ranks> getSubRanks() {
         List<Ranks> ranks = new ArrayList<>();
 
@@ -126,7 +145,13 @@ public enum Ranks {
         return ranks;
     }
 
-    public boolean hasPerm(String perm) {
+    /**
+     * Check if a rank have defined a permission
+     * @param perm permission to check
+     * @return if rank have permission
+     */
+    public boolean hasPerm(@NotNull String perm) {
+        // Check for this rank
         for (Permission permission : permissions) {
             String permIn = permission.getPerm();
             if (permIn.equals(perm)) {
@@ -134,6 +159,7 @@ public enum Ranks {
             }
         }
 
+        // Check for sub ranks
         for (Ranks subRank : getSubRanks()) {
             if (subRank.hasPerm(perm)) {
                 return true;
@@ -143,7 +169,14 @@ public enum Ranks {
         return false;
     }
 
-    public PermissionState getPerm(String perm) {
+    /**
+     * Get state of a permission
+     * @param perm permission to get
+     * @return state of permission
+     */
+    @Nullable
+    public PermissionState getPerm(@NotNull String perm) {
+        // Get for this rank
         for (Permission permission : permissions) {
             String permIn = permission.getPerm();
 
@@ -152,6 +185,7 @@ public enum Ranks {
             }
         }
 
+        // Get for sub ranks
         for (Ranks subRank : getSubRanks()) {
             PermissionState state = subRank.getPerm(perm);
             if (state != null) {
@@ -162,9 +196,17 @@ public enum Ranks {
         return null;
     }
 
-    public static void applyPermissions(Player player, Ranks rank) {
+    /**
+     * This method apply rank permission to a player <br/>
+     * If a permission wasn't defined, it will be set to false
+     * @param player player to apply permission
+     * @param rank rank of player
+     */
+    public static void applyPermissions(@NotNull Player player, @NotNull Ranks rank) {
+        // Create an attachment
         PermissionAttachment attachment = player.addAttachment(Faylisia.getInstance());
 
+        // Apply all perms
         for (String perm : Permission.allPerms) {
             if (rank.hasPerm(perm)) {
                 PermissionState state = rank.getPerm(perm);
@@ -174,6 +216,7 @@ public enum Ranks {
             }
         }
 
+        // Apply additional perms like world edit perms
         for (String perm : Permission.otherPerms) {
             if (rank.hasPerm(perm)) {
                 PermissionState state = rank.getPerm(perm);
@@ -183,6 +226,7 @@ public enum Ranks {
             }
         }
 
+        // Update commands in chat for player
         player.updateCommands();
     }
 }

@@ -12,18 +12,27 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A chest menu which show all categories of custom items
+ */
 public class ItemsViewerMenu extends ChestMenu {
     private final ChestMenu from;
     private final int totalPage;
     private int currentPage = 0;
 
-    public ItemsViewerMenu(ChestMenu from) {
+    /**
+     * Initialize menu
+     * @param from previous menu
+     */
+    public ItemsViewerMenu(@Nullable ChestMenu from) {
         super("&8&lItems", 6);
 
+        // Calculate page amount
         this.from = from;
         totalPage = (int) Math.ceil(Categories.values().length / 28.0);
 
@@ -35,6 +44,7 @@ public class ItemsViewerMenu extends ChestMenu {
 
     @Override
     public void refreshMenu() {
+        // Fill background with background item
         for (int i = 0; i < 54; i++) {
             ItemStack bgItem = new ItemStack(Material.MAGENTA_STAINED_GLASS_PANE);
 
@@ -45,28 +55,37 @@ public class ItemsViewerMenu extends ChestMenu {
             this.addItem(i, bgItem, (e) -> false);
         }
 
+        // Get categories
         Categories[] cat = Categories.values();
         List<Categories> categories = new ArrayList<>();
 
+        // Add all categories of current page
         for (int i = currentPage * 28; i < cat.length && i < (currentPage + 1) * 28; i++) {
             categories.add(cat[i]);
         }
 
+        // Set all categories slots
         for (int i = 0; i < 28; i++) {
+            // Calculate slot
             int slot = 10 + i + i / 7 * 2;
+            // If category has to be placed in the slot add it else clear slot
             if (i < categories.size()) {
+                // Add category item
                 Categories category = categories.get(i);
                 this.replaceExistingItem(slot, category.getAsItemStack(1), e -> {
                     if (e.getWhoClicked() instanceof Player player) {
+                        // Open category
                         new CategoryViewerMenu(this, category, player.hasPermission("faylisia.items.give")).open(player);
                     }
                     return false;
                 });
             } else {
+                // Clear slot
                 this.replaceExistingItem(slot, new ItemStack(Material.AIR), e -> false);
             }
         }
 
+        // Create open wiki item
         ItemStack wiki = new ItemStack(Material.BOOK);
         ItemMeta wikiMeta = wiki.getItemMeta();
 
@@ -86,6 +105,7 @@ public class ItemsViewerMenu extends ChestMenu {
             return false;
         });
 
+        // Create previous page item
         ItemStack previousPage = new ItemStack(Material.PAPER);
         ItemMeta previousPageMeta = previousPage.getItemMeta();
 
@@ -103,6 +123,7 @@ public class ItemsViewerMenu extends ChestMenu {
             return false;
         });
 
+        // Create return or close item depending on previous menu existing or no
         if (from != null) {
             ItemStack returnItem = new ItemStack(Material.BARRIER);
             ItemMeta returnItemMeta = returnItem.getItemMeta();
@@ -141,6 +162,7 @@ public class ItemsViewerMenu extends ChestMenu {
             });
         }
 
+        // Create next page item
         ItemStack nextPage = new ItemStack(Material.PAPER);
         ItemMeta nextPageMeta = nextPage.getItemMeta();
 

@@ -68,14 +68,24 @@ public class ColorsUtils {
         return message;
     }
 
-    public static String generateGradient(String message, String... colours) throws InvalidColorException {
+    /**
+     * This method generate a gradient from colours
+     * @param message message to transform
+     * @param colors color range
+     * @return gradient message
+     * @throws InvalidColorException if a color isn't a valid color like #342345
+     */
+    public static String generateGradient(String message, String... colors) throws InvalidColorException {
+        // Check if two colors or more are used
         int count = message.length();
-        if (Math.min(count, colours.length) < 2) {
+        if (Math.min(count, colors.length) < 2) {
             return message;
         }
 
-        List<String> cols = createGradient(count, colours);
+        // Get all colors of gradiant
+        List<String> cols = createGradient(count, colors);
 
+        // Apply all colors to message
         StringBuilder colourCodes = new StringBuilder();
         for (int i = 0; i < cols.size(); i++) {
             colourCodes.append(ChatColor.of(cols.get(i))).append(message.charAt(i));
@@ -83,30 +93,51 @@ public class ColorsUtils {
         return colourCodes.toString();
     }
 
-    public static List<String> createGradient(int count, String[] colours) throws InvalidColorException {
+    /**
+     * This method create all colors of a gradiant from the color range
+     * @param count amount of color to create
+     * @param colors color range
+     * @return colors of gradient
+     * @throws InvalidColorException
+     */
+    public static List<String> createGradient(int count, String[] colors) throws InvalidColorException {
+        // Create an instance of Rainbow
         Rainbow rainbow = new Rainbow();
 
+        // Try to apply parameters to Rainbow instance
         try {
+            // Apply parameters
             rainbow.setNumberRange(1, count);
-            rainbow.setSpectrum(colours);
+            rainbow.setSpectrum(colors);
         } catch (InvalidColorException e) {
+            // Resend error if it's an invalid color exception
             throw e;
         } catch (Exception e) {
+            // Show others exception
             e.printStackTrace();
         }
 
+        // Add all colors and return them
         List<String> hexCodes = new ArrayList<>();
         for (int i = 1; i <= count; i++) {
-            hexCodes.add("#" + rainbow.colourAt(i));
+            hexCodes.add("#" + rainbow.colorAt(i));
         }
         return hexCodes;
     }
 
-    public static String translateHexColors(String s) {
-        Matcher matcher = hexPattern.matcher(s);
+    /**
+     * This method translate all hex colors to chat colors
+     * @param message message to translate
+     * @return translated message
+     */
+    public static String translateHexColors(String message) {
+        // Create matcher and result string builder
+        Matcher matcher = hexPattern.matcher(message);
         StringBuilder result = new StringBuilder();
 
+        // Find all hex colors
         while (matcher.find()) {
+            // Apply color
             matcher.appendReplacement(result, ChatColor.of(matcher.group()).toString());
         }
 
@@ -114,11 +145,19 @@ public class ColorsUtils {
         return result.toString();
     }
 
-    public static String stripHexColors(String s) {
-        Matcher matcher = hexPattern.matcher(s);
+    /**
+     * This method remove all hex colors
+     * @param message message to translate
+     * @return translated message
+     */
+    public static String stripHexColors(String message) {
+        // Create matcher and result string builder
+        Matcher matcher = hexPattern.matcher(message);
         StringBuilder result = new StringBuilder();
 
+        // Find all hex colors
         while (matcher.find()) {
+            // Remove color
             matcher.appendReplacement(result, "");
         }
 

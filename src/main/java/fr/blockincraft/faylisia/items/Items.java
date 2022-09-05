@@ -10,6 +10,9 @@ import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+/**
+ * This class contain all items, armor set and recipes
+ */
 public class Items {
     public static final ArmorSet coolDiamondSet = new ArmorSet("cool_diamond_set")
             .setBonus(
@@ -44,6 +47,7 @@ public class Items {
                     )
             );
 
+    // Register armor set here
     static {
         coolDiamondSet.register();
     }
@@ -119,6 +123,7 @@ public class Items {
             .setCategory(Categories.COOL_DIAMOND)
             .setRarity(Rarity.DEUS);
 
+    // Set recipes here
     static {
         coolDiamond.setRecipe(new CraftingRecipe(9, new CustomItemStack(coolDiamondBlock, 1)));
         coolDiamondBlock.setRecipe(new CraftingRecipe(1,
@@ -154,6 +159,7 @@ public class Items {
         ));
     }
 
+    // Register items here
     static {
         coolDiamond.register();
         coolDiamondBlock.register();

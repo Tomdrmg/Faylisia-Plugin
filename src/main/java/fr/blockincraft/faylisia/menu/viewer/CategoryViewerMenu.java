@@ -16,7 +16,9 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,11 +30,18 @@ public class CategoryViewerMenu extends ChestMenu {
     private final int totalPage;
     private int currentPage = 0;
 
+    /**
+     * Initialize menu
+     * @param from previous menu
+     * @param category category to display
+     * @param withGive if player can give him custom items
+     */
     public CategoryViewerMenu(ChestMenu from, Categories category, boolean withGive) {
         super("&8&lItems &d&l> &8&l" + ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', category.name)), 6);
 
         this.from = from;
         this.category = category;
+        // Calculate page amount
         int totalPage = (int) Math.ceil(category.items.size() / 28.0);
         this.totalPage = totalPage == 0 ? 1 : totalPage;
         this.withGive = withGive;
@@ -45,6 +54,7 @@ public class CategoryViewerMenu extends ChestMenu {
 
     @Override
     public void refreshMenu() {
+        // Fill background with background item
         for (int i = 0; i < 54; i++) {
             ItemStack bgItem = new ItemStack(Material.MAGENTA_STAINED_GLASS_PANE);
 
@@ -55,23 +65,33 @@ public class CategoryViewerMenu extends ChestMenu {
             this.addItem(i, bgItem, (e) -> false);
         }
 
+        // Get items of category
         List<CustomItem> it = category.items;
         List<CustomItem> items = new ArrayList<>();
 
+        // Add all items of current page
         for (int i = currentPage * 28; i < it.size() && i < (currentPage + 1) * 28; i++) {
             items.add(it.get(i));
         }
 
+        // Show all items of the page
         for (int i = 0; i < 28; i++) {
+            // Calculate slot
             int slot = 10 + i + i / 7 * 2;
+            // If item has to be placed in the slot add it else clear slot
             if (i < items.size()) {
+                // Add item
                 CustomItem item = items.get(i);
                 this.replaceExistingItem(slot, getItemStackFromCustomUnusable(new CustomItemStack(item, 1)), e -> {
-                    if (e.getWhoClicked() instanceof  Player player) {
+                    if (e.getWhoClicked() instanceof Player player) {
+                        // If click is middle, click to give, and if player can give
+                        // Itself then give an item to player
                         if (e.getClick() == ClickType.MIDDLE && player.hasPermission("faylisia.items.give")) {
-                            PlayerUtils.giveOrDrop(player, item.getAsItemStack(1));
+                            PlayerUtils.giveOrDrop(player, new CustomItemStack(item, 1).getAsItemStack());
                             return false;
                         }
+
+                        // In other cases try to open menu
                         if (item.getRecipes() != null && item.getRecipes().length > 0) {
                             try {
                                 new RecipeViewerMenu(item, this).open(player);
@@ -85,10 +105,12 @@ public class CategoryViewerMenu extends ChestMenu {
                     return false;
                 });
             } else {
+                // Clear slot
                 this.replaceExistingItem(slot, new ItemStack(Material.AIR), e -> false);
             }
         }
 
+        // Create open wiki item
         ItemStack wiki = new ItemStack(Material.BOOK);
         ItemMeta wikiMeta = wiki.getItemMeta();
 
@@ -108,6 +130,7 @@ public class CategoryViewerMenu extends ChestMenu {
             return false;
         });
 
+        // Create previous page item
         ItemStack previousPage = new ItemStack(Material.PAPER);
         ItemMeta previousPageMeta = previousPage.getItemMeta();
 
@@ -125,6 +148,7 @@ public class CategoryViewerMenu extends ChestMenu {
             return false;
         });
 
+        // Create return or close item depending on previous menu existing or no
         if (from != null) {
             ItemStack returnItem = new ItemStack(Material.BARRIER);
             ItemMeta returnItemMeta = returnItem.getItemMeta();
@@ -163,6 +187,7 @@ public class CategoryViewerMenu extends ChestMenu {
             });
         }
 
+        // Create next page item
         ItemStack nextPage = new ItemStack(Material.PAPER);
         ItemMeta nextPageMeta = nextPage.getItemMeta();
 
@@ -181,16 +206,33 @@ public class CategoryViewerMenu extends ChestMenu {
         });
     }
 
-    private ItemStack getItemStackFromCustomUnusable(CustomItemStack customItemStack) {
-        ItemStack itemStack = customItemStack.getItem().getAsItemStack(customItemStack.getAmount());
+    /**
+     * Get an item stack from a custom item but which isn't recognize like this custom item
+     * To prevent duplication of this item, if it is taken, it will be unusable
+     * @param customItemStack custom item stack to make unusable
+     * @return unusable item stack
+     */
+    @NotNull
+    private ItemStack getItemStackFromCustomUnusable(@NotNull CustomItemStack customItemStack) {
+        // Create item
+        ItemStack itemStack = customItemStack.getAsItemStack();
 
+        // Get meta and remove item id if it has
         ItemMeta meta = itemStack.getItemMeta();
         if (meta.getPersistentDataContainer().has(CustomItem.idKey, PersistentDataType.STRING)) meta.getPersistentDataContainer().remove(CustomItem.idKey);
+
+        // Get or create lore for item
         List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
+
+        // Add click indications
         lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m--------------------------"));
         lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique pour voir les crafts"));
         if (withGive) lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique molette pour l'obtenir"));
+
+        // Apply new lore
         meta.setLore(lore);
+
+        // Then apply it
         itemStack.setItemMeta(meta);
 
         return itemStack;

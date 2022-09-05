@@ -6,9 +6,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * Task that will be activated each tick to update {@link Tab} header and footer of all players
+ */
 public class TabHeaderFooterTask extends BukkitRunnable {
     private static TabHeaderFooterTask instance;
 
+    /**
+     * Initialize instance and start task
+     */
     public static void startTask() {
         if (instance == null) {
             instance = new TabHeaderFooterTask();

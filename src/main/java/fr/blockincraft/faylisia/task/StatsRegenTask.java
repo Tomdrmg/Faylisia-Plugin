@@ -7,10 +7,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * Task that will be activated each seconds to regen health and magical power of all online players
+ */
 public class StatsRegenTask extends BukkitRunnable {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
     private static StatsRegenTask instance;
 
+    /**
+     * Initialize instance and start task
+     */
     public static void startTask() {
         if (instance == null) {
             instance = new StatsRegenTask();

@@ -23,6 +23,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -45,7 +46,7 @@ public class PlayerUtils {
      * @param player {@link Player} player which will receive items
      * @param itemStack bukkit {@link ItemStack} to give
      */
-    public static void giveOrDrop(@Nonnull Player player, @Nonnull ItemStack itemStack) {
+    public static void giveOrDrop(@NotNull Player player, @NotNull ItemStack itemStack) {
         // Check if bukkit item stack is AIR
         if (itemStack.getType() == Material.AIR) return;
 
@@ -89,7 +90,7 @@ public class PlayerUtils {
      * @param player bukkit {@link Player} which will see the {@link ArmorStand}
      * @param location location of the {@link ArmorStand} will spawn
      */
-    public static void spawnDamageIndicator(long damage, boolean critic, @Nonnull Player player, @Nonnull Location location) {
+    public static void spawnDamageIndicator(long damage, boolean critic, @NotNull Player player, @NotNull Location location) {
         // Create the name of entity with colors and commas
         StringBuilder sb = new StringBuilder();
         sb.append(damage);

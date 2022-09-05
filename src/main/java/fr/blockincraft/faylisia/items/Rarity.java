@@ -1,5 +1,10 @@
 package fr.blockincraft.faylisia.items;
 
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * All item rarities
+ */
 public enum Rarity {
     COMMON(0, "COMMUN", '7', false),
     UNCOMMON(1, "NON COMMUN", 'a', false),
@@ -16,13 +21,14 @@ public enum Rarity {
     private final char colorChar;
     private final boolean magicalChars;
 
-    Rarity(int index, String name, char colorChar, boolean magicalChars) {
+    Rarity(int index, @NotNull String name, char colorChar, boolean magicalChars) {
         this.index = index;
         this.name = name;
         this.colorChar = colorChar;
         this.magicalChars = magicalChars;
     }
 
+    @NotNull
     public String getName() {
         return name;
     }

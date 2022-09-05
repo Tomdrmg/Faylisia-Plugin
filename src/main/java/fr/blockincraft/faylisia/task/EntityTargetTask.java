@@ -8,10 +8,17 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * Task that will be activated each tick to update {@link CustomEntity} target <br/>
+ * Because of mobs continue to target creative/spectator players and to place a limit to 20 blocks distance
+ */
 public class EntityTargetTask extends BukkitRunnable {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
     private static EntityTargetTask instance;
 
+    /**
+     * Initialize instance and start task
+     */
     public static void startTask() {
         if (instance == null) {
             instance = new EntityTargetTask();
@@ -21,17 +28,23 @@ public class EntityTargetTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        // Retrieve all custom entities
         for (CustomEntity entity : registry.getEntities()) {
-            if (!entity.getEntity().isValid() || entity.getEntity() == null) {
+            // Remove them if they are removed
+            if (entity.getEntity() == null || !entity.getEntity().isValid()) {
                 registry.removeEntity(entity);
             } else {
                 if (entity.getEntity() instanceof Mob mob) {
+                    // Only continue if target is a player because we prevent mob to
+                    // target others mobs in GameListeners
                     if (mob.getTarget() instanceof Player player) {
+                        // Remove target if player was in creative or spectator
                         if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
                             mob.setTarget(null);
                             continue;
                         }
 
+                        // Calculate distance
                         double x1 = mob.getLocation().getX();
                         double z1 = mob.getLocation().getZ();
                         double x2 = player.getLocation().getX();
@@ -39,6 +52,7 @@ public class EntityTargetTask extends BukkitRunnable {
 
                         double d = Math.sqrt((x2 - x1) * (x2 - x1) + (z2 - z1) * (z2 - z1));
 
+                        // Remove target if it was at least at twenty blocks
                         if (d > 20) {
                             mob.setTarget(null);
                         }

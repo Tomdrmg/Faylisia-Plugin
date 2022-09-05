@@ -1,5 +1,7 @@
 package fr.blockincraft.faylisia.utils.colorsexception;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.annotation.Nonnull;
 
 public class InvalidColorException extends Exception {
@@ -8,7 +10,7 @@ public class InvalidColorException extends Exception {
     /**
      * @param color Invalid color
      */
-    public InvalidColorException(@Nonnull String color) {
+    public InvalidColorException(@NotNull String color) {
         super(color + " isn't a valid color");
         this.color = color;
     }

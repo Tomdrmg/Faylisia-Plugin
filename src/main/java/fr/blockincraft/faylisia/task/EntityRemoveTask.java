@@ -9,6 +9,9 @@ public class EntityRemoveTask extends BukkitRunnable {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
     private static EntityRemoveTask instance;
 
+    /**
+     * Initialize instance and start task
+     */
     public static void startTask() {
         if (instance == null) {
             instance = new EntityRemoveTask();

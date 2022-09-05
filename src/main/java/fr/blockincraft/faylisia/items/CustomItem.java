@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * A custom item, similar to a {@link Material} but custom
+ */
 @JsonSerialize(using = CustomItemSerializer.class)
 public class CustomItem {
     public static final NamespacedKey idKey = new NamespacedKey(Faylisia.getInstance(), "custom-id");
@@ -40,11 +43,19 @@ public class CustomItem {
     private Categories category = null;
     private int color = -1;
 
-    public CustomItem(Material material, String id) throws InvalidBuildException {
+    /**
+     * @param material material of item
+     * @param id id of custom item (must be unique)
+     */
+    public CustomItem(Material material, String id) {
         this.material = material;
         this.id = id;
     }
 
+    /**
+     * Create an item stack from this item, so use {@link CustomItemStack#getAsItemStack()} to create an item to give
+     * @return created item stack
+     */
     public ItemStack getAsItemStack() {
         if (!registered) return null;
 
@@ -72,18 +83,6 @@ public class CustomItem {
         meta.setDisplayName(ChatColor.getByChar(rarity.getColorChar()) + ChatColor.BOLD.toString() + name);
 
         itemStack.setItemMeta(meta);
-
-        return itemStack;
-    }
-
-    public ItemStack getAsItemStack(int amount) {
-        if (!registered) return null;
-
-        if (amount > material.getMaxStackSize()) amount = material.getMaxStackSize();
-        if (amount < 1) amount = 1;
-
-        ItemStack itemStack = getAsItemStack();
-        itemStack.setAmount(amount);
 
         return itemStack;
     }

@@ -1,6 +1,15 @@
 package fr.blockincraft.faylisia.player.permission;
 
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
+
+/**
+ * This method contain a permission and an associated state <br/>
+ * Lists of all permissions was here
+ */
 public class Permission {
+    // All perms
     public static final String[] allPerms = new String[]{
             "bukkit.command.version",
             "bukkit.command.plugins",
@@ -80,6 +89,7 @@ public class Permission {
             "faylisia.items.menu",
             "faylisia.items.recipe"
     };
+    // Others perms like world edit perms or other plugins perms
     public static final String[] otherPerms = new String[]{
             "worldedit.help",
             "worldedit.reload",
@@ -233,15 +243,30 @@ public class Permission {
     private final String perm;
     private final PermissionState state;
 
-    public Permission(String perm, PermissionState state) {
+    /**
+     * Basic constructor
+     * @param perm permission
+     * @param state associated state
+     */
+    public Permission(@NotNull String perm, @NotNull PermissionState state) {
         this.perm = perm;
         this.state = state;
     }
 
+    /**
+     * Simple getter
+     * @return permission
+     */
+    @NotNull
     public String getPerm() {
         return perm;
     }
 
+    /**
+     * Simple getter
+     * @return state
+     */
+    @NotNull
     public PermissionState getState() {
         return state;
     }

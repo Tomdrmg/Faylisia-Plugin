@@ -10,7 +10,10 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +37,7 @@ public abstract class ChestMenu {
      * @param title The title of the Menu
      * @param lines The number of lines to initialize
      */
-    public ChestMenu(String title, int lines) {
+    public ChestMenu(@NotNull String title, int lines) {
         this.title = ChatColor.translateAlternateColorCodes('&', title);
         this.clickable = false;
         this.emptyClickable = true;
@@ -71,6 +74,7 @@ public abstract class ChestMenu {
      * @param clickable Whether the Player can access his Inventory
      * @return The ChestMenu Instance
      */
+    @NotNull
     public ChestMenu setPlayerInventoryClickable(boolean clickable) {
         this.clickable = clickable;
         return this;
@@ -91,6 +95,7 @@ public abstract class ChestMenu {
      * @param emptyClickable Whether the Player can click empty slots
      * @return The ChestMenu Instance
      */
+    @NotNull
     public ChestMenu setEmptySlotsClickable(boolean emptyClickable) {
         this.emptyClickable = emptyClickable;
         return this;
@@ -111,12 +116,19 @@ public abstract class ChestMenu {
      * @param handler The MenuClickHandler
      * @return The ChestMenu Instance
      */
-    public ChestMenu addPlayerInventoryClickHandler(MenuClickHandler handler) {
+    @NotNull
+    public ChestMenu addPlayerInventoryClickHandler(@NotNull MenuClickHandler handler) {
         this.playerclick = handler;
         return this;
     }
 
-    public ChestMenu addMenuDragHandler(MenuDragHandler handler) {
+    /**
+     * Adds a DragHandler
+     * @param handler the drag handler
+     * @return the ChestMenu instance
+     */
+    @NotNull
+    public ChestMenu addMenuDragHandler(@Nullable MenuDragHandler handler) {
         this.drag = handler;
         return this;
     }
@@ -128,7 +140,8 @@ public abstract class ChestMenu {
      * @param item The Item for that Slot
      * @return The ChestMenu Instance
      */
-    public ChestMenu addItem(int slot, ItemStack item) {
+    @NotNull
+    public ChestMenu addItem(int slot, @Nullable ItemStack item) {
         final int size = this.items.size();
         if (size > slot)
             this.items.set(slot, item);
@@ -149,7 +162,8 @@ public abstract class ChestMenu {
      * @param clickHandler The MenuClickHandler for that Slot
      * @return The ChestMenu Instance
      */
-    public ChestMenu addItem(int slot, ItemStack item, MenuClickHandler clickHandler) {
+    @NotNull
+    public ChestMenu addItem(int slot, @Nullable ItemStack item, @Nullable MenuClickHandler clickHandler) {
         addItem(slot, item);
         addMenuClickHandler(slot, clickHandler);
         return this;
@@ -161,6 +175,7 @@ public abstract class ChestMenu {
      * @param slot The Slot in the Inventory
      * @return The ItemStack in that Slot
      */
+    @Nullable
     public ItemStack getItemInSlot(int slot) {
         setup();
         return this.inv.getItem(slot);
@@ -173,7 +188,8 @@ public abstract class ChestMenu {
      * @param handler The MenuClickHandler
      * @return The ChestMenu Instance
      */
-    public ChestMenu addMenuClickHandler(int slot, MenuClickHandler handler) {
+    @NotNull
+    public ChestMenu addMenuClickHandler(int slot, @Nullable MenuClickHandler handler) {
         this.handlers.put(slot, handler);
         return this;
     }
@@ -184,7 +200,8 @@ public abstract class ChestMenu {
      * @param handler The MenuOpeningHandler
      * @return The ChestMenu Instance
      */
-    public ChestMenu addMenuOpeningHandler(MenuOpeningHandler handler) {
+    @NotNull
+    public ChestMenu addMenuOpeningHandler(@Nullable MenuOpeningHandler handler) {
         this.open = handler;
         return this;
     }
@@ -195,18 +212,9 @@ public abstract class ChestMenu {
      * @param handler The MenuCloseHandler
      * @return The ChestMenu Instance
      */
-    public ChestMenu addMenuCloseHandler(MenuCloseHandler handler) {
+    @NotNull
+    public ChestMenu addMenuCloseHandler(@NotNull MenuCloseHandler handler) {
         this.close = handler;
-        return this;
-    }
-
-    /**
-     * Finishes the Creation of the Menu
-     *
-     * @return The ChestMenu Instance
-     */
-    @Deprecated
-    public ChestMenu build() {
         return this;
     }
 
@@ -215,6 +223,7 @@ public abstract class ChestMenu {
      *
      * @return The Contents of this Inventory
      */
+    @NotNull
     public ItemStack[] getContents() {
         setup();
         return this.inv.getContents();
@@ -229,28 +238,18 @@ public abstract class ChestMenu {
         }
     }
 
-    public void reset(boolean update) {
-        if (update)
-            this.inv.clear();
-        else
-            this.inv = Bukkit.createInventory(null, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
-        for (int i = 0; i < this.items.size(); i++) {
-            this.inv.setItem(i, this.items.get(i));
-        }
-    }
-
     /**
      * Modifies an ItemStack in an ALREADY OPENED ChestMenu
      *
      * @param slot The Slot of the Item which will be replaced
      * @param item The new Item
      */
-    public void replaceExistingItem(int slot, ItemStack item) {
+    public void replaceExistingItem(int slot, @Nullable ItemStack item) {
         setup();
         this.inv.setItem(slot, item);
     }
 
-    public void replaceExistingItem(int slot, ItemStack item, MenuClickHandler handler) {
+    public void replaceExistingItem(int slot, @Nullable ItemStack item, @Nullable MenuClickHandler handler) {
         setup();
         this.inv.setItem(slot, item);
         this.addMenuClickHandler(slot, handler);
@@ -261,7 +260,7 @@ public abstract class ChestMenu {
      *
      * @param players The Players who will see this Menu
      */
-    public void open(Player... players) {
+    public void open(@NotNull Player... players) {
         setup();
         for (Player p : players) {
             p.openInventory(this.inv);
@@ -276,6 +275,7 @@ public abstract class ChestMenu {
      * @param slot The Slot in the Inventory
      * @return The MenuClickHandler registered for the specified Slot
      */
+    @Nullable
     public MenuClickHandler getMenuClickHandler(int slot) {
         return handlers.get(slot);
     }
@@ -285,6 +285,7 @@ public abstract class ChestMenu {
      *
      * @return The registered MenuCloseHandler
      */
+    @NotNull
     public MenuCloseHandler getMenuCloseHandler() {
         return close;
     }
@@ -294,6 +295,7 @@ public abstract class ChestMenu {
      *
      * @return The registered MenuOpeningHandler
      */
+    @Nullable
     public MenuOpeningHandler getMenuOpeningHandler() {
         return open;
     }
@@ -304,10 +306,12 @@ public abstract class ChestMenu {
      *
      * @return The registered MenuClickHandler
      */
+    @NotNull
     public MenuClickHandler getPlayerInventoryClickHandler() {
         return playerclick;
     }
 
+    @Nullable
     public MenuDragHandler getMenuDragHandler() {
         return drag;
     }
@@ -318,6 +322,7 @@ public abstract class ChestMenu {
      *
      * @return The converted Inventory
      */
+    @Nullable
     public Inventory toInventory() {
         return this.inv;
     }

@@ -4,6 +4,7 @@ import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.entity.Player;
@@ -41,12 +42,12 @@ public class Loot {
                 int amount = this.amount.getAmount();
 
                 while (amount > item.getMaterial().getMaxStackSize()) {
-                    loots.add(item.getAsItemStack(item.getMaterial().getMaxStackSize()));
+                    loots.add(new CustomItemStack(item, item.getMaterial().getMaxStackSize()).getAsItemStack());
                     amount -= item.getMaterial().getMaxStackSize();
                 }
 
                 if (amount > 0) {
-                    loots.add(item.getAsItemStack(amount));
+                    loots.add(new CustomItemStack(item, amount).getAsItemStack());
                 }
             }
         }
@@ -117,17 +118,15 @@ public class Loot {
                 }
 
                 while (amount > item.getMaterial().getMaxStackSize()) {
-                    loots.add(item.getAsItemStack(item.getMaterial().getMaxStackSize()));
+                    loots.add(new CustomItemStack(item, item.getMaterial().getMaxStackSize()).getAsItemStack());
                     amount -= item.getMaterial().getMaxStackSize();
                 }
 
                 if (amount > 0) {
-                    loots.add(item.getAsItemStack(amount));
+                    loots.add(new CustomItemStack(item, amount).getAsItemStack());
                 }
             }
         }
-
-        System.out.println(probability);
 
         return loots.toArray(new ItemStack[0]);
     }

@@ -21,6 +21,9 @@ import java.util.regex.Matcher;
 public class ChatListeners implements Listener {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
 
+    /**
+     * Apply colors and {@link Ranks} prefix to chat messages
+     */
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         CustomPlayerDTO custom = registry.getOrRegisterPlayer(e.getPlayer().getUniqueId());

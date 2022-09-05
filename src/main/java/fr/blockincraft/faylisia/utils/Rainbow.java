@@ -9,31 +9,39 @@ import java.util.List;
 public class Rainbow {
     private double minNum;
     private double maxNum;
-    private String[] colours;
-    private List<ColourGradient> colourGradients;
+    private String[] colors;
+    private List<ColourGradient> colorGradients;
 
+    /**
+     * Initialize size, colors and spectrum
+     */
     public Rainbow() {
         try {
             minNum = 0;
             maxNum = 100;
-            colours = new String[]{"red", "yellow", "lime", "blue"};
-            setSpectrum(colours);
+            colors = new String[]{"red", "yellow", "lime", "blue"};
+            setSpectrum(colors);
         } catch (Exception e) {
             throw new AssertionError(e);
         }
     }
 
-    public String colourAt(double number) {
-        if (colourGradients.size() == 1) {
-            return colourGradients.get(0).colourAt(number);
+    /**
+     * This method return color at an emplacement
+     * @param number emplacement
+     * @return color
+     */
+    public String colorAt(double number) {
+        if (colorGradients.size() == 1) {
+            return colorGradients.get(0).colorAt(number);
         } else {
-            double segment = (maxNum - minNum)/(colourGradients.size());
-            int index = (int) Math.min(Math.floor((Math.max(number, minNum) - minNum)/segment), colourGradients.size() - 1);
-            return colourGradients.get(index).colourAt(number);
+            double segment = (maxNum - minNum)/(colorGradients.size());
+            int index = (int) Math.min(Math.floor((Math.max(number, minNum) - minNum)/segment), colorGradients.size() - 1);
+            return colorGradients.get(index).colorAt(number);
         }
     }
 
-    public void setSpectrum (String ... spectrum) throws Exception {
+    public void setSpectrum(String ... spectrum) throws Exception {
         if (spectrum.length < 2) {
             throw new Exception("At least two colors for rainbow!");
         } else {
@@ -42,17 +50,17 @@ public class Rainbow {
             firstGradient.setGradient(spectrum[0], spectrum[1]);
             firstGradient.setNumberRange(minNum, minNum + increment);
 
-            colourGradients = new ArrayList<>();
-            colourGradients.add(firstGradient);
+            colorGradients = new ArrayList<>();
+            colorGradients.add(firstGradient);
 
             for (int i = 1; i < spectrum.length - 1; i++) {
                 ColourGradient colourGradient = new ColourGradient();
                 colourGradient.setGradient(spectrum[i], spectrum[i + 1]);
                 colourGradient.setNumberRange(minNum + increment * i, minNum + increment * (i + 1));
-                colourGradients.add(colourGradient);
+                colorGradients.add(colourGradient);
             }
 
-            colours = spectrum;
+            colors = spectrum;
         }
     }
 
@@ -61,21 +69,17 @@ public class Rainbow {
         if (maxNumber > minNumber) {
             minNum = minNumber;
             maxNum = maxNumber;
-            setSpectrum(colours);
+            setSpectrum(colors);
         } else {
             throw new Exception("maxNumber (" + maxNum + ") is not greater than minNumber (" + minNum + ")");
         }
     }
 
-    public String colorAt(double number) {
-        return colourAt(number);
-    }
-
 }
 
 class ColourGradient {
-    private int[] startColour = {0xff, 0x00, 0x00};
-    private int[] endColour = {0x00, 0x00, 0xff};
+    private int[] startColor = {0xff, 0x00, 0x00};
+    private int[] endColor = {0x00, 0x00, 0xff};
     private double minNum = 0;
     private double maxNum = 100;
 
@@ -102,8 +106,8 @@ class ColourGradient {
         htmlColors.put("white", new int[]{0xff, 0xff, 0xff});
     }
 
-    public String colourAt(double number) {
-        return formatHex(calcHex(number, startColour[0], endColour[0])) + formatHex(calcHex(number, startColour[1], endColour[1])) + formatHex(calcHex(number, startColour[2], endColour[2]));
+    public String colorAt(double number) {
+        return formatHex(calcHex(number, startColor[0], endColor[0])) + formatHex(calcHex(number, startColor[1], endColor[1])) + formatHex(calcHex(number, startColor[2], endColor[2]));
     }
 
     private int calcHex(double number, int channelStart, int channelEnd) {
@@ -119,7 +123,12 @@ class ColourGradient {
         return (int) Math.round(cPerUnit * (num - minNum) + channelStart);
     }
 
-    private String formatHex (int val) {
+    /**
+     * This method translate an int hex to a string hex
+     * @param val hex
+     * @return string hex
+     */
+    private String formatHex(int val) {
         String hex = Integer.toHexString(val);
         if (hex.length() == 1) {
             return '0' + hex;
@@ -128,7 +137,13 @@ class ColourGradient {
         }
     }
 
-    public void setNumberRange(double minNumber, double maxNumber) throws Exception{
+    /**
+     * This method set number range of this gradient
+     * @param minNumber min number
+     * @param maxNumber max number
+     * @throws Exception if min number greater or equal max number
+     */
+    public void setNumberRange(double minNumber, double maxNumber) throws Exception {
         if (maxNumber > minNumber) {
             minNum = minNumber;
             maxNum = maxNumber;
@@ -137,15 +152,31 @@ class ColourGradient {
         }
     }
 
-    public void setGradient (String colourStart, String colourEnd) throws InvalidColorException {
-        startColour = getHexColour(colourStart);
-        endColour = getHexColour(colourEnd);
+    /**
+     * Set start and end color
+     * @param colorStart start color
+     * @param colorEnd end color
+     * @throws InvalidColorException if at least one color is invalid
+     */
+    public void setGradient(String colorStart, String colorEnd) throws InvalidColorException {
+        startColor = getHexColor(colorStart);
+        endColor = getHexColor(colorEnd);
     }
 
-    private int[] getHexColour(String s) throws InvalidColorException {
+    /**
+     * This method parse a hex color string to a rgb array <br/>
+     * This also accept html colors
+     * @param s hex string
+     * @return rgb array from hex
+     * @throws InvalidColorException if color is invalid
+     */
+    private int[] getHexColor(String s) throws InvalidColorException {
+        // Find if color is hex or html
         if (s.matches("^#?[0-9a-fA-F]{6}$")){
+            // Parse hex color
             return rgbStringToArray(s.replace("#", ""));
         } else {
+            // Get html color to rgb
             int[] rgbArray = htmlColors.get(s.toLowerCase());
             if (rgbArray == null) {
                 throw new InvalidColorException(s);
@@ -155,10 +186,17 @@ class ColourGradient {
         }
     }
 
-    private int[] rgbStringToArray(String s){
+    /**
+     * This method parse string rgb to rgb array
+     * @param s hex string
+     * @return rgb array
+     */
+    private int[] rgbStringToArray(String s) {
+        // Parse rgb from hex
         int red = Integer.parseInt(s.substring(0,2), 16);
         int green = Integer.parseInt(s.substring(2,4), 16);
         int blue = Integer.parseInt(s.substring(4,6), 16);
+        // Return array
         return new int[]{red, green, blue};
     }
 }

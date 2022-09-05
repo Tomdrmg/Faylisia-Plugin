@@ -403,7 +403,7 @@ public class CustomPlayerDTO {
         long previousMaxEffectiveHealth = this.maxEffectiveHealth;
         this.maxEffectiveHealth = (long) (getStat(Stats.HEALTH) * (1 + getStat(Stats.DEFENSE) / 100));
         if (this.effectiveHealth > 0) {
-            this.setEffectiveHealth(this.effectiveHealth / previousMaxEffectiveHealth * this.maxEffectiveHealth);
+            this.setEffectiveHealth((long) (((double) this.effectiveHealth) / ((double) previousMaxEffectiveHealth) * ((double) this.maxEffectiveHealth)));
         }
 
         player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(100);

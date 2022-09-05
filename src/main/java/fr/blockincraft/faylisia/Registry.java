@@ -6,6 +6,7 @@ import fr.blockincraft.faylisia.core.service.DiscordTicketService;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.entity.CustomEntityType;
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.map.Region;
@@ -24,6 +25,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -91,8 +93,8 @@ public class Registry {
      * @param member {@link Member} associated to the token
      * @return token
      */
-    @Nonnull
-    public String createToken(@Nonnull Member member) {
+    @NotNull
+    public String createToken(@NotNull Member member) {
         // Create random instance, content array and token length
         Random r = new SecureRandom();
         char[] content = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ()[]{}:/-+=#@".toCharArray();
@@ -131,7 +133,7 @@ public class Registry {
      * @param member {@link Member} to check
      * @return if he has a token
      */
-    public boolean hasToken(@Nonnull Member member) {
+    public boolean hasToken(@NotNull Member member) {
         return tokensToMember.containsValue(member);
     }
 
@@ -141,7 +143,7 @@ public class Registry {
      * @return associated {@link Member} / null if invalid token
      */
     @Nullable
-    public Member validateToken(@Nonnull String token) {
+    public Member validateToken(@NotNull String token) {
         // Check if token is valid
         if (!tokensToMember.containsKey(token)) return null;
 
@@ -155,7 +157,7 @@ public class Registry {
     /**
      * @return all {@link DiscordTicketDTO} with their associated {@link Channel} id
      */
-    @Nonnull
+    @NotNull
     public Map<Long, DiscordTicketDTO> getTickets() {
         return new HashMap<>(tickets);
     }
@@ -174,7 +176,7 @@ public class Registry {
      * This method register a {@link DiscordTicketDTO} in this registry and in database
      * @param dto {@link DiscordTicketDTO} to register
      */
-    public void createTicket(@Nonnull DiscordTicketDTO dto) {
+    public void createTicket(@NotNull DiscordTicketDTO dto) {
         tickets.put(dto.getChannelId(), dto);
         ticketService.persistDiscordTicket(dto);
     }
@@ -183,7 +185,7 @@ public class Registry {
      * This method update a {@link DiscordTicketDTO} in database
      * @param dto {@link DiscordTicketDTO} to update
      */
-    public void updateTicket(@Nonnull DiscordTicketDTO dto) {
+    public void updateTicket(@NotNull DiscordTicketDTO dto) {
         ticketService.mergeDiscordTicket(dto);
     }
 
@@ -191,7 +193,7 @@ public class Registry {
      * This method delete a {@link DiscordTicketDTO} in this registry and in database
      * @param dto {@link DiscordTicketDTO} to remove
      */
-    public void removeTicket(@Nonnull DiscordTicketDTO dto) {
+    public void removeTicket(@NotNull DiscordTicketDTO dto) {
         tickets.remove(dto.getChannelId());
         ticketService.removeDiscordTicket(dto);
     }
@@ -201,7 +203,7 @@ public class Registry {
      * @param userId discord {@link User} id
      * @return all {@link DiscordTicketDTO} of user
      */
-    @Nonnull
+    @NotNull
     public List<DiscordTicketDTO> getTicketsOf(long userId) {
         List<DiscordTicketDTO> tickets = new ArrayList<>();
 
@@ -217,7 +219,7 @@ public class Registry {
     /**
      * @return all {@link CustomPlayerDTO} with their associated {@link UUID}
      */
-    @Nonnull
+    @NotNull
     public Map<UUID, CustomPlayerDTO> getPlayers() {
         return new HashMap<>(players);
     }
@@ -228,7 +230,7 @@ public class Registry {
      * @return {@link CustomPlayerDTO} associated / null if he doesn't exist
      */
     @Nullable
-    public CustomPlayerDTO getPlayer(@Nonnull UUID player) {
+    public CustomPlayerDTO getPlayer(@NotNull UUID player) {
         return players.get(player);
     }
 
@@ -238,8 +240,8 @@ public class Registry {
      * @param player bukkit {@link Player} {@link UUID}
      * @return {@link CustomPlayerDTO} instance created
      */
-    @Nonnull
-    public CustomPlayerDTO registerPlayer(@Nonnull UUID player) {
+    @NotNull
+    public CustomPlayerDTO registerPlayer(@NotNull UUID player) {
         CustomPlayerDTO dto = new CustomPlayerDTO(player);
 
         customPlayerService.persistCustomPlayer(dto);
@@ -252,8 +254,8 @@ public class Registry {
      * @param player bukkit {@link Player} {@link UUID}
      * @return {@link CustomPlayerDTO} instance associated
      */
-    @Nonnull
-    public CustomPlayerDTO getOrRegisterPlayer(@Nonnull UUID player) {
+    @NotNull
+    public CustomPlayerDTO getOrRegisterPlayer(@NotNull UUID player) {
         CustomPlayerDTO pl = getPlayer(player);
         return pl == null ? registerPlayer(player) : pl;
     }
@@ -262,14 +264,14 @@ public class Registry {
      * This method apply change of a {@link CustomPlayerDTO} in database
      * @param dto edited {@link CustomPlayerDTO}
      */
-    public void applyModification(@Nonnull CustomPlayerDTO dto) {
+    public void applyModification(@NotNull CustomPlayerDTO dto) {
         customPlayerService.mergeCustomPlayer(dto);
     }
 
     /**
      * @return all {@link CustomItem}
      */
-    @Nonnull
+    @NotNull
     public List<CustomItem> getItems() {
         return new ArrayList<>(items);
     }
@@ -279,7 +281,7 @@ public class Registry {
      * @param id id to check
      * @return if it was used
      */
-    public boolean itemIdUsed(@Nonnull String id) {
+    public boolean itemIdUsed(@NotNull String id) {
         return itemsById.containsKey(id);
     }
 
@@ -287,7 +289,7 @@ public class Registry {
      * This method register a {@link CustomItem} in this registry and in database
      * @param item {@link CustomItem} to register
      */
-    public void registerItem(@Nonnull CustomItem item) {
+    public void registerItem(@NotNull CustomItem item) {
         itemsById.put(item.getId(), item);
         items.add(item);
         Categories category = item.getCategory();
@@ -322,7 +324,7 @@ public class Registry {
     /**
      * @return all {@link CustomItem} and their associated id
      */
-    @Nonnull
+    @NotNull
     public Map<String, CustomItem> getItemsById() {
         return new HashMap<>(itemsById);
     }
@@ -332,40 +334,32 @@ public class Registry {
      * Used to prevent bad bukkit {@link ItemStack} in case of custom item change
      * @param inventory {@link PlayerInventory} to scan
      */
-    public void refreshItems(@Nonnull PlayerInventory inventory) {
+    public void refreshItems(@NotNull PlayerInventory inventory) {
         // For each item stack in player inventory
         for (ItemStack itemStack : inventory.getContents()) {
             // Check if item isn't null and isn't AIR
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
-            // Get custom item from it and check if it's null
-            CustomItem ci = getCustomItemByItemStack(itemStack);
-            if (ci == null) continue;
+            // Get as custom item stack to retrieve data like enchantments
+            CustomItemStack customItemStack = CustomItemStack.fromItemStack(itemStack);
+            if (customItemStack == null) return;
 
-            // Get an example of the custom item
-            ItemStack model = ci.getAsItemStack();
+            // Get an updated item stack
+            ItemStack model = customItemStack.getAsItemStack();
 
-            // Get meta of example and item stack and check if they are null
-            ItemMeta isMeta = itemStack.getItemMeta();
-            ItemMeta ciMeta = model.getItemMeta();
-            if (ciMeta == null || isMeta == null) continue;
-
-            // Change custom model data if example has one
-            if (ciMeta.hasCustomModelData()) isMeta.setCustomModelData(ciMeta.getCustomModelData());
-            // Update the display name
-            isMeta.setDisplayName(ciMeta.getDisplayName());
-            // Update the lore
-            isMeta.setLore(ciMeta.getLore());
+            // Verify that updated meta isn't null
+            ItemMeta updatedMeta = model.getItemMeta();
+            if (updatedMeta == null) continue;
 
             // Replace the item meta
-            itemStack.setItemMeta(isMeta);
+            itemStack.setItemMeta(updatedMeta);
         }
     }
 
     /**
      * @return all {@link ArmorSet}
      */
-    @Nonnull
+    @NotNull
     public List<ArmorSet> getArmorSets() {
         return new ArrayList<>(armorSets);
     }
@@ -375,7 +369,7 @@ public class Registry {
      * @param id id to check
      * @return if id was already used
      */
-    public boolean armorSetIdUsed(@Nonnull String id) {
+    public boolean armorSetIdUsed(@NotNull String id) {
         return armorSetsById.containsKey(id);
     }
 
@@ -383,7 +377,7 @@ public class Registry {
      * This method register an {@link ArmorSet} in this registry and database
      * @param armorSet {@link ArmorSet} to register
      */
-    public void registerArmorSet(@Nonnull ArmorSet armorSet) {
+    public void registerArmorSet(@NotNull ArmorSet armorSet) {
         armorSetsById.put(armorSet.getId(), armorSet);
         armorSets.add(armorSet);
     }
@@ -391,7 +385,7 @@ public class Registry {
     /**
      * @return all {@link CustomEntityType}
      */
-    @Nonnull
+    @NotNull
     public List<CustomEntityType> getEntityTypes() {
         return new ArrayList<>(entityTypes);
     }
@@ -401,7 +395,7 @@ public class Registry {
      * @param id id to check
      * @return if id was already used
      */
-    public boolean entityTypeIdUsed(@Nonnull String id) {
+    public boolean entityTypeIdUsed(@NotNull String id) {
         return entityTypesById.containsKey(id);
     }
 
@@ -409,7 +403,7 @@ public class Registry {
      * This method register a {@link CustomEntityType} in this registry and in database
      * @param entityType {@link CustomEntityType} to register
      */
-    public void registerEntityType(@Nonnull CustomEntityType entityType) {
+    public void registerEntityType(@NotNull CustomEntityType entityType) {
         entityTypes.add(entityType);
         entityTypesById.put(entityType.getId(), entityType);
     }
@@ -420,14 +414,14 @@ public class Registry {
      * @return associated {@link CustomEntity} / null if he doesn't have
      */
     @Nullable
-    public CustomEntity getCustomEntityByEntity(@Nonnull Entity entity) {
+    public CustomEntity getCustomEntityByEntity(@NotNull Entity entity) {
         return entitiesByEntity.get(entity);
     }
 
     /**
      * @return all {@link CustomEntity}
      */
-    @Nonnull
+    @NotNull
     public List<CustomEntity> getEntities() {
         return new ArrayList<>(entities);
     }
@@ -436,7 +430,7 @@ public class Registry {
      * This method add a {@link CustomEntity} in this registry
      * @param entity {@link CustomEntity} to add
      */
-    public void addEntity(@Nonnull CustomEntity entity) {
+    public void addEntity(@NotNull CustomEntity entity) {
         entities.add(entity);
         entitiesByEntity.put(entity.getEntity(), entity);
     }
@@ -445,7 +439,7 @@ public class Registry {
      * This method remove a {@link CustomEntity} in this registry
      * @param entity {@link CustomEntity} to remove
      */
-    public void removeEntity(@Nonnull CustomEntity entity) {
+    public void removeEntity(@NotNull CustomEntity entity) {
         entities.remove(entity);
         entitiesByEntity.remove(entity.getEntity());
     }
@@ -453,7 +447,7 @@ public class Registry {
     /**
      * @return all {@link ArmorSet} with their associated id
      */
-    @Nonnull
+    @NotNull
     public Map<String, ArmorSet> getArmorSetsById() {
         return new HashMap<>(armorSetsById);
     }
@@ -463,14 +457,14 @@ public class Registry {
      * @param id id to check
      * @return if id was already used
      */
-    public boolean regionIdUsed(@Nonnull String id) {
+    public boolean regionIdUsed(@NotNull String id) {
         return regionsById.containsKey(id);
     }
 
     /**
      * @return all {@link Region} with their associated id
      */
-    @Nonnull
+    @NotNull
     public Map<String, Region> getRegionsById() {
         return regionsById;
     }
@@ -478,7 +472,7 @@ public class Registry {
     /**
      * @return all {@link Region}
      */
-    @Nonnull
+    @NotNull
     public List<Region> getRegions() {
         return regions;
     }
@@ -487,7 +481,7 @@ public class Registry {
      * This method register a {@link Region} in this registry and in database
      * @param region {@link Region} to register
      */
-    public void registerRegion(@Nonnull Region region) {
+    public void registerRegion(@NotNull Region region) {
         regionsById.put(region.getId(), region);
         regions.add(region);
     }
@@ -500,8 +494,8 @@ public class Registry {
      * @param world world of the position
      * @return last sub {@link Region} of the position
      */
-    @Nonnull
-    public Region getRegionAt(int x, int y, int z, @Nonnull World world) {
+    @NotNull
+    public Region getRegionAt(int x, int y, int z, @NotNull World world) {
         // Get default region at start because default region cover all server
         Region region = defaultRegion;
         // Each time try to check if region has subregions
@@ -532,7 +526,7 @@ public class Registry {
      * @return last sub {@link Region} of the position / null if world is null
      */
     @Nullable
-    public Region getRegionAt(@Nonnull Location location) {
+    public Region getRegionAt(@NotNull Location location) {
         if (location.getWorld() == null) return null;
         return getRegionAt(location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getWorld());
     }
@@ -547,7 +541,7 @@ public class Registry {
      * @param strict true if it can't be a subregion of the region to check
      * @return if position is in region
      */
-    public boolean isInRegion(@Nonnull Region region, int x, int y, int z, @Nonnull World world, boolean strict) {
+    public boolean isInRegion(@NotNull Region region, int x, int y, int z, @NotNull World world, boolean strict) {
         Region regionIn = getRegionAt(x, y, z, world);
         if (regionIn == region) return true;
 
@@ -566,7 +560,7 @@ public class Registry {
      * @param strict true if it can't be a subregion of the region to check
      * @return if position is in region
      */
-    public boolean isInRegion(@Nonnull Region region, @Nonnull Location location, boolean strict) {
+    public boolean isInRegion(@NotNull Region region, @NotNull Location location, boolean strict) {
         if (location.getWorld() == null) return false;
         return this.isInRegion(region, location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getWorld(), strict);
     }
@@ -575,7 +569,7 @@ public class Registry {
      * This method set the default {@link Region} of server
      * @param defaultRegion default {@link Region}
      */
-    public void setDefaultRegion(@Nonnull Region defaultRegion) {
+    public void setDefaultRegion(@NotNull Region defaultRegion) {
         this.defaultRegion = defaultRegion;
     }
 }
