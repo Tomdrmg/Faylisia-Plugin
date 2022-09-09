@@ -13,16 +13,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A custom item with damage and stats that is a weapon
+ */
 public class WeaponItem extends CustomItem implements DamageItem, StatsItem {
     private final Map<Stats, Double> stats = new HashMap<>();
     private int damage = 0;
 
-    public WeaponItem(Material material, String id) throws InvalidBuildException {
+    public WeaponItem(@NotNull Material material, @NotNull String id) throws InvalidBuildException {
         super(material, id);
     }
 
+    /**
+     * Add stats and damages to the lore
+     * @return text to add
+     */
     @Override
-    public List<String> firstLore() {
+    @NotNull
+    protected List<String> firstLore() {
         List<String> lore = new ArrayList<>();
 
         lore.add(ChatColor.translateAlternateColorCodes('&', "&7Puissance: &c+" + damage));
@@ -41,6 +49,12 @@ public class WeaponItem extends CustomItem implements DamageItem, StatsItem {
         return damage;
     }
 
+    /**
+     * Change item damages
+     * @param damage new value
+     * @return this instance
+     */
+    @NotNull
     public WeaponItem setDamage(int damage) {
         if (isRegistered()) throw new ChangeRegisteredItem();
         if (damage < 0) damage = 0;
@@ -64,23 +78,42 @@ public class WeaponItem extends CustomItem implements DamageItem, StatsItem {
     }
 
     @Override
-    public @NotNull Map<Stats, Double> getStats() {
+    @NotNull
+    public Map<Stats, Double> getStats() {
         return new HashMap<>(stats);
     }
 
-    public WeaponItem removeStat(Stats stat) {
+    /**
+     * Remove a stat to this item
+     * @param stat stat to remove
+     * @return this instance
+     */
+    @NotNull
+    public WeaponItem removeStat(@NotNull Stats stat) {
         if (isRegistered()) throw new CustomItem.ChangeRegisteredItem();
         stats.remove(stat);
         return this;
     }
 
-    public WeaponItem setStat(Stats stat, double value) {
+    /**
+     * Add or edit a stat on this item
+     * @param stat stat to add/edit
+     * @param value value of stat
+     * @return this instance
+     */
+    @NotNull
+    public WeaponItem setStat(@NotNull Stats stat, double value) {
         if (isRegistered()) throw new CustomItem.ChangeRegisteredItem();
         stats.put(stat, value);
         return this;
     }
 
+    /**
+     * Change item type to weapon
+     * @return new item type
+     */
     @Override
+    @NotNull
     protected String getType() {
         return "ARME";
     }

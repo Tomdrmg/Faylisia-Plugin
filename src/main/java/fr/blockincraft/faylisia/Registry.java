@@ -304,7 +304,7 @@ public class Registry {
      * @return associated {@link CustomItem} / null if it doesn't have
      */
     @Nullable
-    public CustomItem getCustomItemByItemStack(ItemStack itemStack) {
+    public CustomItem getCustomItemByItemStack(@Nullable ItemStack itemStack) {
         // Check if item isn't null and isn't AIR
         if (itemStack == null || itemStack.getType() == Material.AIR) return null;
 

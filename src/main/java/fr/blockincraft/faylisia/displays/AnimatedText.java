@@ -1,5 +1,7 @@
 package fr.blockincraft.faylisia.displays;
 
+import org.jetbrains.annotations.NotNull;
+
 public class AnimatedText {
     private final int animationDuration;
     private final int delayBetweenPart;
@@ -8,11 +10,21 @@ public class AnimatedText {
     private int animationFrame = 0;
     private int delay = 0;
 
-    public AnimatedText(String unique) {
+    /**
+     * Create a text without any animation and only one frame
+     * @param unique text to display
+     */
+    public AnimatedText(@NotNull String unique) {
         this(1, false, unique);
     }
 
-    public AnimatedText(int delayBetweenPart, boolean reverse, String... frames) {
+    /**
+     * Create a animated text
+     * @param delayBetweenPart delay between two frames
+     * @param reverse if at end we do the reverse
+     * @param frames all frames of the animation
+     */
+    public AnimatedText(int delayBetweenPart, boolean reverse, @NotNull String... frames) {
         if (frames.length == 0) throw new RuntimeException("Invalid scoreboard text build! Need at least one frame!");
 
         this.animationDuration = frames.length;
@@ -21,6 +33,11 @@ public class AnimatedText {
         this.frames = frames;
     }
 
+    /**
+     * Get the current frame and go to the next frame
+     * @return current frame
+     */
+    @NotNull
     public String get() {
         if (animationDuration == 1) return frames[0];
 

@@ -9,36 +9,35 @@ import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Loot {
+/**
+ * A loot is an item with a probability to be harvest when kill mob or destroy block
+ */
+public record Loot(int rolls, @NotNull CustomItem item, int probability, int on, @NotNull AmountFunction amount) {
     private static final SecureRandom random = new SecureRandom();
     private static final Registry registry = Faylisia.getInstance().getRegistry();
 
-    private final int rolls;
-    private final CustomItem item;
-    private final int probability;
-    private final int on;
-    private final AmountFunction amount;
-
-    public Loot(int rolls, CustomItem item, int probability, int on, AmountFunction amount) {
-        this.rolls = rolls;
-        this.item = item;
-        this.probability = probability;
-        this.on = on;
-        this.amount = amount;
-    }
-
+    /**
+     * Calculate if an item will be generated or no using probability and rolls of this loot, it will be also calculate
+     * how many items will be generated
+     * @return items generated
+     */
+    @NotNull
     public ItemStack[] generate() {
         List<ItemStack> loots = new ArrayList<>();
 
+        // Do all rolls
         for (int i = 0; i < rolls; i++) {
             int r = random.nextInt(on);
 
+            // Calculate if it will be generated
             if (r < probability) {
+                // Calculate amount of item
                 int amount = this.amount.getAmount();
 
                 while (amount > item.getMaterial().getMaxStackSize()) {
@@ -55,7 +54,15 @@ public class Loot {
         return loots.toArray(new ItemStack[0]);
     }
 
-    public ItemStack[] generateFor(Player player) {
+    /**
+     * Calculate if an item will be generated for the player or no using probability and rolls of this loot, it will
+     * also calculate how many items will be generated. <br/>
+     * By using player we also use player handlers and {@link Stats} of it
+     * @return items generated
+     */
+    @NotNull
+    public ItemStack[] generateFor(@NotNull Player player) {
+        // Calculate probability of generation with player stats
         CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
         int probability = this.probability;
         boolean rare = 100.0 / on * probability <= 5;
@@ -64,11 +71,13 @@ public class Loot {
             probability *= 1 + luck / 100;
         }
 
+        // Retrieve player handlers
         Handlers mainHandHandler = customPlayer.getMainHandHandler();
         Handlers[] armorSetHandlers = customPlayer.getArmorSetHandlers();
         Handlers[] armorSlotHandlers = customPlayer.getArmorSlotHandlers();
         Handlers[] othersHandlers = customPlayer.getOthersHandlers();
 
+        // Apply handlers on probability
         if (mainHandHandler != null) {
             probability = mainHandHandler.getLootProbability(player, item, probability, this.rolls, rare, true, false);
         }
@@ -84,6 +93,7 @@ public class Loot {
 
         List<ItemStack> loots = new ArrayList<>();
 
+        // Calculate rolls and apply handlers on it
         int rolls = this.rolls;
 
         if (mainHandHandler != null) {
@@ -99,10 +109,13 @@ public class Loot {
             rolls = handlers.getLootRolls(player, item, probability, rolls, rare, false, false);
         }
 
+        // Do all rolls
         for (int i = 0; i < rolls; i++) {
             int r = random.nextInt(on);
 
+            // Calculate if item will be generated
             if (r < probability) {
+                // Then calculate amount and apply handlers on it
                 int amount = this.amount.getAmount();
                 if (mainHandHandler != null) {
                     amount = mainHandHandler.getLootAmount(player, item, probability, amount, rolls, rare, true, false);
@@ -131,6 +144,9 @@ public class Loot {
         return loots.toArray(new ItemStack[0]);
     }
 
+    /**
+     * Function to get amount of item generated
+     */
     public interface AmountFunction {
         int getAmount();
     }

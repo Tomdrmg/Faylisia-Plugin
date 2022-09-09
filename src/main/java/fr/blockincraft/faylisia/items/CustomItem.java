@@ -15,6 +15,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +49,7 @@ public class CustomItem {
      * @param material material of item
      * @param id id of custom item (must be unique)
      */
-    public CustomItem(Material material, String id) {
+    public CustomItem(@NotNull Material material, @NotNull String id) {
         this.material = material;
         this.id = id;
     }
@@ -56,6 +58,7 @@ public class CustomItem {
      * Create an item stack from this item, so use {@link CustomItemStack#getAsItemStack()} to create an item to give
      * @return created item stack
      */
+    @NotNull
     public ItemStack getAsItemStack() {
         if (!registered) return null;
 
@@ -87,11 +90,22 @@ public class CustomItem {
         return itemStack;
     }
 
-    public List<String> firstLore() {
+    /**
+     * First lore part, this is util for subclasses, this is lore which will be displayed before {@link CustomItem#lore}
+     * @return text to display
+     */
+    @NotNull
+    protected List<String> firstLore() {
         return new ArrayList<>();
     }
 
-    public List<String> buildLore() {
+    /**
+     * Second lore part, this is lore which will be displayed after {@link CustomItem#lore}
+     * @return text to display
+     */
+    @NotNull
+    protected List<String> buildLore() {
+        // Get other lore part to display before rarity
         List<String> lore = new ArrayList<>(moreLore());
 
         lore.add("");
@@ -104,71 +118,129 @@ public class CustomItem {
         return lore;
     }
 
+    /**
+     * Second lore part, this is lore which will be displayed after {@link CustomItem#lore} but before {@link CustomItem#buildLore()} <br/>
+     * This is util for subclasses
+     * @return text to display
+     */
+    @NotNull
     protected List<String> moreLore() {
         return new ArrayList<>();
     }
 
+    /**
+     * Change custom model data of the item
+     * @param customModelData new value
+     * @return this instance
+     */
+    @NotNull
     public CustomItem setCustomModelData(int customModelData) {
         if (registered) throw new ChangeRegisteredItem();
         this.customModelData = customModelData;
         return this;
     }
 
+    /**
+     * Change item color, only used if item is leather item
+     * @param color new value
+     * @return this instance
+     */
+    @NotNull
     public CustomItem setColor(int color) {
         if (registered) throw new ChangeRegisteredItem();
         this.color = color;
         return this;
     }
 
-    public int getColor() {
-        return color;
-    }
-
-    public CustomItem setName(String name) {
+    /**
+     * Change item display name
+     * @param name new value
+     * @return this instance
+     */
+    @NotNull
+    public CustomItem setName(@NotNull String name) {
         if (registered) throw new ChangeRegisteredItem();
         this.name = name;
         return this;
     }
 
-    public CustomItem setLore(String... lore) {
+    /**
+     * Change item lore
+     * @param lore new value
+     * @return this instance
+     */
+    @NotNull
+    public CustomItem setLore(@Nullable String... lore) {
         if (registered) throw new ChangeRegisteredItem();
         this.lore = lore == null ? new String[0] : lore;
         return this;
     }
 
+    /**
+     * Change item enchantability state
+     * @param enchantable new value
+     * @return this instance
+     */
+    @NotNull
     public CustomItem setEnchantable(boolean enchantable)  {
         if (registered) throw new ChangeRegisteredItem();
         this.enchantable = enchantable;
         return this;
     }
 
+    /**
+     * Change item disenchantability state
+     * @param disenchantable new value
+     * @return this instance
+     */
+    @NotNull
     public CustomItem setDisenchantable(boolean disenchantable) {
         if (registered) throw new ChangeRegisteredItem();
         this.disenchantable = disenchantable;
         return this;
     }
 
-    public CustomItem setRarity(Rarity rarity) {
+    /**
+     * Change item rarity
+     * @param rarity new value
+     * @return this instance
+     */
+    @NotNull
+    public CustomItem setRarity(@NotNull Rarity rarity) {
         if (registered) throw new ChangeRegisteredItem();
         this.rarity = rarity;
         return this;
     }
 
-    public CustomItem setRecipe(Recipe... recipe) {
+    /**
+     * Change item recipes
+     * @param recipe new value
+     * @return this instance
+     */
+    @NotNull
+    public CustomItem setRecipe(@Nullable Recipe... recipe) {
         if (registered) throw new ChangeRegisteredItem();
         this.recipes = recipe == null ? new Recipe[0] : recipe;
         return this;
     }
 
-    public CustomItem setCategory(Categories category) {
+    /**
+     * Change item category
+     * @param category new value
+     * @return this instance
+     */
+    @NotNull
+    public CustomItem setCategory(@NotNull Categories category) {
         this.category = category;
         return this;
     }
 
+    @NotNull
     public Material getMaterial() {
         return material;
     }
 
+    @NotNull
     public String getId() {
         return id;
     }
@@ -177,10 +249,16 @@ public class CustomItem {
         return customModelData;
     }
 
+    public int getColor() {
+        return color;
+    }
+
+    @Nullable
     public String getName() {
         return name;
     }
 
+    @NotNull
     public String[] getLore() {
         return lore;
     }
@@ -193,14 +271,17 @@ public class CustomItem {
         return disenchantable;
     }
 
+    @NotNull
     public Rarity getRarity() {
         return rarity;
     }
 
+    @NotNull
     public Recipe[] getRecipes() {
         return recipes;
     }
 
+    @Nullable
     public Categories getCategory() {
         return category;
     }
@@ -209,37 +290,55 @@ public class CustomItem {
         return registered;
     }
 
+    /**
+     * Valid all parameters of the item and then register it in {@link Registry} <br/>
+     * Registered items can't be edited
+     */
     public void register() {
         if (registered) throw new ChangeRegisteredItem();
 
-        if (material == null) throw new InvalidBuildException("Material cannot be null!");
-        if (id == null || id.isEmpty()) throw new InvalidBuildException("Id cannot be null or empty!");
         if (!idPattern.matcher(id).matches()) throw new InvalidBuildException("Id can only contains pattern [a-z1-9_-]+!");
         if (registry.itemIdUsed(id)) throw new InvalidBuildException("Id already used!");
         if (rarity == null) throw new InvalidBuildException("Rarity cannot be null!");
 
+        // Call this to subclasses
         registerOthers();
 
         registered = true;
         registry.registerItem(this);
     }
 
+    /**
+     * Get the object type like object, weapon, armor..., to override in subclasses <br/>
+     * Principally used to build lore {@link CustomItem#buildLore()}
+     * @return item type
+     */
+    @NotNull
     protected String getType() {
         return "OBJET";
     }
 
+    /**
+     * Method only used in subclasses to do actions and valid more parameters in it
+     */
     protected void registerOthers() {
 
     }
 
+    /**
+     * Thrown when we use a Setter of this class on an item which is {@link CustomItem#registered}
+     */
     protected static class ChangeRegisteredItem extends RuntimeException {
         public ChangeRegisteredItem() {
             super("You tried to edit a registered item!");
         }
     }
 
+    /**
+     * Thrown when an error occurred during item registration in method {@link CustomItem#register()}
+     */
     protected static class InvalidBuildException extends RuntimeException {
-        public InvalidBuildException(String cause) {
+        public InvalidBuildException(@NotNull String cause) {
             super("Invalid custom item build: " + cause);
         }
     }

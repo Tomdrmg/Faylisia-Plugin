@@ -67,9 +67,7 @@ public class CustomPlayerDTO {
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
         CustomItem customItem = registry.getCustomItemByItemStack(mainHandItem);
         if (customItem instanceof HandlerItem handlerItem) {
-            if (handlerItem.getHandlers() != null) {
                 return handlerItem.getHandlers();
-            }
         }
 
         return null;
@@ -85,38 +83,30 @@ public class CustomPlayerDTO {
 
         if (registry.getCustomItemByItemStack(inventory.getHelmet()) instanceof ArmorItem armorItem) {
             ArmorSet armorSet = armorItem.getArmorSet();
-            if (armorSet != null) {
                 armorSets.put(armorSet, 1);
-            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getChestplate()) instanceof ArmorItem armorItem) {
             ArmorSet armorSet = armorItem.getArmorSet();
-            if (armorSet != null) {
                 armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
-            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getLeggings()) instanceof ArmorItem armorItem) {
             ArmorSet armorSet = armorItem.getArmorSet();
-            if (armorSet != null) {
                 armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
-            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getBoots()) instanceof ArmorItem armorItem) {
             ArmorSet armorSet = armorItem.getArmorSet();
-            if (armorSet != null) {
                 armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
-            }
         }
 
         List<Handlers> handlers = new ArrayList<>();
 
         armorSets.forEach((armorSet, pieces) -> {
             for (ArmorSet.Bonus bonus : armorSet.getBonus()) {
-                if (bonus.getMinimum() <= pieces) {
-                    handlers.add(bonus.getHandlers());
+                if (bonus.minimum() <= pieces) {
+                    handlers.add(bonus.handlers());
                 }
             }
         });
@@ -133,27 +123,19 @@ public class CustomPlayerDTO {
         List<Handlers> handlers = new ArrayList<>();
 
         if (registry.getCustomItemByItemStack(inventory.getHelmet()) instanceof HandlerItem handlerItem) {
-            if (handlerItem.getHandlers() != null) {
                 handlers.add(handlerItem.getHandlers());
-            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getChestplate()) instanceof HandlerItem handlerItem) {
-            if (handlerItem.getHandlers() != null) {
                 handlers.add(handlerItem.getHandlers());
-            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getLeggings()) instanceof HandlerItem handlerItem) {
-            if (handlerItem.getHandlers() != null) {
                 handlers.add(handlerItem.getHandlers());
-            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getBoots()) instanceof HandlerItem handlerItem) {
-            if (handlerItem.getHandlers() != null) {
                 handlers.add(handlerItem.getHandlers());
-            }
         }
 
         return handlers.toArray(new Handlers[0]);
@@ -169,16 +151,12 @@ public class CustomPlayerDTO {
 
         ItemStack mainHandItem = inventory.getItemInMainHand();
         if (registry.getCustomItemByItemStack(inventory.getItemInOffHand()) instanceof HandlerItem handlerItem) {
-            if (handlerItem.getHandlers() != null) {
                 handlers.add(handlerItem.getHandlers());
-            }
         }
 
         for (ItemStack itemStack : inventory.getStorageContents()) {
             if (itemStack != mainHandItem && registry.getCustomItemByItemStack(itemStack) instanceof HandlerItem handlerItem) {
-                if (handlerItem.getHandlers() != null) {
                     handlers.add(handlerItem.getHandlers());
-                }
             }
         }
 

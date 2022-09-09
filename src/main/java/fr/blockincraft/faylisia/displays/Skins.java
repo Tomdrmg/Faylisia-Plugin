@@ -1,5 +1,10 @@
 package fr.blockincraft.faylisia.displays;
 
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * This enum contain all skins used to render tab/players or others
+ */
 public enum Skins {
     LIME(
             "eyJ0aW1lc3RhbXAiOjE1NDczMzg4MzQ3OTcsInByb2ZpbGVJZCI6IjVjN2ZiNzhhMmQxMzQ5NTZhNWE1M2EyNGQ5NWY1YjRmIiwicHJvZmlsZU5hbWUiOiJQZWFyc29uSW5tYW4iLCJzaWduYXR1cmVSZXF1aXJlZCI6dHJ1ZSwidGV4dHVyZXMiOnsiU0tJTiI6eyJ1cmwiOiJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2RlZTZkMGM3MGMxNDAyODg4ZGI4YzEwYzE5M2JhMzRhZjc4NmUyMjhmODAzZDhmODQxZDRiZmFjMWE3MzFiMDkifX19",
@@ -25,7 +30,7 @@ public enum Skins {
     public final String value;
     public final String signature;
 
-    Skins(String value, String signature) {
+    Skins(@NotNull String value, @NotNull String signature) {
         this.value = value;
         this.signature = signature;
     }

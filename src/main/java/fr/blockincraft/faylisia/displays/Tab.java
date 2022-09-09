@@ -18,6 +18,7 @@ import net.md_5.bungee.chat.TextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +32,9 @@ public class Tab {
 
     private static final char[] letters = new char[]{'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
 
+    // Create a list of player uuid and name to place them in tab with the right order
+    // We name them "!aa", "!ab"... because Minecraft sort them by name, we can always change
+    // their display name to a good render
     static {
         uuidsPerSlot = new HashMap<>();
         namePerSlot = new HashMap<>();
@@ -44,6 +48,13 @@ public class Tab {
         }
     }
 
+    /**
+     * Get a fake player info data to display amount of online players
+     * @param onlinePlayers online players amount
+     * @param slot slot to display it (Tab contains 4 bars with 20 slot each, from 0 to 79)
+     * @return fake player info data
+     */
+    @NotNull
     private static PlayerInfoData getPlayerHeader(int onlinePlayers, int slot) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
@@ -58,6 +69,12 @@ public class Tab {
         return playerInfoData;
     }
 
+    /**
+     * Get a fake player info data to display an empty slot
+     * @param slot slot to display it (Tab contains 4 bars with 20 slot each, from 0 to 79)
+     * @return fake player info data
+     */
+    @NotNull
     private static PlayerInfoData getPlayerEmpty(int slot) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
@@ -72,7 +89,14 @@ public class Tab {
         return playerInfoData;
     }
 
-    private static PlayerInfoData getPlayerRender(Player player, int slot) {
+    /**
+     * Get a fake player info data to display a player
+     * @param player player to display
+     * @param slot slot to display it (Tab contains 4 bars with 20 slot each, from 0 to 79)
+     * @return fake player info data
+     */
+    @NotNull
+    private static PlayerInfoData getPlayerRender(@NotNull Player player, int slot) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
 
@@ -89,7 +113,11 @@ public class Tab {
         return playerInfoData;
     }
 
-    public static void initPlayersTabPartFor(Player player) {
+    /**
+     * Initialize player tab (add {@link Tab#getPlayerHeader(int, int)}, players and empty slots)
+     * @param player player to initialize her tab
+     */
+    public static void initPlayersTabPartFor(@NotNull Player player) {
         List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers()).stream().sorted((Comparator<Player>) (o1, o2) -> {
             CustomPlayerDTO p1 = registry.getOrRegisterPlayer(o1.getUniqueId());
             CustomPlayerDTO p2 = registry.getOrRegisterPlayer(o2.getUniqueId());
@@ -121,7 +149,11 @@ public class Tab {
         }
     }
 
-    public static void refreshPlayersInTabFor(Player player) {
+    /**
+     * Update all players in the tab of a player (update {@link Tab#getPlayerHeader(int, int)} and players)
+     * @param player player to update her tab
+     */
+    public static void refreshPlayersInTabFor(@NotNull Player player) {
         List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
 
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
@@ -152,7 +184,13 @@ public class Tab {
         }
     }
 
-    public static void refreshPlayerSkinOfFor(Player of, Player player) {
+    /**
+     * Update player skin of a player to another player <br/>
+     * Todo: remove player entity, respawn it and then link player client to new entity
+     * @param of player to update skin
+     * @param player player which will receive the changes
+     */
+    public static void refreshPlayerSkinOfFor(@NotNull Player of, @NotNull Player player) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
         List<PlayerInfoData> players = new ArrayList<>();
 
@@ -218,6 +256,12 @@ public class Tab {
         }*/
     }
 
+    /**
+     * Get fake player info data to display the stats header
+     * @param slot slot to display it
+     * @return fake player info data
+     */
+    @NotNull
     private static PlayerInfoData getStatsHeader(int slot) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
@@ -232,7 +276,14 @@ public class Tab {
         return playerInfoData;
     }
 
-    private static PlayerInfoData getRankElement(int slot, Ranks rank) {
+    /**
+     * Get a fake player info data to display player rank
+     * @param slot slot to display it
+     * @param rank rank to display
+     * @return fake player info data
+     */
+    @NotNull
+    private static PlayerInfoData getRankElement(int slot, @NotNull Ranks rank) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
 
@@ -246,7 +297,14 @@ public class Tab {
         return playerInfoData;
     }
 
-    private static PlayerInfoData getClassesElement(int slot, Classes classes) {
+    /**
+     * Get a fake player info data to display player class
+     * @param slot slot to display it
+     * @param classes class to display
+     * @return fake player info data
+     */
+    @NotNull
+    private static PlayerInfoData getClassesElement(int slot, @NotNull Classes classes) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
 
@@ -260,6 +318,13 @@ public class Tab {
         return playerInfoData;
     }
 
+    /**
+     * Get a fake player info data to display player damage
+     * @param slot slot to display it
+     * @param value damage to display
+     * @return fake player info data
+     */
+    @NotNull
     private static PlayerInfoData getDamageElement(int slot, long value) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
@@ -274,7 +339,15 @@ public class Tab {
         return playerInfoData;
     }
 
-    private static PlayerInfoData getStatElement(int slot, Stats stat, long value) {
+    /**
+     * Get a fake player info data to display a stat of a player
+     * @param slot slot to display it
+     * @param stat stat to show
+     * @param value value of the stat
+     * @return fake player info data
+     */
+    @NotNull
+    private static PlayerInfoData getStatElement(int slot, @NotNull Stats stat, long value) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
 
@@ -288,7 +361,11 @@ public class Tab {
         return playerInfoData;
     }
 
-    public static void initStatsPartFor(Player player) {
+    /**
+     * Initialize stats tab part for a player
+     * @param player player to init her tab
+     */
+    public static void initStatsPartFor(@NotNull Player player) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
         List<PlayerInfoData> players = new ArrayList<>();
 
@@ -308,7 +385,11 @@ public class Tab {
         }
     }
 
-    public static void refreshStatsPartFor(Player player) {
+    /**
+     * Update stats tab part for a player
+     * @param player player to update her tab
+     */
+    public static void refreshStatsPartFor(@NotNull Player player) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
         List<PlayerInfoData> players = new ArrayList<>();
 
@@ -339,6 +420,12 @@ public class Tab {
         }
     }
 
+    /**
+     * Get a fake player info data to display guild header
+     * @param slot slot to display it
+     * @return fake player info data
+     */
+    @NotNull
     private static PlayerInfoData getGuildHeader(int slot) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
@@ -353,6 +440,12 @@ public class Tab {
         return playerInfoData;
     }
 
+    /**
+     * Get a fake player info data to display a "coming soon" player
+     * @param slot slot to display it
+     * @return fake player info data
+     */
+    @NotNull
     private static PlayerInfoData getComingSoon(int slot) {
         String name = namePerSlot.get(slot);
         UUID uuid = uuidsPerSlot.get(slot);
@@ -367,7 +460,11 @@ public class Tab {
         return playerInfoData;
     }
 
-    public static void initGuildPartFor(Player player) {
+    /**
+     * Initialize guild tab part for a player
+     * @param player player to init her tab
+     */
+    public static void initGuildPartFor(@NotNull Player player) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
         List<PlayerInfoData> players = new ArrayList<>();
 
@@ -387,7 +484,11 @@ public class Tab {
         }
     }
 
-    public static void refreshGuildPartFor(Player player) {
+    /**
+     * Update guild information in tab of a player
+     * @param player player to update her tab
+     */
+    public static void refreshGuildPartFor(@NotNull Player player) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
         List<PlayerInfoData> players = new ArrayList<>();
 
@@ -407,11 +508,15 @@ public class Tab {
 
 
 
-    //Header footer part
+    //Tab header and footer part
     private static final Map<UUID, AnimatedText[]> header = new HashMap<>();
     private static final Map<UUID, AnimatedText[]> footer = new HashMap<>();
 
-    public static void updateFooterAndHeader(Player player) {
+    /**
+     * Update tab header and footer for a player
+     * @param player player to update her tab
+     */
+    public static void updateFooterAndHeader(@NotNull Player player) {
         AnimatedText[] header = Tab.header.get(player.getUniqueId());
         AnimatedText[] footer = Tab.footer.get(player.getUniqueId());
 

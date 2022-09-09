@@ -1,15 +1,20 @@
 package fr.blockincraft.faylisia.items.management;
 
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.menu.viewer.CategoryViewerMenu;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Categories are used to sort {@link CustomItem} for display in {@link CategoryViewerMenu}
+ */
 public enum Categories {
     COOL_DIAMOND(Material.DIAMOND_HORSE_ARMOR, -1, "&d&lCool Diamond",
             "&8The most cool category",
@@ -24,13 +29,19 @@ public enum Categories {
     public final String[] lore;
     public final List<CustomItem> items = new ArrayList<>();
 
-    Categories(Material material, int customModelData, String name, String... lore) {
+    Categories(@NotNull Material material, int customModelData, @NotNull String name, @NotNull String... lore) {
         this.material = material;
         this.customModelData = customModelData;
         this.name = name;
         this.lore = lore;
     }
 
+    /**
+     * Create an item stack to represent the category in {@link CategoryViewerMenu}
+     * @param amount size of item stack
+     * @return created item stack
+     */
+    @NotNull
     public ItemStack getAsItemStack(int amount) {
         if (amount < 1) amount = 1;
         if (amount > material.getMaxStackSize()) amount = material.getMaxStackSize();
@@ -38,6 +49,7 @@ public enum Categories {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta meta = itemStack.getItemMeta();
 
+        assert meta != null;
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name + " Category"));
         meta.setLore(Arrays.stream(lore).map(
                 text -> ChatColor.translateAlternateColorCodes('&', text.replace("%items%", String.valueOf(items.size())))

@@ -6,10 +6,12 @@ import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class ArmorItem extends CustomItem implements StatsItem {
+    // All materials that are armor items
     private static final Material[] armorMaterials = new Material[]{
             Material.LEATHER_HELMET,
             Material.LEATHER_CHESTPLATE,
@@ -49,11 +51,12 @@ public class ArmorItem extends CustomItem implements StatsItem {
     private ArmorSet armorSet = null;
     private final Map<Stats, Double> stats = new HashMap<>();
 
-    public ArmorItem(Material material, String id) throws InvalidBuildException {
+    public ArmorItem(@NotNull Material material, @NotNull String id) {
         super(material, id);
     }
 
     @Override
+    @NotNull
     public List<String> firstLore() {
         List<String> lore = new ArrayList<>();
 
@@ -72,8 +75,8 @@ public class ArmorItem extends CustomItem implements StatsItem {
 
         for (ArmorSet.Bonus bonus : armorSet.getBonus()) {
             lore.add("");
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&d" + bonus.getMinimum() + " Pieces bonus - " + bonus.getName() + "&d:"));
-            for (String descPart : bonus.getDescription()) {
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&d" + bonus.minimum() + " Pieces bonus - " + bonus.name() + "&d:"));
+            for (String descPart : bonus.description()) {
                 lore.add(ChatColor.translateAlternateColorCodes('&', descPart));
             }
         }
@@ -81,12 +84,18 @@ public class ArmorItem extends CustomItem implements StatsItem {
         return lore;
     }
 
-    public ArmorItem setArmorSet(ArmorSet armorSet) {
+    /**
+     * Change an armor set to add set bonus when wear
+     * @param armorSet new value
+     * @return this instance
+     */
+    public ArmorItem setArmorSet(@Nullable ArmorSet armorSet) {
         if (isRegistered()) throw new ChangeRegisteredItem();
         this.armorSet = armorSet;
         return this;
     }
 
+    @NotNull
     public ArmorSet getArmorSet() {
         return armorSet;
     }
@@ -112,24 +121,37 @@ public class ArmorItem extends CustomItem implements StatsItem {
         return stats.get(stat) != null;
     }
 
-    public ArmorItem removeStat(Stats stat) {
+    /**
+     * Remove a stat of this item
+     * @param stat stat to remove
+     * @return this instance
+     */
+    public ArmorItem removeStat(@NotNull Stats stat) {
         if (isRegistered()) throw new ChangeRegisteredItem();
         stats.remove(stat);
         return this;
     }
 
-    public ArmorItem setStat(Stats stat, double value) {
+    /**
+     * Add or edit a stat of this item
+     * @param stat stat to add/edit
+     * @param value value of this stat
+     * @return this instance
+     */
+    public ArmorItem setStat(@NotNull Stats stat, double value) {
         if (isRegistered()) throw new ChangeRegisteredItem();
         stats.put(stat, value);
         return this;
     }
 
     @Override
-    public @NotNull Map<Stats, Double> getStats() {
+    @NotNull
+    public Map<Stats, Double> getStats() {
         return new HashMap<>(stats);
     }
 
     @Override
+    @NotNull
     protected String getType() {
         return "PIECE D'ARMURE";
     }

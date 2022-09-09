@@ -6,12 +6,16 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Deserializer to convert {@link String} to a list of enchantments of a {@link CustomItemStack}
+ */
 public class EnchantmentDeserializer extends StdDeserializer<Map<CustomEnchantments, Integer>> {
     public EnchantmentDeserializer() {
         this(null);

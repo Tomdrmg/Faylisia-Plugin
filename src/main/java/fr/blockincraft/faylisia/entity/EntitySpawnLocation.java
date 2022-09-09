@@ -1,5 +1,10 @@
 package fr.blockincraft.faylisia.entity;
 
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * A custom entity spawn location, used to spawn an entity if a player is near
+ */
 public class EntitySpawnLocation {
     private final int x;
     private final int y;
@@ -7,7 +12,13 @@ public class EntitySpawnLocation {
     private final CustomEntityType type;
     private long lastKill = 0;
 
-    public EntitySpawnLocation(int x, int y, int z, CustomEntityType type) {
+    /**
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     * @param type custom entity type
+     */
+    public EntitySpawnLocation(int x, int y, int z, @NotNull CustomEntityType type) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -26,6 +37,7 @@ public class EntitySpawnLocation {
         return z;
     }
 
+    @NotNull
     public CustomEntityType getType() {
         return type;
     }

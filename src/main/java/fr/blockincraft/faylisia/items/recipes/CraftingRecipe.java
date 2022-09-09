@@ -4,9 +4,12 @@ import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.menu.CraftingMenu;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class CraftingRecipe implements Recipe {
     private final CustomItemStack[] pattern;
@@ -14,46 +17,98 @@ public class CraftingRecipe implements Recipe {
     private final PatternType patternType;
     private final Direction direction;
 
-    public CraftingRecipe(int resultAmount, CustomItemStack p1, CustomItemStack p2, CustomItemStack p3,
-                                            CustomItemStack p4, CustomItemStack p5, CustomItemStack p6,
-                                            CustomItemStack p7, CustomItemStack p8, CustomItemStack p9) {
+    /**
+     * Constructor for a 3x3 recipe like ore blocks
+     * @param resultAmount amount of item crafted
+     * @param p1 first ingredient
+     * @param p2 second ingredient
+     * @param p3 third ingredient
+     * @param p4 fourth ingredient
+     * @param p5 fifth ingredient
+     * @param p6 sixth ingredient
+     * @param p7 seventh ingredient
+     * @param p8 eighth ingredient
+     * @param p9 ninth ingredient
+     */
+    public CraftingRecipe(int resultAmount, @Nullable CustomItemStack p1, @Nullable CustomItemStack p2, @Nullable CustomItemStack p3,
+                                            @Nullable CustomItemStack p4, @Nullable CustomItemStack p5, @Nullable CustomItemStack p6,
+                                            @Nullable CustomItemStack p7, @Nullable CustomItemStack p8, @Nullable CustomItemStack p9) {
         this.resultAmount = resultAmount;
         this.pattern = new CustomItemStack[]{p1, p2, p3, p4, p5, p6, p7, p8, p9};
         this.patternType = PatternType.FULL;
         this.direction = null;
     }
 
-    public CraftingRecipe(int resultAmount, CustomItemStack p1, CustomItemStack p2, CustomItemStack p3,
-                                            CustomItemStack p4, CustomItemStack p5, CustomItemStack p6, Direction direction) {
+    /**
+     * Constructor for 3x2 pattern like doors
+     * @param resultAmount amount of item crafted
+     * @param p1 first ingredient
+     * @param p2 second ingredient
+     * @param p3 third ingredient
+     * @param p4 fourth ingredient
+     * @param p5 fifth ingredient
+     * @param p6 sixth ingredient
+     * @param direction direction of recipe
+     */
+    public CraftingRecipe(int resultAmount, @Nullable CustomItemStack p1, @Nullable CustomItemStack p2, @Nullable CustomItemStack p3,
+                                            @Nullable CustomItemStack p4, @Nullable CustomItemStack p5, @Nullable CustomItemStack p6, @NotNull Direction direction) {
         this.resultAmount = resultAmount;
         this.pattern = new CustomItemStack[]{p1, p2, p3, p4, p5, p6};
         this.patternType = PatternType.TWO_THREE;
-        this.direction = direction == null ? Direction.HORIZONTAL : direction;
+        this.direction = direction;
     }
 
-    public CraftingRecipe(int resultAmount, CustomItemStack p1, CustomItemStack p2,
-                                            CustomItemStack p3, CustomItemStack p4) {
+    /**
+     * Constructor for a 2x2 pattern
+     * @param resultAmount amount of item crafted
+     * @param p1 first ingredient
+     * @param p2 second ingredient
+     * @param p3 third ingredient
+     * @param p4 fourth ingredient
+     */
+    public CraftingRecipe(int resultAmount, @Nullable CustomItemStack p1, @Nullable CustomItemStack p2,
+                                            @Nullable CustomItemStack p3, @Nullable CustomItemStack p4) {
         this.resultAmount = resultAmount;
         this.pattern = new CustomItemStack[]{p1, p2, p3, p4};
         this.patternType = PatternType.TWO_TWO;
         this.direction = null;
     }
 
-    public CraftingRecipe(int resultAmount, CustomItemStack p1, CustomItemStack p2, CustomItemStack p3, Direction direction) {
+    /**
+     * Constructor for 3x1 pattern like swords
+     * @param resultAmount amount of item crafted
+     * @param p1 first ingredient
+     * @param p2 second ingredient
+     * @param p3 third ingredient
+     * @param direction direction of recipe
+     */
+    public CraftingRecipe(int resultAmount, @Nullable CustomItemStack p1, @Nullable CustomItemStack p2, @Nullable CustomItemStack p3, @NotNull Direction direction) {
         this.resultAmount = resultAmount;
         this.pattern = new CustomItemStack[]{p1, p2, p3};
         this.patternType = PatternType.THREE_ONE;
         this.direction = direction;
     }
 
-    public CraftingRecipe(int resultAmount, CustomItemStack p1, CustomItemStack p2, Direction direction) {
+    /**
+     * Constructor for 2x1 pattern like stick
+     * @param resultAmount amount of item crafted
+     * @param p1 first ingredient
+     * @param p2 second ingredient
+     * @param direction direction of recipe
+     */
+    public CraftingRecipe(int resultAmount, @Nullable CustomItemStack p1, @Nullable CustomItemStack p2, @NotNull Direction direction) {
         this.resultAmount = resultAmount;
         this.pattern = new CustomItemStack[]{p1, p2};
         this.patternType = PatternType.TWO_ONE;
         this.direction = direction;
     }
 
-    public CraftingRecipe(int resultAmount, CustomItemStack p1) {
+    /**
+     * Constructor for only 1x1 pattern like planks
+     * @param resultAmount amount of item crafted
+     * @param p1 ingredient
+     */
+    public CraftingRecipe(int resultAmount, @Nullable CustomItemStack p1) {
         this.resultAmount = resultAmount;
         this.pattern = new CustomItemStack[]{p1};
         this.patternType = PatternType.ONE;
@@ -61,11 +116,13 @@ public class CraftingRecipe implements Recipe {
     }
 
     @Override
+    @NotNull
     public String getMenuId() {
         return "crafting_table";
     }
 
     @Override
+    @NotNull
     public CustomItemStack[] getItems() {
         return pattern;
     }
@@ -76,6 +133,7 @@ public class CraftingRecipe implements Recipe {
     }
 
     @Override
+    @Nullable
     public CustomItemStack[] matches(ItemStack[] recipe) {
         if (emptyPattern()) return null;
         if (emptyRecipe(recipe)) return null;
@@ -270,6 +328,7 @@ public class CraftingRecipe implements Recipe {
     }
 
     @Override
+    @NotNull
     public Map<Integer, CustomItemStack> getForDisplay() {
         Map<Integer, CustomItemStack> items = new HashMap<>();
         int[] craftingGrid = CraftingMenu.craftingGrid;
@@ -282,7 +341,7 @@ public class CraftingRecipe implements Recipe {
                 items.put(craftingGrid[0], pattern[0]);
             }
             case TWO_ONE -> {
-                switch (direction) {
+                switch (Objects.requireNonNull(direction)) {
                     case HORIZONTAL -> {
                         items.put(craftingGrid[0], pattern[0]);
                         items.put(craftingGrid[1], pattern[1]);
@@ -294,7 +353,7 @@ public class CraftingRecipe implements Recipe {
                 }
             }
             case THREE_ONE -> {
-                switch (direction) {
+                switch (Objects.requireNonNull(direction)) {
                     case HORIZONTAL -> {
                         items.put(craftingGrid[0], pattern[2]);
                         items.put(craftingGrid[1], pattern[1]);
@@ -314,7 +373,7 @@ public class CraftingRecipe implements Recipe {
                 items.put(craftingGrid[4], pattern[3]);
             }
             case TWO_THREE -> {
-                switch (direction) {
+                switch (Objects.requireNonNull(direction)) {
                     case HORIZONTAL -> {
                         items.put(craftingGrid[0], pattern[0]);
                         items.put(craftingGrid[1], pattern[1]);
@@ -354,15 +413,24 @@ public class CraftingRecipe implements Recipe {
         return CraftingMenu.resultSlot;
     }
 
+    @NotNull
     public PatternType getPatternType() {
         return patternType;
     }
 
+    @Nullable
     public Direction getDirection() {
         return direction;
     }
 
-    public boolean matches(ItemStack[] recipe, CustomItemStack[] pattern) {
+    /**
+     * Check if a list of item stack matches with a pattern <br/>
+     * An {@link IndexOutOfBoundsException} can be thrown if you don't send a recipe and a pattern with 9 items
+     * @param recipe list to check
+     * @param pattern pattern to check
+     * @return if list matches with pattern
+     */
+    public boolean matches(@NotNull ItemStack[] recipe, @NotNull CustomItemStack[] pattern) {
         for (int i = 0; i < 9; i++) {
             CustomItemStack patternItem = pattern[i];
             if (patternItem == null && recipe[i] == null) continue;
@@ -378,7 +446,12 @@ public class CraftingRecipe implements Recipe {
         return true;
     }
 
-    private int getEmptyAmount(ItemStack[] recipe) {
+    /**
+     * Check how many items are null or AIR items in a list of item stack
+     * @param recipe list to check
+     * @return amount of empty item stack
+     */
+    private int getEmptyAmount(@NotNull ItemStack[] recipe) {
         int amount = 0;
 
         for (ItemStack itemStack : recipe) {
@@ -388,7 +461,12 @@ public class CraftingRecipe implements Recipe {
         return amount;
     }
 
-    private boolean emptyRecipe(ItemStack[] recipe) {
+    /**
+     * Check if list of item stack contain only null or AIR items
+     * @param recipe list to check
+     * @return if they are all empty
+     */
+    private boolean emptyRecipe(@NotNull ItemStack[] recipe) {
         for (ItemStack itemStack : recipe) {
             if (itemStack != null && itemStack.getType() != Material.AIR) {
                 return false;
@@ -398,9 +476,12 @@ public class CraftingRecipe implements Recipe {
         return true;
     }
 
+    /**
+     * @return if pattern only contain null item
+     */
     private boolean emptyPattern() {
         for (CustomItemStack itemStack : pattern) {
-            if (itemStack != null && itemStack.getItem() != null) {
+            if (itemStack != null) {
                 return false;
             }
         }
@@ -408,6 +489,9 @@ public class CraftingRecipe implements Recipe {
         return true;
     }
 
+    /**
+     * Pattern type used to know how to check if recipe matches, for example, a door is {@link PatternType#TWO_THREE} and direction {@link Direction#VERTICAL}
+     */
     private enum PatternType {
         FULL,
         TWO_THREE,
@@ -417,6 +501,9 @@ public class CraftingRecipe implements Recipe {
         ONE
     }
 
+    /**
+     * Direction of a crafting recipe used with {@link PatternType#TWO_THREE}, {@link PatternType#THREE_ONE} and {@link PatternType#TWO_ONE}
+     */
     public enum Direction {
         VERTICAL,
         HORIZONTAL

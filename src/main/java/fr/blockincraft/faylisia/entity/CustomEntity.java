@@ -2,9 +2,7 @@ package fr.blockincraft.faylisia.entity;
 
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
-import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -13,6 +11,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -27,7 +27,15 @@ public class CustomEntity {
     private long health;
     private long lastDamage = 0;
 
-    public CustomEntity(CustomEntityType entityType, World world, int x, int y, int z) {
+    /**
+     * Constructor also spawn the entity
+     * @param entityType custom entity type
+     * @param world world where entity will spawn
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     */
+    public CustomEntity(@NotNull CustomEntityType entityType, @NotNull World world, int x, int y, int z) {
         health = entityType.getMaxHealth();
         this.entityType = entityType;
         this.spawnLoc = new Location(world, x, y, z);
@@ -39,24 +47,38 @@ public class CustomEntity {
         registry.addEntity(this);
     }
 
+    /**
+     * Remove entity from the world and from the registry
+     */
     public void remove() {
         registry.removeEntity(this);
         entity.remove();
     }
 
+    /**
+     * Update entity name, used to update entity health points
+     */
     public void updateName() {
         entity.setCustomName(entityType.getNameWithHealth(health < 0 ? 0 : health));
     }
 
+    /**
+     * @return bukkit's entity associated to this
+     */
+    @Nullable
     public Entity getEntity() {
         return entity;
     }
 
+    @NotNull
     public CustomEntityType getEntityType() {
         return entityType;
     }
 
-    public void death(Player killer) {
+    /**
+     * Method to 'kill' entity
+     */
+    public void death(@Nullable Player killer) {
         if (entity instanceof LivingEntity living) {
             living.setHealth(0);
         } else {
@@ -85,16 +107,25 @@ public class CustomEntity {
         return lastDamage;
     }
 
-    public void takeDamage(long damage, Player attacker) {
+    /**
+     * Inflict damage to the entity, you can set an attacker to drop loot if entity will dead after this hit or to add
+     *  effects like a thorns
+     */
+    public void takeDamage(long damage, @Nullable Player attacker) {
         health -= damage;
         if (health <= 0) {
             death(attacker);
         }
-        updateName();
         lastDamage = Date.from(Instant.now()).getTime();
     }
 
-    public long getDamageFor(Player player) {
+    /**
+     * Calculate damage to inflict to a player when hit, this can be useful to create a mob which inflict more
+     * damage to player with a diamond armor for example
+     * @param player player which will be attacked
+     * @return damage to inflict to this player
+     */
+    public long getDamageFor(@NotNull Player player) {
         return entityType.getDamage();
     }
 

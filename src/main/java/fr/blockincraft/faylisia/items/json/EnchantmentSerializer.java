@@ -3,17 +3,25 @@ package fr.blockincraft.faylisia.items.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Serializer to convert enchantments of a {@link CustomItemStack} to a {@link String}
+ */
 public class EnchantmentSerializer extends JsonSerializer<Map<CustomEnchantments, Integer>> {
     @Override
     public void serialize(Map<CustomEnchantments, Integer> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         serialize(value, gen, serializers, true);
     }
 
+    /**
+     * Serialize item enchantments
+     * @param withObject if we start with '{' and finish with '}'
+     */
     public void serialize(Map<CustomEnchantments, Integer> value, JsonGenerator gen, SerializerProvider serializers, boolean withObject) throws IOException {
         if (withObject) gen.writeStartObject();
 

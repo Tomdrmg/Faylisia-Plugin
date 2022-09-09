@@ -11,6 +11,7 @@ import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class ActionBar {
     private static final ProtocolManager protocolManager = Faylisia.getInstance().getProtocolManager();
@@ -18,7 +19,11 @@ public class ActionBar {
 
     private static final String format = "&grad(%health%/%max_health% #F934A1 #E23746) &f%health_icon%      &grad(%defense% #5eff00 #00e038) &f%defense_icon%      &grad(%magical_reserve%/%max_magical_reserve% #B812F7 #9A1BFB) &f%magical_reserve_icon%";
 
-    public static void display(Player player) {
+    /**
+     * Display action bar to a player
+     * @param player targeted player
+     */
+    public static void display(@NotNull Player player) {
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.SET_ACTION_BAR_TEXT);
 
         CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
@@ -46,6 +51,12 @@ public class ActionBar {
         }
     }
 
+    /**
+     * Transform a long like 10000 to a String with commas like "10,000"
+     * @param value long to transform
+     * @return String with commas
+     */
+    @NotNull
     private static String valueWithCommas(long value) {
         char[] valueAsChars = String.valueOf(value).toCharArray();
 
