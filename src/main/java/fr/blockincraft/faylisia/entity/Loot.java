@@ -7,13 +7,17 @@ import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.player.Stats;
+import fr.blockincraft.faylisia.utils.HandlersUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A loot is an item with a probability to be harvest when kill mob or destroy block
@@ -71,43 +75,26 @@ public record Loot(int rolls, @NotNull CustomItem item, int probability, int on,
             probability *= 1 + luck / 100;
         }
 
-        // Retrieve player handlers
-        Handlers mainHandHandler = customPlayer.getMainHandHandler();
-        Handlers[] armorSetHandlers = customPlayer.getArmorSetHandlers();
-        Handlers[] armorSlotHandlers = customPlayer.getArmorSlotHandlers();
-        Handlers[] othersHandlers = customPlayer.getOthersHandlers();
-
-        // Apply handlers on probability
-        if (mainHandHandler != null) {
-            probability = mainHandHandler.getLootProbability(player, item, probability, this.rolls, rare, true, false);
-        }
-        for (Handlers handlers : armorSetHandlers) {
-            probability = handlers.getLootProbability(player, item, probability, this.rolls, rare, false, true);
-        }
-        for (Handlers handlers : armorSlotHandlers) {
-            probability = handlers.getLootProbability(player, item, probability, this.rolls, rare, false, true);
-        }
-        for (Handlers handlers : othersHandlers) {
-            probability = handlers.getLootProbability(player, item, probability, this.rolls, rare, false, false);
-        }
+        probability = HandlersUtils.getValueWithHandlers(customPlayer, "getLootProbability", probability, int.class, new HandlersUtils.Parameter[]{
+                new HandlersUtils.Parameter(player, Player.class),
+                new HandlersUtils.Parameter(item, CustomItem.class),
+                new HandlersUtils.Parameter(on, int.class),
+                new HandlersUtils.Parameter(this.rolls, int.class),
+                new HandlersUtils.Parameter(rare, boolean.class)
+        });
 
         List<ItemStack> loots = new ArrayList<>();
 
         // Calculate rolls and apply handlers on it
         int rolls = this.rolls;
 
-        if (mainHandHandler != null) {
-            rolls = mainHandHandler.getLootRolls(player, item, probability, rolls, rare, true, false);
-        }
-        for (Handlers handlers : armorSetHandlers) {
-            rolls = handlers.getLootRolls(player, item, probability, rolls, rare, false, true);
-        }
-        for (Handlers handlers : armorSlotHandlers) {
-            rolls = handlers.getLootRolls(player, item, probability, rolls, rare, false, true);
-        }
-        for (Handlers handlers : othersHandlers) {
-            rolls = handlers.getLootRolls(player, item, probability, rolls, rare, false, false);
-        }
+        rolls = HandlersUtils.getValueWithHandlers(customPlayer, "getLootRolls", rolls, int.class, new HandlersUtils.Parameter[]{
+                new HandlersUtils.Parameter(player, Player.class),
+                new HandlersUtils.Parameter(item, CustomItem.class),
+                new HandlersUtils.Parameter(probability, int.class),
+                new HandlersUtils.Parameter(on, int.class),
+                new HandlersUtils.Parameter(rare, boolean.class)
+        });
 
         // Do all rolls
         for (int i = 0; i < rolls; i++) {
@@ -117,18 +104,15 @@ public record Loot(int rolls, @NotNull CustomItem item, int probability, int on,
             if (r < probability) {
                 // Then calculate amount and apply handlers on it
                 int amount = this.amount.getAmount();
-                if (mainHandHandler != null) {
-                    amount = mainHandHandler.getLootAmount(player, item, probability, amount, rolls, rare, true, false);
-                }
-                for (Handlers handlers : armorSetHandlers) {
-                    amount = handlers.getLootAmount(player, item, probability, amount, rolls, rare, false, true);
-                }
-                for (Handlers handlers : armorSlotHandlers) {
-                    amount = handlers.getLootAmount(player, item, probability, amount, rolls, rare, false, true);
-                }
-                for (Handlers handlers : othersHandlers) {
-                    amount = handlers.getLootAmount(player, item, probability, amount, rolls, rare, false, false);
-                }
+
+                amount = HandlersUtils.getValueWithHandlers(customPlayer, "getLootAmount", amount, int.class, new HandlersUtils.Parameter[]{
+                        new HandlersUtils.Parameter(player, Player.class),
+                        new HandlersUtils.Parameter(item, CustomItem.class),
+                        new HandlersUtils.Parameter(probability, int.class),
+                        new HandlersUtils.Parameter(on, int.class),
+                        new HandlersUtils.Parameter(rolls, int.class),
+                        new HandlersUtils.Parameter(rare, boolean.class)
+                });
 
                 while (amount > item.getMaterial().getMaxStackSize()) {
                     loots.add(new CustomItemStack(item, item.getMaterial().getMaxStackSize()).getAsItemStack());

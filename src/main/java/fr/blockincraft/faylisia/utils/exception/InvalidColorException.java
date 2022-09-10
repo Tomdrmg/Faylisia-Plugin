@@ -1,4 +1,4 @@
-package fr.blockincraft.faylisia.utils.colorsexception;
+package fr.blockincraft.faylisia.utils.exception;
 
 import org.jetbrains.annotations.NotNull;
 

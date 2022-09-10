@@ -6,6 +6,7 @@ import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.api.serializer.CustomItemSerializer;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.recipes.Recipe;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -75,7 +76,7 @@ public class CustomItem {
         List<String> lore = new ArrayList<>(firstLore());
         if (this.lore.length > 0 && lore.size() > 0) lore.add("");
         for (String l : this.lore) {
-            lore.add(ChatColor.translateAlternateColorCodes('&', l));
+            lore.add(ColorsUtils.translateAll(l));
         }
         lore.addAll(buildLore());
 

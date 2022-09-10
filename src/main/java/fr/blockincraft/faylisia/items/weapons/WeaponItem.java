@@ -4,6 +4,7 @@ import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.DamageItem;
 import fr.blockincraft.faylisia.items.StatsItem;
 import fr.blockincraft.faylisia.player.Stats;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
@@ -33,12 +34,12 @@ public class WeaponItem extends CustomItem implements DamageItem, StatsItem {
     protected List<String> firstLore() {
         List<String> lore = new ArrayList<>();
 
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&7Puissance: &c+" + damage));
+        lore.add(ColorsUtils.translateAll("&7Puissance: &c+" + damage));
 
         List<Map.Entry<Stats, Double>> sorted = stats.entrySet().stream().sorted((o1, o2) -> o1.getKey().index - o2.getKey().index).toList();
 
         sorted.forEach(entry -> {
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&7" + entry.getKey().name + " &" + entry.getKey().color + "+" + entry.getValue()));
+            lore.add(ColorsUtils.translateAll("&7" + entry.getKey().name + " &" + entry.getKey().color + "+" + entry.getValue()));
         });
 
         return lore;

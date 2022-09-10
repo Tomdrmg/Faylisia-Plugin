@@ -3,6 +3,7 @@ package fr.blockincraft.faylisia.items.armor;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.StatsItem;
 import fr.blockincraft.faylisia.player.Stats;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
@@ -63,21 +64,22 @@ public class ArmorItem extends CustomItem implements StatsItem {
         List<Map.Entry<Stats, Double>> sorted = stats.entrySet().stream().sorted((o1, o2) -> o1.getKey().index - o2.getKey().index).toList();
 
         sorted.forEach(entry -> {
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&7" + entry.getKey().name + " &" + entry.getKey().color + "+" + entry.getValue()));
+            lore.add(ColorsUtils.translateAll("&7" + entry.getKey().name + " &" + entry.getKey().color + "+" + entry.getValue()));
         });
 
         return lore;
     }
 
     @Override
+    @NotNull
     protected List<String> moreLore() {
         List<String> lore = new ArrayList<>();
 
         for (ArmorSet.Bonus bonus : armorSet.getBonus()) {
             lore.add("");
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&d" + bonus.minimum() + " Pieces bonus - " + bonus.name() + "&d:"));
+            lore.add(ColorsUtils.translateAll("&d" + bonus.minimum() + " Pieces bonus - " + bonus.name() + "&d:"));
             for (String descPart : bonus.description()) {
-                lore.add(ChatColor.translateAlternateColorCodes('&', descPart));
+                lore.add(ColorsUtils.translateAll(descPart));
             }
         }
 

@@ -6,6 +6,8 @@ import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.items.json.EnchantmentSerializer;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.TextUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -16,10 +18,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This is an item stack of a custom item with an amount and custom enchantments <br/>
@@ -156,10 +156,10 @@ public class CustomItemStack {
      * @return custom item stack created
      */
     @Nullable
-    public static CustomItemStack fromItemStack(@NotNull ItemStack model) {
+    public static CustomItemStack fromItemStack(@Nullable ItemStack model) {
         // Get custom item from model
         CustomItem item = Faylisia.getInstance().getRegistry().getCustomItemByItemStack(model);
-        if (item == null) return null;
+        if (item == null || model == null) return null;
         // Get amount
         int amount = model.getAmount();
 
@@ -203,7 +203,7 @@ public class CustomItemStack {
         CustomItemStack customItemStack = fromItemStack(itemStack);
 
         // Check if they aren't null
-        if (customItemStack != null && customItemStack.getItem() != null) {
+        if (customItemStack != null) {
             // Check if its same custom item
             if (customItemStack.item.getId().equals(item.getId())) {
                 // Check enchantments
@@ -233,22 +233,20 @@ public class CustomItemStack {
      */
     public boolean isSimilar(@NotNull CustomItemStack customItemStack) {
         // Check if they aren't null
-        if (customItemStack.getItem() != null) {
-            // Check if its same custom item
-            if (customItemStack.item.getId().equals(item.getId())) {
-                // Check enchantments
-                if (!item.isEnchantable() && !customItemStack.item.isEnchantable()) {
-                    return true;
-                } else if (!item.isEnchantable() || !customItemStack.item.isEnchantable()) {
-                    return false;
-                } else {
-                    for (Map.Entry<CustomEnchantments, Integer> entry : enchantments.entrySet()) {
-                        if (!customItemStack.hasEnchantment(entry.getKey())) return false;
-                        if (customItemStack.getEnchantmentLevel(entry.getKey()) != entry.getValue()) return false;
-                    }
-
-                    return true;
+        // Check if its same custom item
+        if (customItemStack.item.getId().equals(item.getId())) {
+            // Check enchantments
+            if (!item.isEnchantable() && !customItemStack.item.isEnchantable()) {
+                return true;
+            } else if (!item.isEnchantable() || !customItemStack.item.isEnchantable()) {
+                return false;
+            } else {
+                for (Map.Entry<CustomEnchantments, Integer> entry : enchantments.entrySet()) {
+                    if (!customItemStack.hasEnchantment(entry.getKey())) return false;
+                    if (customItemStack.getEnchantmentLevel(entry.getKey()) != entry.getValue()) return false;
                 }
+
+                return true;
             }
         }
 
@@ -302,7 +300,45 @@ public class CustomItemStack {
 
                 ItemMeta meta = itemStack.getItemMeta();
                 if (meta != null) {
+                    // Add item flag
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+
+                    // Add enchantments lore
+                    List<String> lore = meta.getLore();
+                    if (lore != null) {
+                        int index = item.getLore().length + item.firstLore().size();
+                        if (item.firstLore().size() > 0 && item.getLore().length > 0) index++;
+
+                        if (index > 0) {
+                            lore.add(index, "");
+                            index++;
+                        }
+
+                        List<Map.Entry<CustomEnchantments, Integer>> enchants = enchantments.entrySet().stream().sorted(
+                                (o1, o2) -> o1.getKey().index - o2.getKey().index
+                        ).toList();
+
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < enchants.size(); i++) {
+                            CustomEnchantments enchant = enchants.get(i).getKey();
+                            int level = enchants.get(i).getValue();
+
+                            if (i % 2 == 0) {
+                                sb = new StringBuilder("&7" + enchant.nameDependingOfLevel.getName(level, enchant.name) + " " + TextUtils.intToRoman(level));
+                                if (i == enchants.size() - 1) {
+                                    lore.add(index, ColorsUtils.translateAll(sb.toString()));
+                                    index++;
+                                }
+                            } else {
+                                sb.append("&7, ").append(enchant.nameDependingOfLevel.getName(level, enchant.name)).append(" ").append(TextUtils.intToRoman(level));
+                                lore.add(index, ColorsUtils.translateAll(sb.toString()));
+                                index++;
+                            }
+                        }
+
+                        meta.setLore(lore);
+                    }
+
                     itemStack.setItemMeta(meta);
                 }
             }

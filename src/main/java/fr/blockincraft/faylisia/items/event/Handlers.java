@@ -16,6 +16,14 @@ import org.bukkit.inventory.EquipmentSlot;
  */
 public interface Handlers {
     /**
+     * Called when a handler was called, for example this is used in {@link EnchantmentHandlers} to prevent using model instance by throwing a
+     * {@link RuntimeException}
+     */
+    default void onHandlerCall() {
+
+    }
+
+    /**
      * Event called when probability to drop a {@link Loot} <br/>
      * This event was called after applying the <b>luck</b> {@link Stats}
      * @param player player which will get the loot
@@ -27,7 +35,8 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return probability of the loot
      */
-    default int getLootProbability(Player player, CustomItem item, int probability, int baseRolls, boolean isRare, boolean inHand, boolean inArmorSlot) {
+    default int getLootProbability(Player player, CustomItem item, int on, int baseRolls, boolean isRare, int probability, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return probability;
     }
 
@@ -42,7 +51,8 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return rolls of the loot
      */
-    default int getLootRolls(Player player, CustomItem item, int probability, int rolls, boolean isRare, boolean inHand, boolean inArmorSlot) {
+    default int getLootRolls(Player player, CustomItem item, int probability, int on, boolean isRare, int rolls, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return rolls;
     }
 
@@ -59,7 +69,8 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return amount of the loot
      */
-    default int getLootAmount(Player player, CustomItem item, int probability, int amount, int rolls, boolean isRare, boolean inHand, boolean inArmorSlot) {
+    default int getLootAmount(Player player, CustomItem item, int probability, int on, int rolls, boolean isRare, int amount, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return amount;
     }
 
@@ -73,8 +84,8 @@ public interface Handlers {
      * @param isRightClick if the click is a right click
      * @param hand the hand of the interaction
      */
-    default void onInteract(Player player, Block clickedBlock, boolean inHand, boolean inArmorSlot, boolean isRightClick, EquipmentSlot hand) {
-
+    default void onInteract(Player player, Block clickedBlock, boolean isRightClick, EquipmentSlot hand, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
     }
 
     /**
@@ -87,6 +98,7 @@ public interface Handlers {
      * @return damages to deal
      */
     default long onDamage(Player player, CustomEntity customEntity, long damage, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return damage;
     }
 
@@ -100,6 +112,7 @@ public interface Handlers {
      * @return damages to receive
      */
     default long onTakeDamage(Player player, CustomEntity customEntity, long damageTaken, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return damageTaken;
     }
 
@@ -113,6 +126,7 @@ public interface Handlers {
      * @return value of the stat
      */
     default double getDefaultStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return value;
     }
 
@@ -125,6 +139,7 @@ public interface Handlers {
      * @return effective health to gain
      */
     default long onRegenHealth(Player player, long regen, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return regen;
     }
 
@@ -137,6 +152,7 @@ public interface Handlers {
      * @return magical power to gain
      */
     default long onRegenMagicalPower(Player player, long regen, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return regen;
     }
 
@@ -151,6 +167,7 @@ public interface Handlers {
      * @return new value of the stat
      */
     default double calculateItemStat(Player player, CustomItem customItem, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return value;
     }
 
@@ -164,6 +181,7 @@ public interface Handlers {
      * @return value to return
      */
     default double getStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return value;
     }
 
@@ -177,6 +195,7 @@ public interface Handlers {
      * @return damages to return
      */
     default long getDamage(Player player, long value, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return value;
     }
 
@@ -190,6 +209,7 @@ public interface Handlers {
      * @return raw damages to return
      */
     default long getRawDamage(Player player, long value, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return value;
     }
 
@@ -203,6 +223,7 @@ public interface Handlers {
      * @return hand raw damages to return
      */
     default long calculateHandRawDamage(Player player, long value, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return value;
     }
 
@@ -217,6 +238,7 @@ public interface Handlers {
      * @return raw damages to return
      */
     default long calculateItemRawDamage(Player player, CustomItem customItem, long value, boolean inHand, boolean inArmorSlot) {
+        onHandlerCall();
         return value;
     }
 }

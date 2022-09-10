@@ -15,6 +15,7 @@ import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.displays.Tab;
 import fr.blockincraft.faylisia.player.permission.Ranks;
 import fr.blockincraft.faylisia.utils.FileUtils;
+import fr.blockincraft.faylisia.utils.HandlersUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -308,23 +309,10 @@ public class GameListeners implements Listener {
                 boolean critic = customPlayer.generateCritical();
                 long damage = Math.round(customPlayer.getDamage(critic));
 
-                // Get all player handlers
-                Handlers mainHandHandlers = customPlayer.getMainHandHandler();
-                Handlers[] armorSetHandlers = customPlayer.getArmorSetHandlers();
-                Handlers[] armorSlotHandlers = customPlayer.getArmorSlotHandlers();
-                Handlers[] othersHandlers = customPlayer.getOthersHandlers();
-
-                // Call them
-                if (mainHandHandlers != null) damage = mainHandHandlers.onDamage(player, entity, damage, true, false);
-                for (Handlers handlers : armorSetHandlers) {
-                    damage = handlers.onDamage(player, entity, damage, false, true);
-                }
-                for (Handlers handlers : armorSlotHandlers) {
-                    damage = handlers.onDamage(player, entity, damage, false, true);
-                }
-                for (Handlers handlers : othersHandlers) {
-                    damage = handlers.onDamage(player, entity, damage, false, false);
-                }
+                damage = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
+                        new HandlersUtils.Parameter(player, Player.class),
+                        new HandlersUtils.Parameter(entity, CustomEntity.class)
+                });
 
                 // Spawn damage indicator and apply custom damage to entity
                 PlayerUtils.spawnDamageIndicator(damage, critic, player, subE.getEntity().getLocation());
@@ -369,7 +357,7 @@ public class GameListeners implements Listener {
 
     /**
      * Cancel interaction, this contains breaking/placing blocks and call all player <br/>
-     * {@link Handlers#onInteract(Player, Block, boolean, boolean, boolean, EquipmentSlot)}
+     * {@link Handlers#onInteract(Player, Block, boolean, EquipmentSlot, boolean, boolean)} using {@link HandlersUtils}
      */
     @EventHandler
     public void handleInteraction(PlayerInteractEvent e) {
@@ -378,23 +366,14 @@ public class GameListeners implements Listener {
             return;
         }
 
-        Handlers mainHandHandlers = customPlayer.getMainHandHandler();
-        Handlers[] armorSetHandlers = customPlayer.getArmorSetHandlers();
-        Handlers[] armorSlotHandlers = customPlayer.getArmorSlotHandlers();
-        Handlers[] othersHandlers = customPlayer.getOthersHandlers();
-
         boolean isRightClick = e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK;
 
-        if (mainHandHandlers != null) mainHandHandlers.onInteract(e.getPlayer(), e.getClickedBlock(), true, false, isRightClick, e.getHand());
-        for (Handlers handlers : armorSetHandlers) {
-            handlers.onInteract(e.getPlayer(), e.getClickedBlock(), false, true, isRightClick, e.getHand());
-        }
-        for (Handlers handlers : armorSlotHandlers) {
-            handlers.onInteract(e.getPlayer(), e.getClickedBlock(), false, true, isRightClick, e.getHand());
-        }
-        for (Handlers handlers : othersHandlers) {
-            handlers.onInteract(e.getPlayer(), e.getClickedBlock(), false, false, isRightClick, e.getHand());
-        }
+        HandlersUtils.callHandlers(customPlayer, "onInteract", new HandlersUtils.Parameter[]{
+                new HandlersUtils.Parameter(e.getPlayer(), Player.class),
+                new HandlersUtils.Parameter(e.getClickedBlock(), Block.class),
+                new HandlersUtils.Parameter(isRightClick, boolean.class),
+                new HandlersUtils.Parameter(e.getHand(), EquipmentSlot.class)
+        });
 
         if (e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.CRAFTING_TABLE) {
             new CraftingMenu().open(e.getPlayer());

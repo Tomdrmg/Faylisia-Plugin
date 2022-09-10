@@ -117,6 +117,7 @@ public class CustomEntity {
             death(attacker);
         }
         lastDamage = Date.from(Instant.now()).getTime();
+        updateName();
     }
 
     /**

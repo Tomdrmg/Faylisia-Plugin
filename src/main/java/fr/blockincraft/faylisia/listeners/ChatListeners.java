@@ -6,7 +6,7 @@ import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.player.permission.Ranks;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
-import fr.blockincraft.faylisia.utils.colorsexception.InvalidColorException;
+import fr.blockincraft.faylisia.utils.exception.InvalidColorException;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

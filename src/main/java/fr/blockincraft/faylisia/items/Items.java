@@ -20,11 +20,13 @@ public class Items {
                             "Berserk", 2, new Handlers() {
                         @Override
                         public double calculateItemStat(Player player, CustomItem customItem, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                            onHandlerCall();
                             return inArmorSlot && stat == Stats.STRENGTH ? value * 1.5 : value;
                         }
 
                         @Override
                         public double getDefaultStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                            onHandlerCall();
                             return inArmorSlot && stat == Stats.STRENGTH ? value * 1.5 : value;
                         }
                     }, "&7Vous gagnez &c+50% &7de force", "&7quand il est actif."
@@ -33,6 +35,7 @@ public class Items {
                             "Divine protection", 3, new Handlers() {
                         @Override
                         public double getStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                            onHandlerCall();
                             return stat == Stats.DEFENSE && inArmorSlot ? value + 100 : value;
                         }
                     }, "&7Vous gagnez &c+100 &7de défense", "&7quand il est actif."
@@ -41,6 +44,7 @@ public class Items {
                             "Hulk Power", 4, new Handlers() {
                         @Override
                         public long getDamage(Player player, long damage, boolean inHand, boolean inArmorSlot) {
+                            onHandlerCall();
                             return inArmorSlot ? damage * 2 : damage;
                         }
                     }, "&7Vos dégats sont augmentés", "&7de &c100%&7."

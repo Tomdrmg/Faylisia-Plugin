@@ -1,6 +1,6 @@
 package fr.blockincraft.faylisia.utils;
 
-import fr.blockincraft.faylisia.utils.colorsexception.InvalidColorException;
+import fr.blockincraft.faylisia.utils.exception.InvalidColorException;
 
 import java.util.ArrayList;
 import java.util.Hashtable;

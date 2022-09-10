@@ -1,6 +1,6 @@
 package fr.blockincraft.faylisia.utils;
 
-import fr.blockincraft.faylisia.utils.colorsexception.InvalidColorException;
+import fr.blockincraft.faylisia.utils.exception.InvalidColorException;
 import net.md_5.bungee.api.ChatColor;
 
 import java.util.*;

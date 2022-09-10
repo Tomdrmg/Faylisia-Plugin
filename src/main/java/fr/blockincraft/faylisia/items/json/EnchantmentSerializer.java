@@ -12,10 +12,10 @@ import java.util.Map;
 /**
  * Serializer to convert enchantments of a {@link CustomItemStack} to a {@link String}
  */
-public class EnchantmentSerializer extends JsonSerializer<Map<CustomEnchantments, Integer>> {
+public class EnchantmentSerializer extends JsonSerializer<Map> {
     @Override
-    public void serialize(Map<CustomEnchantments, Integer> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        serialize(value, gen, serializers, true);
+    public void serialize(Map value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        serialize((Map<CustomEnchantments, Integer>) value, gen, serializers, true);
     }
 
     /**
