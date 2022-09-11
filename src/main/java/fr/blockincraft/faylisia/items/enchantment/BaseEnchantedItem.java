@@ -1,4 +1,4 @@
-package fr.blockincraft.faylisia.items;
+package fr.blockincraft.faylisia.items.enchantment;
 
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 import org.jetbrains.annotations.NotNull;

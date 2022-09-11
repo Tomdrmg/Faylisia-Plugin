@@ -72,7 +72,8 @@ public class HandlersUtils {
             try {
                 method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Error when calling handler method!");
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
@@ -82,7 +83,8 @@ public class HandlersUtils {
             try {
                 method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Error when calling handler method!");
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
@@ -90,7 +92,8 @@ public class HandlersUtils {
             try {
                 method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Error when calling handler method!");
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
@@ -100,7 +103,8 @@ public class HandlersUtils {
             try {
                 method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Error when calling handler method!");
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
     }
@@ -173,7 +177,8 @@ public class HandlersUtils {
             try {
                 value = (T) method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Error when calling handler method!");
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
@@ -185,7 +190,8 @@ public class HandlersUtils {
             try {
                 value = (T) method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Error when calling handler method!");
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
@@ -195,7 +201,8 @@ public class HandlersUtils {
             try {
                 value = (T) method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Error when calling handler method!");
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
@@ -207,7 +214,8 @@ public class HandlersUtils {
             try {
                 value = (T) method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Error when calling handler method!");
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 

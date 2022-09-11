@@ -14,6 +14,7 @@ import fr.blockincraft.faylisia.menu.CraftingMenu;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.displays.Tab;
 import fr.blockincraft.faylisia.player.permission.Ranks;
+import fr.blockincraft.faylisia.utils.AreaUtils;
 import fr.blockincraft.faylisia.utils.FileUtils;
 import fr.blockincraft.faylisia.utils.HandlersUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
@@ -228,18 +229,9 @@ public class GameListeners implements Listener {
             if (Date.from(Instant.now()).getTime() - (entry.getKey().getLastKill() + (entry.getKey().getType().getTickBeforeRespawn() < 0 ? 0 : entry.getKey().getType().getTickBeforeRespawn() * 50)) > 0) {
                // If entity isn't already spawned
                 if (entry.getValue() == null || !entry.getValue().getEntity().isValid()){
-                    // Calculate coordinates with player at center
-                    int x = entry.getKey().getX() - plLoc.getBlockX();
-                    int y = entry.getKey().getY() - plLoc.getBlockY();
-                    int z = entry.getKey().getZ() - plLoc.getBlockZ();
 
-                    // Calculate distance
-                    double d1 = Math.sqrt(x * x + z * z);
-                    double d2 = Math.sqrt(x * x + y * y);
-                    double d3 = Math.sqrt(z * z + y * y);
-
-                    // If distances are inferior or equal to 75 blocks
-                    if (d1 <= 75 && d2 <= 75 && d3 <= 75) {
+                    // Check distance
+                    if (AreaUtils.isInRadius(plLoc.getX(), plLoc.getY(), plLoc.getZ(), 75.0, entry.getKey().getX(), entry.getKey().getY(), entry.getKey().getZ())) {
                         Entities.spawnLocations.put(entry.getKey(), entry.getKey().getType().spawn(entry.getKey().getX(), entry.getKey().getY(), entry.getKey().getZ()));
                     }
                 }

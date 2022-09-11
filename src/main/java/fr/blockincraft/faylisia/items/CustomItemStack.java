@@ -3,6 +3,7 @@ package fr.blockincraft.faylisia.items;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
+import fr.blockincraft.faylisia.items.enchantment.BaseEnchantedItem;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.items.json.EnchantmentSerializer;
@@ -16,18 +17,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This is an item stack of a custom item with an amount and custom enchantments <br/>
  * You can convert it to an {@link ItemStack} using {@link CustomItemStack#getAsItemStack()} <br/>
  * When create a custom item stack using {@link CustomItemStack#fromItemStack(ItemStack)}, modifications will not be applied to the item stack
  */
-public class CustomItemStack {
-    public static final NamespacedKey enchantsKey = new NamespacedKey(Faylisia.getInstance(), "custom_enchants");
+public class CustomItemStack implements Cloneable {
+    public static final NamespacedKey enchantsKey = new NamespacedKey(Faylisia.getInstance(), "custom-enchants");
 
     private final Map<CustomEnchantments, Integer> enchantments = new HashMap<>();
     private final CustomItem item;

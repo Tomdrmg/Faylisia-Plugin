@@ -21,7 +21,7 @@ import java.util.Arrays;
 public enum CustomEnchantments {
     PROTECTION(0, "Protection", new EnchantmentHandlersIn(-1) {
         @Override
-        public double getStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+        public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
             return inArmorSlot && stat == Stats.DEFENSE ? value + 25 * level : value;
         }
     }, 4, 4, new Class[]{ArmorItem.class}, new CustomEnchantments[0]);
@@ -37,18 +37,30 @@ public enum CustomEnchantments {
     public final NameDependingOfLevel nameDependingOfLevel;
 
     /**
-     * Constructor without more validation
+     * Constructor without more validation and custom level name
      */
     CustomEnchantments(int index, @NotNull String name, @NotNull EnchantmentHandlers handlers, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts) {
         this(index, name, handlers, maxLevel, maxFusionLevel, itemTypes, conflicts, item -> true);
     }
 
+    /**
+     * Constructor without custom level name
+     */
     CustomEnchantments(int index, @NotNull String name, @NotNull EnchantmentHandlers handlers, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts, @NotNull ValidateEnchantability validate) {
         this(index, name, handlers, maxLevel, maxFusionLevel, itemTypes, conflicts, validate, (level, nameIn) -> nameIn);
     }
 
     /**
-     * Constructor with more validation
+     * Full constructor
+     * @param index index used to sort enchantments on rendering them
+     * @param name display name of enchantment
+     * @param handlers handlers to make enchantment functions
+     * @param maxLevel maximum level obtaining
+     * @param maxFusionLevel maximum level obtaining by fusion of enchantment lacryma
+     * @param itemTypes types of item which can have this
+     * @param conflicts conflicts with others enchantments
+     * @param validate more validation function
+     * @param nameDependingOfLevel different name depending on enchantment level function
      */
     CustomEnchantments(int index, @NotNull String name, @NotNull EnchantmentHandlers handlers, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts, @NotNull ValidateEnchantability validate, @NotNull NameDependingOfLevel nameDependingOfLevel) {
         this.index = index;
@@ -142,7 +154,7 @@ public enum CustomEnchantments {
          * @param level level of enchantment (set to one if inferior)
          * @return copy
          */
-        @Nonnull
+        @NotNull
         public EnchantmentHandlers withLevel(int level) {
             // Level need to be at least 1
             if (level < 1) level = 1;

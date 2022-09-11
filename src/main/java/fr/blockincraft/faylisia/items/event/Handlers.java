@@ -4,11 +4,13 @@ import fr.blockincraft.faylisia.core.entity.CustomPlayer;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.entity.Loot;
 import fr.blockincraft.faylisia.items.CustomItem;
-import fr.blockincraft.faylisia.items.DamageItem;
+import fr.blockincraft.faylisia.items.weapons.DamageItem;
 import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * In order, the handlers are executed from the main hand items, armor sets, armor slots items then others items. <br/>
@@ -35,7 +37,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return probability of the loot
      */
-    default int getLootProbability(Player player, CustomItem item, int on, int baseRolls, boolean isRare, int probability, boolean inHand, boolean inArmorSlot) {
+    default int getLootProbability(@NotNull Player player, @NotNull CustomItem item, int on, int baseRolls, boolean isRare, int probability, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return probability;
     }
@@ -51,7 +53,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return rolls of the loot
      */
-    default int getLootRolls(Player player, CustomItem item, int probability, int on, boolean isRare, int rolls, boolean inHand, boolean inArmorSlot) {
+    default int getLootRolls(@NotNull Player player, @NotNull CustomItem item, int probability, int on, boolean isRare, int rolls, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return rolls;
     }
@@ -69,7 +71,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return amount of the loot
      */
-    default int getLootAmount(Player player, CustomItem item, int probability, int on, int rolls, boolean isRare, int amount, boolean inHand, boolean inArmorSlot) {
+    default int getLootAmount(@NotNull Player player, @NotNull CustomItem item, int probability, int on, int rolls, boolean isRare, int amount, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return amount;
     }
@@ -84,7 +86,7 @@ public interface Handlers {
      * @param isRightClick if the click is a right click
      * @param hand the hand of the interaction
      */
-    default void onInteract(Player player, Block clickedBlock, boolean isRightClick, EquipmentSlot hand, boolean inHand, boolean inArmorSlot) {
+    default void onInteract(@NotNull Player player, @Nullable Block clickedBlock, boolean isRightClick, @NotNull EquipmentSlot hand, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
     }
 
@@ -97,7 +99,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return damages to deal
      */
-    default long onDamage(Player player, CustomEntity customEntity, long damage, boolean inHand, boolean inArmorSlot) {
+    default long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, long damage, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return damage;
     }
@@ -111,7 +113,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return damages to receive
      */
-    default long onTakeDamage(Player player, CustomEntity customEntity, long damageTaken, boolean inHand, boolean inArmorSlot) {
+    default long onTakeDamage(@NotNull Player player, @NotNull CustomEntity customEntity, long damageTaken, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return damageTaken;
     }
@@ -125,7 +127,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return value of the stat
      */
-    default double getDefaultStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+    default double getDefaultStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return value;
     }
@@ -138,7 +140,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return effective health to gain
      */
-    default long onRegenHealth(Player player, long regen, boolean inHand, boolean inArmorSlot) {
+    default long onRegenHealth(@NotNull Player player, long regen, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return regen;
     }
@@ -151,7 +153,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return magical power to gain
      */
-    default long onRegenMagicalPower(Player player, long regen, boolean inHand, boolean inArmorSlot) {
+    default long onRegenMagicalPower(@NotNull Player player, long regen, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return regen;
     }
@@ -166,7 +168,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return new value of the stat
      */
-    default double calculateItemStat(Player player, CustomItem customItem, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+    default double calculateItemStat(@NotNull Player player, @NotNull CustomItem customItem, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return value;
     }
@@ -180,7 +182,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return value to return
      */
-    default double getStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+    default double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return value;
     }
@@ -194,7 +196,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return damages to return
      */
-    default long getDamage(Player player, long value, boolean inHand, boolean inArmorSlot) {
+    default long getDamage(@NotNull Player player, long value, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return value;
     }
@@ -208,7 +210,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return raw damages to return
      */
-    default long getRawDamage(Player player, long value, boolean inHand, boolean inArmorSlot) {
+    default long getRawDamage(@NotNull Player player, long value, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return value;
     }
@@ -222,7 +224,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return hand raw damages to return
      */
-    default long calculateHandRawDamage(Player player, long value, boolean inHand, boolean inArmorSlot) {
+    default long calculateHandRawDamage(@NotNull Player player, long value, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return value;
     }
@@ -237,7 +239,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return raw damages to return
      */
-    default long calculateItemRawDamage(Player player, CustomItem customItem, long value, boolean inHand, boolean inArmorSlot) {
+    default long calculateItemRawDamage(@NotNull Player player, @NotNull CustomItem customItem, long value, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return value;
     }

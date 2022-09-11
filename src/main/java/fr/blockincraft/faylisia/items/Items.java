@@ -1,31 +1,51 @@
 package fr.blockincraft.faylisia.items;
 
+import fr.blockincraft.faylisia.Faylisia;
+import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.recipes.CraftingRecipe;
+import fr.blockincraft.faylisia.items.weapons.AbilityItem;
 import fr.blockincraft.faylisia.items.weapons.WeaponItem;
 import fr.blockincraft.faylisia.player.Stats;
+import fr.blockincraft.faylisia.utils.AbilitiesUtils;
+import fr.blockincraft.faylisia.utils.HandlersUtils;
+import fr.blockincraft.faylisia.utils.PlayerUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * This class contain all items, armor set and recipes
  */
 public class Items {
+    private static final Registry registry = Faylisia.getInstance().getRegistry();
+
+
+
     public static final ArmorSet coolDiamondSet = new ArmorSet("cool_diamond_set")
             .setBonus(
                     new ArmorSet.Bonus(
                             "Berserk", 2, new Handlers() {
                         @Override
-                        public double calculateItemStat(Player player, CustomItem customItem, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                        public double calculateItemStat(@NotNull Player player, @NotNull CustomItem customItem, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
                             onHandlerCall();
                             return inArmorSlot && stat == Stats.STRENGTH ? value * 1.5 : value;
                         }
 
                         @Override
-                        public double getDefaultStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                        public double getDefaultStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
                             onHandlerCall();
                             return inArmorSlot && stat == Stats.STRENGTH ? value * 1.5 : value;
                         }
@@ -34,7 +54,7 @@ public class Items {
                     new ArmorSet.Bonus(
                             "Divine protection", 3, new Handlers() {
                         @Override
-                        public double getStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                        public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
                             onHandlerCall();
                             return stat == Stats.DEFENSE && inArmorSlot ? value + 100 : value;
                         }
@@ -43,7 +63,7 @@ public class Items {
                     new ArmorSet.Bonus(
                             "Hulk Power", 4, new Handlers() {
                         @Override
-                        public long getDamage(Player player, long damage, boolean inHand, boolean inArmorSlot) {
+                        public long getDamage(@NotNull Player player, long damage, boolean inHand, boolean inArmorSlot) {
                             onHandlerCall();
                             return inArmorSlot ? damage * 2 : damage;
                         }
@@ -126,6 +146,61 @@ public class Items {
             .setDisenchantable(true)
             .setCategory(Categories.COOL_DIAMOND)
             .setRarity(Rarity.DEUS);
+    public static final AbilityItem testItem = (AbilityItem) new AbilityItem(Material.IRON_SWORD, "test_item")
+            .setAbilityName("Boom")
+            .setAbilityDesc("&7Inflige &c10x &7les dégats aux monstres", "&7Dans un rayon de 10 blocs")
+            .setAbility((player, clickedBlock, hand) -> {
+                CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
+
+                long damage = (long) (customPlayer.getDamage(false) * 10);
+
+                AbilitiesUtils.getEntitiesInRadius(player.getLocation(), 10.0).forEach(customEntity -> {
+                    PlayerUtils.spawnDamageIndicator(damage, false, player, customEntity.getEntity().getLocation());
+                    customEntity.takeDamage(damage, player);
+                });
+            })
+            .setCooldown(5)
+            .setUseCost(20)
+            .setDamage(20)
+            .setStat(Stats.MAGICAL_RESERVE, 100)
+            .setName("Test Item")
+            .setRarity(Rarity.COSMIC)
+            .setCategory(Categories.COOL_DIAMOND);
+    public static final AbilityItem dagger = (AbilityItem) new AbilityItem(Material.IRON_SWORD, "dagger")
+            .setAbilityName("Rush")
+            .setAbilityDesc("&7Se téléporte a 3 cibles dans un rayon", "&7de 50 blocs et leur assène deux", "&7coûts critiques")
+            .setAbility((player, clickedBlock, hand) -> {
+                CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
+
+                long damage = (long) customPlayer.getDamage(true);
+
+                List<CustomEntity> entities = AbilitiesUtils.getEntitiesInRadius(player.getLocation(), 50.0);
+                Collections.shuffle(entities);
+
+                for (int i = 0; i < 3 && i < entities.size(); i++) {
+                    int finalI = i;
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
+                        long damageIn = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
+                                new HandlersUtils.Parameter(player, Player.class),
+                                new HandlersUtils.Parameter(entities.get(finalI), CustomEntity.class)
+                        });
+
+                        player.teleport(entities.get(finalI).getEntity().getLocation());
+                        PlayerUtils.spawnDamageIndicator(damageIn, true, player, entities.get(finalI).getEntity().getLocation());
+                        entities.get(finalI).takeDamage(damageIn, player);
+                    }, i * 3L);
+                }
+            })
+            .setCooldown(30)
+            .setUseCost(100)
+            .setDamage(100)
+            .setStat(Stats.MAGICAL_RESERVE, 200)
+            .setStat(Stats.STRENGTH, 50)
+            .setStat(Stats.CRITICAL_DAMAGE, 50)
+            .setStat(Stats.CRITICAL_CHANCE, 30)
+            .setName("Dague")
+            .setRarity(Rarity.COSMIC)
+            .setCategory(Categories.COOL_DIAMOND);
 
     // Set recipes here
     static {
@@ -161,6 +236,17 @@ public class Items {
                 new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
                 CraftingRecipe.Direction.HORIZONTAL
         ));
+
+        testItem.setRecipe(new CraftingRecipe(1,
+                new CustomItemStack(coolDiamondBlock, 1),
+                new CustomItemStack(coolDiamondSword, 1),
+                CraftingRecipe.Direction.VERTICAL
+        ));
+        dagger.setRecipe(new CraftingRecipe(1,
+                new CustomItemStack(coolDiamondSword, 1),
+                new CustomItemStack(coolDiamondBlock, 1),
+                CraftingRecipe.Direction.VERTICAL
+        ));
     }
 
     // Register items here
@@ -174,5 +260,8 @@ public class Items {
         coolDiamondChestplate.register();
         coolDiamondLeggings.register();
         coolDiamondBoots.register();
+
+        testItem.register();
+        dagger.register();
     }
 }

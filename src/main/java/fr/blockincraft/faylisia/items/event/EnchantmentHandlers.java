@@ -1,10 +1,7 @@
 package fr.blockincraft.faylisia.items.event;
 
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
-
-import javax.annotation.Nonnull;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Handlers used to create {@link CustomEnchantments}, in this enum we create a handler model, and to get handlers for a level, we use {@link EnchantmentHandlers#withLevel(int)} which
@@ -31,6 +28,6 @@ public abstract class EnchantmentHandlers implements Handlers {
      * @param level level of enchantment (set to one if inferior)
      * @return copy
      */
-    @Nonnull
+    @NotNull
     public abstract EnchantmentHandlers withLevel(int level);
 }

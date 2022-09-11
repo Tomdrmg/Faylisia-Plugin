@@ -2,15 +2,12 @@ package fr.blockincraft.faylisia.api.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import fr.blockincraft.faylisia.items.BaseEnchantedItem;
+import fr.blockincraft.faylisia.items.enchantment.BaseEnchantedItem;
 import fr.blockincraft.faylisia.items.CustomItem;
-import fr.blockincraft.faylisia.items.DamageItem;
+import fr.blockincraft.faylisia.items.weapons.DamageItem;
 import fr.blockincraft.faylisia.items.StatsItem;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
-import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.items.json.EnchantmentSerializer;
 import fr.blockincraft.faylisia.player.Stats;
 

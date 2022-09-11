@@ -7,7 +7,9 @@ import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.*;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
+import fr.blockincraft.faylisia.items.event.HandlerItem;
 import fr.blockincraft.faylisia.items.event.Handlers;
+import fr.blockincraft.faylisia.items.weapons.DamageItem;
 import fr.blockincraft.faylisia.listeners.GameListeners;
 import fr.blockincraft.faylisia.player.permission.Ranks;
 import fr.blockincraft.faylisia.player.Stats;
@@ -19,22 +21,25 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.checkerframework.checker.units.qual.C;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.*;
 
 public class CustomPlayerDTO {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
     private static final SecureRandom random = new SecureRandom();
 
+    // Stored values
+    private final UUID player;
     private Classes classes = Classes.HUMAN;
     private Ranks rank = Ranks.PLAYER;
     private boolean canBreak = false;
     private String name;
     private Long discordUserId;
 
-    private final UUID player;
+    // Non stored values
+    private final Map<CustomItem, Long> lastUse = new HashMap<>();
     private final Map<Stats, Double> stats = new HashMap<>();
     private long effectiveHealth = 0;
     private long maxEffectiveHealth = 0;
@@ -367,7 +372,7 @@ public class CustomPlayerDTO {
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(getStat(Stats.HEALTH) / 5 > 40 ? 40 : Math.ceil(getStat(Stats.HEALTH) / 5.0));
 
         long previousMaxEffectiveHealth = this.maxEffectiveHealth;
-        this.maxEffectiveHealth = (long) (getStat(Stats.HEALTH) * (1 + getStat(Stats.DEFENSE) / 100));
+        this.maxEffectiveHealth = (long) (getStat(Stats.HEALTH) * (1.0 + getStat(Stats.DEFENSE) / 100.0));
         if (this.effectiveHealth > 0) {
             this.setEffectiveHealth((long) (((double) this.effectiveHealth) / ((double) previousMaxEffectiveHealth) * ((double) this.maxEffectiveHealth)));
         }
@@ -470,7 +475,7 @@ public class CustomPlayerDTO {
         if (this.effectiveHealth == 0) {
             playerHealth = 0;
         } else if (getStat(Stats.HEALTH) <= 200) {
-            playerHealth = Math.ceil((double) this.effectiveHealth / 5);
+            playerHealth = Math.ceil((double) getHealth() / 5);
             if (playerHealth == 0) playerHealth = 1;
         } else {
             playerHealth = Math.ceil(40.0 / getStat(Stats.HEALTH) * getHealth());
@@ -609,5 +614,17 @@ public class CustomPlayerDTO {
     public void setDiscordUserId(Long discordUserId) {
         this.discordUserId = discordUserId;
         registry.applyModification(this);
+    }
+
+    public Long getLastUse(CustomItem item) {
+        return lastUse.get(item);
+    }
+
+    public void use(CustomItem item) {
+        lastUse.put(item, Date.from(Instant.now()).getTime());
+    }
+
+    public void use(CustomItem item, long minus) {
+        lastUse.put(item, Date.from(Instant.now()).getTime() - (minus > 0 ? minus : 0));
     }
 }

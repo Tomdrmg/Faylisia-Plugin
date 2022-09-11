@@ -15,7 +15,7 @@ public enum Stats {
     STRENGTH(3, "Force", '4', '\uE004', '\uE015', 10.0, -1.0),
     CRITICAL_DAMAGE(4, "Dégats Critiques", '9', '\uE005', '\uE016', 100.0, -1.0),
     CRITICAL_CHANCE(5, "Chance Critique", '9', '\uE006', '\uE017', 20.0, 100.0),
-    MAGICAL_RESERVE(6, "Réserve Magique", 'd', '\uE007', '\uE018', 0.0, -1.0),
+    MAGICAL_RESERVE(6, "Éthernanos Max", 'd', '\uE007', '\uE018', 0.0, -1.0),
     SPEED(7, "Vitesse", 'f', '\uE008', '\uE019', 100.0, 500.0),
     LUCK(8, "Chance", 'b', '\uE009', '\uE020', 0.0, 1900.0),
     KNOWLEDGE(9, "Savoir", 'e', '\uE010', '\uE021', 0.0, -1.0);

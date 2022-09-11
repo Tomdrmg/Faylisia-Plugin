@@ -1,11 +1,9 @@
 package fr.blockincraft.faylisia.items.weapons;
 
 import fr.blockincraft.faylisia.items.CustomItem;
-import fr.blockincraft.faylisia.items.DamageItem;
 import fr.blockincraft.faylisia.items.StatsItem;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 

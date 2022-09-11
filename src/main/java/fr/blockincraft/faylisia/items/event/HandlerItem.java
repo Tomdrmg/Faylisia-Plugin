@@ -1,4 +1,4 @@
-package fr.blockincraft.faylisia.items;
+package fr.blockincraft.faylisia.items.event;
 
 import fr.blockincraft.faylisia.items.event.Handlers;
 import org.jetbrains.annotations.NotNull;

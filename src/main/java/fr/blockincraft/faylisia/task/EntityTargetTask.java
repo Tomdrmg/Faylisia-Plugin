@@ -3,6 +3,7 @@ package fr.blockincraft.faylisia.task;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.entity.CustomEntity;
+import fr.blockincraft.faylisia.utils.AreaUtils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
@@ -44,16 +45,8 @@ public class EntityTargetTask extends BukkitRunnable {
                             continue;
                         }
 
-                        // Calculate distance
-                        double x1 = mob.getLocation().getX();
-                        double z1 = mob.getLocation().getZ();
-                        double x2 = player.getLocation().getX();
-                        double z2 = player.getLocation().getZ();
-
-                        double d = Math.sqrt((x2 - x1) * (x2 - x1) + (z2 - z1) * (z2 - z1));
-
-                        // Remove target if it was at least at twenty blocks
-                        if (d > 20) {
+                        // Check distance
+                        if (!AreaUtils.isInRadius(mob.getLocation(), 20.0, player.getLocation())) {
                             mob.setTarget(null);
                         }
                     }

@@ -1,4 +1,4 @@
-package fr.blockincraft.faylisia.items;
+package fr.blockincraft.faylisia.items.weapons;
 
 /**
  * An item which has damage like weapons
