@@ -155,6 +155,11 @@ public class Items {
                 long damage = (long) (customPlayer.getDamage(false) * 10);
 
                 AbilitiesUtils.getEntitiesInRadius(player.getLocation(), 10.0).forEach(customEntity -> {
+                    long damageIn = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
+                            new HandlersUtils.Parameter(player, Player.class),
+                            new HandlersUtils.Parameter(customEntity, CustomEntity.class)
+                    });
+
                     PlayerUtils.spawnDamageIndicator(damage, false, player, customEntity.getEntity().getLocation());
                     customEntity.takeDamage(damage, player);
                 });
