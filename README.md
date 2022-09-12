@@ -11,13 +11,13 @@ Plugin utilisé pour créer le serveur Faylisia
   - [Objets classiques](#Objets)
   - [Armes](#Armes)
   - [Armures](#Armures)
-  - [Armes magiques (avec abilité)](#Armes Magiques)
+  - [Armes magiques (avec abilité)](#Armes_Magiques)
 - **[Enchantements customisés](#Enchantements)**
 - **[Entités customisées](#Entités)**
   - [Loots customisable](#Loots)
-  - [Classes de monstres](#Classes De Monstres)
+  - [Classes de monstres](#Classes_De_Monstres)
   - [Les Recettes](#Les Recettes)
-    - [Les 'Crafting Recipes'](#Les Crafting Recipes)
+    - [Les 'Crafting Recipes'](#Les_Crafting_Recipes)
 
 ## Concepts utilisés dans le plugin
 
