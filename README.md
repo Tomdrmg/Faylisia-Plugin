@@ -16,7 +16,7 @@ Plugin utilisé pour créer le serveur Faylisia
 - **[Entités customisées](#Entités)**
   - [Loots customisable](#Loots)
   - [Classes de monstres](#Classes_De_Monstres)
-  - [Les Recettes](#Les Recettes)
+  - [Les Recettes](#Les_Recettes)
     - [Les 'Crafting Recipes'](#Les_Crafting_Recipes)
 
 ## Concepts utilisés dans le plugin
