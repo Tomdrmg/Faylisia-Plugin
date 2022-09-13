@@ -4,6 +4,8 @@ Plugin utilisé pour créer le serveur Faylisia
 > Le plugin est conçu de manière à rendre la création d'objets, d'entités et d'enchantements **rapide** est **facile**.
 >> Lors de la création de contenue dans le plugin veuillez mettre des commentaires en **anglais** pour décrire les actions faites
 
+> Si vous avez besoin d'aide / une suggestion / besoin de plus de méthodes pour rendre le code facile : me mp sur discord ou aller faire un ticket sur le serveur discord
+
 ### Fonctionalités en place :
 
 - **[Objets customisés](#Objets)**
@@ -11,13 +13,13 @@ Plugin utilisé pour créer le serveur Faylisia
   - [Objets classiques](#Objets)
   - [Armes](#Armes)
   - [Armures](#Armures)
-  - [Armes magiques (avec abilité)](#Armes_Magiques)
+  - [Armes magiques (avec abilité)](#Armes-Magiques)
 - **[Enchantements customisés](#Enchantements)**
 - **[Entités customisées](#Entités)**
   - [Loots customisable](#Loots)
-  - [Classes de monstres](#Classes_De_Monstres)
+  - [Classes de monstres](#Classes-De-Monstres)
   - [Les Recettes](#Les_Recettes)
-    - [Les 'Crafting Recipes'](#Les_Crafting_Recipes)
+    - [Les 'Crafting Recipes'](#Les-Crafting-Recipes)
 
 ## Concepts utilisés dans le plugin
 
@@ -199,7 +201,7 @@ public enum Categories {
 
 #### Armes
 
-Les armes sont des objets customisés avec des stats et des dégats.
+Les armes sont des objets customisés avec des stats et des dégâts.
 Exemple d'arme :
 
 ```java
@@ -247,13 +249,13 @@ public class Items {
 
 ### Armures
 
-Les armures sont des objets customisés avec des stats et un [Armor Set](#Armor Set) qui peut être null
+Les armures sont des objets customisés avec des stats et un [Armor Set](#Armor-Set) qui peut être null
 
 #### Armor Set
 
-Les armor sets représentent un ensemble de bonus donnés au joueur si il équipe un nombre prédéfini d'objet avec le même armor set.
+Les armor sets représentent un ensemble de bonus donnés au joueur s'il équipe un nombre prédéfini d'objet avec le même armor set.
 
-> Les bonus sont donnés en passant par les [Handlers](#Les Handlers)
+> Les bonus sont donnés en passant par les [Handlers](#Les-Handlers)
 
 Exemple de piece d'armure et d'armor set :
 
@@ -396,7 +398,7 @@ public class Items {
               customEntity.takeDamage(damage, player);
             });
           })
-          .setCooldown(5) // On a défini le délai entre deux utilisation de l'abilité
+          .setCooldown(5) // On a défini le délai entre deux utilisations de l'abilité
           .setUseCost(20) // On a défini le coût d'énergie magique pour utiliser l'abilité
           .setDamage(20) // On a défini les dégats de l'objet
           .setStat(Stats.MAGICAL_RESERVE, 100) // On a ajouté de la reserve magique a l'objet
@@ -429,12 +431,12 @@ public class Items {
 #### Les Recettes
 
 Les recettes ou recipes sont les manières de créer les objets, il en existe plusieurs types comme les crafting recipes qui s'utilisent dans un menu avec un pattern particuliés.  
-Ils sont constitués avec des [`CustomItemStack`](src/main/java/fr/blockincraft/faylisia/items/CustomItemStack.java) qui peuvent être créer en faisant : `new CustomItemStack(type de l'item déclaré dans la class Items, quantité de l'item)`
+Ils sont constitués avec des [`CustomItemStack`](src/main/java/fr/blockincraft/faylisia/items/CustomItemStack.java) qui peuvent être créé en faisant : `new CustomItemStack(type de l'item déclaré dans la class Items, quantité de l'item)`
 
 ##### Les Crafting Recipes
 
-Les crafting recipes sont les recettes réalisable dans un menu de table de craft avec un pattern en 3x3.  
-Pour en créer un, il y a plusieurs constructors pour créer des pattern différent, le 1x1 pour les minerais par exemple, le 1x2 pour les sticks, le 2x2 pour la table de craft, le 3x1 pour les épées, le 3x2 pour les portes/sceaux, le 3x3 pour les blocs de minerais.  
+Les crafting recipes sont les recettes réalisables dans un menu de table de craft avec un pattern en 3x3.  
+Pour en créer un, il y a plusieurs constructors pour créer des patterns différents, le 1x1 pour les minerais par exemple, le 1x2 pour les sticks, le 2x2 pour la table de craft, le 3x1 pour les épées, le 3x2 pour les portes/sceaux, le 3x3 pour les blocs de minerais.  
 Lorsque le pattern est en 1x2 / 1x3 / 2x3 il faut définir la direction avec verticale pour une épée et horizontale pour un lit.  
 
 Exemple de craft pour une épée et pour une table de craft :
@@ -473,7 +475,43 @@ public class Test {
 
 ### Enchantements
 
+Les enchantements sont semblables aux enchantements vanilla, ils peuvent être appliqués sur un type d'item, ils possèdent des conflits, c'est-à-dire des enchantements avec lesquelles ils ne sont pas compatibles.  
+Les enchantements sont créés avec une limite de niveau global et une limite de niveau lors de la fusion de deux items.  
+Les enchantements doivent être créés dans la class [`CustomEnchantments`](src/main/java/fr/blockincraft/faylisia/items/enchantment/CustomEnchantments.java).  
+Pour les rendre fonctionnels on utilise les [Handlers](#Les-Handlers) mais lorsqu'on les crée il faut utiliser une nouvelle class nommé [`EnchantmentHandlersIn`](src/main/java/fr/blockincraft/faylisia/items/enchantment/CustomEnchantments.java) avec le niveau en paramètre : `new EnchantmentHandlersIn(-1) {};`, lors de la création d'un model pour un enchantement, le niveau doit être défini à `-1`.  
 
+Exemple d'enchantement :
+
+```java
+package fr.blockincraft.faylisia.items.enchantment;
+
+public enum CustomEnchantments {
+  // On a créé un enchantement avec l'index 0 nommé "Protection", avec des handlers, on met ensuite son
+  // niveau maximal à 4 et son niveau maximal de fusion à 4 aussi, on dit ensuite que l'enchantement peut
+  // être appliqué seulement si l'item est un ArmorItem (ou class filles) puis on met un tableau vide car
+  // on ne veut pas de conflits
+  PROTECTION(0, "Protection", new EnchantmentHandlersIn(-1) {
+      // On recrée la fonction "getDefaultStat" de la class Handlers
+      // pour ajouter 25 de valeur par niveau aux stats si la stat 
+      // calculé est la Force et si la pièce d'armure est bien dans
+      // un slot d'armure
+      @Override
+      public double getDefaultStat(Player player, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+        return inArmorSlot && stat == Stats.DEFENSE ? value + 25 * level : value;
+      }
+
+      // On recrée la fonction "calculateItemStat" de la class Handlers
+      // pour ajouter 25 de valeur par niveau aux stats si la stat calculé 
+      // est la Défense et si la pièce d'armure est bien dans un slot d'armure
+      @Override
+      public double calculateItemStat(Player player, CustomItem customItem, Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+        return inArmorSlot && stat == Stats.DEFENSE ? value + 25 * level : value;
+      }
+  }, 4, 4, new Class[]{ArmorItem.class}, new CustomEnchantments[0]); // Pour en ajouter un autre, il faut mettre une virgule à la place du point virgule et mettre le point virgule apres le dernier.
+  
+  // ... reste du code
+}
+```
 
 ***
 

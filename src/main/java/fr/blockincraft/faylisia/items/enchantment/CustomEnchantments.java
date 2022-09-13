@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -21,7 +20,12 @@ import java.util.Arrays;
 public enum CustomEnchantments {
     PROTECTION(0, "Protection", new EnchantmentHandlersIn(-1) {
         @Override
-        public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+        public double getDefaultStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+            return inArmorSlot && stat == Stats.DEFENSE ? value + 25 * level : value;
+        }
+
+        @Override
+        public double calculateItemStat(@NotNull Player player, @NotNull CustomItem customItem, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
             return inArmorSlot && stat == Stats.DEFENSE ? value + 25 * level : value;
         }
     }, 4, 4, new Class[]{ArmorItem.class}, new CustomEnchantments[0]);
