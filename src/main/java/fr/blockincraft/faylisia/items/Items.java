@@ -9,7 +9,7 @@ import fr.blockincraft.faylisia.items.armor.ArmorSet;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.recipes.CraftingRecipe;
-import fr.blockincraft.faylisia.items.weapons.AbilityItem;
+import fr.blockincraft.faylisia.items.weapons.WeaponAbilityItem;
 import fr.blockincraft.faylisia.items.weapons.WeaponItem;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.AbilitiesUtils;
@@ -20,11 +20,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * This class contain all items, armor set and recipes
@@ -146,7 +143,7 @@ public class Items {
             .setDisenchantable(true)
             .setCategory(Categories.COOL_DIAMOND)
             .setRarity(Rarity.DEUS);
-    public static final AbilityItem testItem = (AbilityItem) new AbilityItem(Material.IRON_SWORD, "test_item")
+    public static final WeaponAbilityItem testItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "test_item")
             .setAbilityName("Boom")
             .setAbilityDesc("&7Inflige &c10x &7les dégats aux monstres", "&7Dans un rayon de 10 blocs")
             .setAbility((player, clickedBlock, hand) -> {
@@ -171,7 +168,7 @@ public class Items {
             .setName("Test Item")
             .setRarity(Rarity.COSMIC)
             .setCategory(Categories.COOL_DIAMOND);
-    public static final AbilityItem dagger = (AbilityItem) new AbilityItem(Material.IRON_SWORD, "dagger")
+    public static final WeaponAbilityItem dagger = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "dagger")
             .setAbilityName("Rush")
             .setAbilityDesc("&7Se téléporte a 3 cibles dans un rayon", "&7de 50 blocs et leur assène deux", "&7coûts critiques")
             .setAbility((player, clickedBlock, hand) -> {

@@ -370,13 +370,14 @@ package fr.blockincraft.faylisia.items;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.Rarity;
+import fr.blockincraft.faylisia.items.weapons.WeaponAbilityItem;
 import org.bukkit.Material;
 
 public class Items {
   // ...
 
   // On a créé un nouvel objet avec comme material une "épée en fer" et avec "test_item" comme identifiant unique
-  public static final AbilityItem testItem = (AbilityItem) new AbilityItem(Material.IRON_SWORD, "test_item")
+  public static final WeaponAbilityItem testItem = (WeaponAbilityItem) new AbilityItem(Material.IRON_SWORD, "test_item")
           .setAbilityName("Boom") // On a défini le nom de l'abilité
           .setAbilityDesc("&7Inflige &c10x &7les dégats aux monstres", "&7Dans un rayon de 10 blocs") // On a défini la description de l'abilité
           // On a défini l'abilité de l'objet avec une fonction lambda (Il y aura toujours les mêmes 
@@ -486,6 +487,8 @@ Exemple d'enchantement :
 package fr.blockincraft.faylisia.items.enchantment;
 
 public enum CustomEnchantments {
+  // L'index sert à trier les enchantements pour l'affichage, l'enchantement 0 sera avant l'enchantement 1
+  
   // On a créé un enchantement avec l'index 0 nommé "Protection", avec des handlers, on met ensuite son
   // niveau maximal à 4 et son niveau maximal de fusion à 4 aussi, on dit ensuite que l'enchantement peut
   // être appliqué seulement si l'item est un ArmorItem (ou class filles) puis on met un tableau vide car

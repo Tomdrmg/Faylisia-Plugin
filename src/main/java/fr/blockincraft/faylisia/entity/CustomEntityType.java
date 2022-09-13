@@ -1,7 +1,9 @@
 package fr.blockincraft.faylisia.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.api.serializer.EntityTypeSerializer;
 import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.map.Regions;
 import fr.blockincraft.faylisia.player.Stats;
@@ -14,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
+@JsonSerialize(using = EntityTypeSerializer.class)
 public class CustomEntityType {
     public static final NamespacedKey idKey = new NamespacedKey(Faylisia.getInstance(), "custom-id");
     private static final Pattern idPattern = Pattern.compile("[a-z1-9_-]+");

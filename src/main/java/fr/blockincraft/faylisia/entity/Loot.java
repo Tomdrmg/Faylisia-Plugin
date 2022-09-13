@@ -1,7 +1,9 @@
 package fr.blockincraft.faylisia.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.api.serializer.LootSerializer;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
@@ -22,6 +24,7 @@ import java.util.Map;
 /**
  * A loot is an item with a probability to be harvest when kill mob or destroy block
  */
+@JsonSerialize(using = LootSerializer.class)
 public record Loot(int rolls, @NotNull CustomItem item, int probability, int on, @NotNull AmountFunction amount) {
     private static final SecureRandom random = new SecureRandom();
     private static final Registry registry = Faylisia.getInstance().getRegistry();

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import fr.blockincraft.faylisia.items.enchantment.BaseEnchantedItem;
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.weapons.AbilityItem;
+import fr.blockincraft.faylisia.items.weapons.WeaponAbilityItem;
 import fr.blockincraft.faylisia.items.weapons.DamageItem;
 import fr.blockincraft.faylisia.items.StatsItem;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
@@ -51,11 +53,18 @@ public class CustomItemSerializer extends JsonSerializer<CustomItem> {
         }
 
         if (value instanceof ArmorItem armorItem) {
-            gen.writeObjectField("armor_set", armorItem.getArmorSet().getId());
+            gen.writeObjectField("armorSet", armorItem.getArmorSet().getId());
         }
 
         if (value instanceof BaseEnchantedItem enchantedItem) {
             new EnchantmentSerializer().serialize(enchantedItem.getEnchantments(), gen, serializers, false);
+        }
+
+        if (value instanceof AbilityItem abilityItem) {
+            gen.writeObjectField("abilityName", abilityItem.getAbilityName());
+            gen.writeObjectField("abilityDesc", abilityItem.getAbilityDesc());
+            gen.writeObjectField("abilityUseCost", abilityItem.getUseCost());
+            gen.writeObjectField("abilityCooldown", abilityItem.getCooldown());
         }
 
         gen.writeEndObject();

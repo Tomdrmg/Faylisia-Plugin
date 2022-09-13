@@ -1,7 +1,10 @@
 package fr.blockincraft.faylisia.items.armor;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.api.serializer.ArmorSetSerializer;
+import fr.blockincraft.faylisia.api.serializer.BonusSerializer;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,6 +13,7 @@ import java.util.regex.Pattern;
 /**
  * An armor set is one or multiple bonus given if player wear required amount of piece with the same armor set
  */
+@JsonSerialize(using = ArmorSetSerializer.class)
 public class ArmorSet {
     private static final Pattern idPattern = Pattern.compile("[a-z1-9_-]+");
     private static final Registry registry = Faylisia.getInstance().getRegistry();
@@ -66,6 +70,7 @@ public class ArmorSet {
     /**
      * Bonus object represent bonus given to a player if requirements are filled
      */
+    @JsonSerialize(using = BonusSerializer.class)
     public record Bonus(String name, int minimum, Handlers handlers, String... description) {
         /**
          * Constructor needed to set minimum bigger than zero and smaller than four

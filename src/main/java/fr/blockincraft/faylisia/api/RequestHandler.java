@@ -39,13 +39,20 @@ public class RequestHandler extends HandlerWrapper {
             return;
         }
         if (uri.equals("/items")) {
-            try {
-                returnItems(outputStream, response);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            returnItems(outputStream, response);
             return;
         }
+
+        if (uri.equals("/armor_sets")) {
+            returnArmorSets(outputStream, response);
+            return;
+        }
+
+        if (uri.equals("/entity_types")) {
+            returnEntityTypes(outputStream, response);
+            return;
+        }
+
         if (uri.equals("/state")) {
             response.setStatus(HttpServletResponse.SC_OK);
             outputStream.println(objectMapper.writeValueAsString(new State(Bukkit.getOnlinePlayers().size(), Bukkit.getMaxPlayers(), true)));
@@ -67,7 +74,43 @@ public class RequestHandler extends HandlerWrapper {
             response.setStatus(HttpServletResponse.SC_OK);
             outputStream.println(json);
             outputStream.flush();
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
+            outputStream.flush();
+        }
+    }
+
+    public void returnArmorSets(ServletOutputStream outputStream, HttpServletResponse response) throws IOException {
+        Registry registry = Faylisia.getInstance().getRegistry();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            String json = objectMapper.writeValueAsString(new Response("armor_sets", registry.getArmorSets()));
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            outputStream.println(json);
+            outputStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
+            outputStream.flush();
+        }
+    }
+
+    public void returnEntityTypes(ServletOutputStream outputStream, HttpServletResponse response) throws IOException {
+        Registry registry = Faylisia.getInstance().getRegistry();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            String json = objectMapper.writeValueAsString(new Response("entity_types", registry.getEntityTypes()));
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            outputStream.println(json);
+            outputStream.flush();
+        } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
