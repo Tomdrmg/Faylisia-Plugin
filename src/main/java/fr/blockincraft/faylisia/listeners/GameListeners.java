@@ -7,12 +7,15 @@ import fr.blockincraft.faylisia.displays.ScoreboardManager;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.entity.Entities;
 import fr.blockincraft.faylisia.entity.EntitySpawnLocation;
+import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.map.Spawn;
 import fr.blockincraft.faylisia.menu.CraftingMenu;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.displays.Tab;
+import fr.blockincraft.faylisia.menu.DisenchantementMenu;
+import fr.blockincraft.faylisia.menu.EnchantementMenu;
 import fr.blockincraft.faylisia.player.permission.Ranks;
 import fr.blockincraft.faylisia.utils.AreaUtils;
 import fr.blockincraft.faylisia.utils.FileUtils;
@@ -303,7 +306,8 @@ public class GameListeners implements Listener {
 
                 damage = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
-                        new HandlersUtils.Parameter(entity, CustomEntity.class)
+                        new HandlersUtils.Parameter(entity, CustomEntity.class),
+                        new HandlersUtils.Parameter(DamageType.MELEE_DAMAGE, DamageType.class)
                 });
 
                 // Spawn damage indicator and apply custom damage to entity
@@ -369,6 +373,12 @@ public class GameListeners implements Listener {
 
         if (e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.CRAFTING_TABLE) {
             new CraftingMenu().open(e.getPlayer());
+        }
+        if (e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.GRINDSTONE) {
+            new DisenchantementMenu().open(e.getPlayer());
+        }
+        if (e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.ANVIL) {
+            new EnchantementMenu().open(e.getPlayer());
         }
 
         e.setCancelled(true);

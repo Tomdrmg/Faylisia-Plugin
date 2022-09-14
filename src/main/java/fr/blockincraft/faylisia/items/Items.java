@@ -6,6 +6,8 @@ import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
+import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacryma;
+import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.recipes.CraftingRecipe;
@@ -154,7 +156,8 @@ public class Items {
                 AbilitiesUtils.getEntitiesInRadius(player.getLocation(), 10.0).forEach(customEntity -> {
                     long damageIn = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
                             new HandlersUtils.Parameter(player, Player.class),
-                            new HandlersUtils.Parameter(customEntity, CustomEntity.class)
+                            new HandlersUtils.Parameter(customEntity, CustomEntity.class),
+                            new HandlersUtils.Parameter(DamageType.MAGIC_DAMAGE, DamageType.class)
                     });
 
                     PlayerUtils.spawnDamageIndicator(damage, false, player, customEntity.getEntity().getLocation());
@@ -184,7 +187,8 @@ public class Items {
                     Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
                         long damageIn = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
                                 new HandlersUtils.Parameter(player, Player.class),
-                                new HandlersUtils.Parameter(entities.get(finalI), CustomEntity.class)
+                                new HandlersUtils.Parameter(entities.get(finalI), CustomEntity.class),
+                                new HandlersUtils.Parameter(DamageType.MELEE_DAMAGE, DamageType.class)
                         });
 
                         player.teleport(entities.get(finalI).getEntity().getLocation());
@@ -203,6 +207,12 @@ public class Items {
             .setName("Dague")
             .setRarity(Rarity.COSMIC)
             .setCategory(Categories.COOL_DIAMOND);
+    public static final EnchantmentLacryma enchantmentLacryma = (EnchantmentLacryma) new EnchantmentLacryma(Material.ENCHANTED_BOOK, "enchantment_lacryma")
+            .setName("Lacryma D'enchantement")
+            .setLore("&bUne lacryma magique qui peut stocker", "un ou plusieurs enchantements")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.RARE);
 
     // Set recipes here
     static {
@@ -249,6 +259,11 @@ public class Items {
                 new CustomItemStack(coolDiamondBlock, 1),
                 CraftingRecipe.Direction.VERTICAL
         ));
+
+        enchantmentLacryma.setRecipe(new CraftingRecipe(1,
+                null, new CustomItemStack(coolDiamond, 1), null,
+                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
+                null, new CustomItemStack(coolDiamond, 1), null));
     }
 
     // Register items here
@@ -265,5 +280,7 @@ public class Items {
 
         testItem.register();
         dagger.register();
+
+        enchantmentLacryma.register();
     }
 }

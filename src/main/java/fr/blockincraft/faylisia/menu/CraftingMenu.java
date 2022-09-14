@@ -46,8 +46,8 @@ public class CraftingMenu extends ChestMenu {
         // change display name and lore
         invalidRecipeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lInvalid recipe!"));
         invalidRecipeMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Place items in grid to"),
-                ChatColor.translateAlternateColorCodes('&', "&8craft an item.")
+                ChatColor.translateAlternateColorCodes('&', "&8Placez des items dans la grille"),
+                ChatColor.translateAlternateColorCodes('&', "&8pour craft un item.")
         ));
 
         // Update meta
@@ -79,7 +79,7 @@ public class CraftingMenu extends ChestMenu {
         this.addMenuCloseHandler(p -> {
             for (int slot : craftingGrid) {
                 ItemStack is = getItemInSlot(slot);
-                if (is != null) PlayerUtils.giveOrDrop(p, getItemInSlot(slot));
+                if (is != null) PlayerUtils.giveOrDrop(p, is);
             }
         });
 
@@ -308,9 +308,9 @@ public class CraftingMenu extends ChestMenu {
 
         // Add craft footer to lore
         List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m------------------------"));
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Shift click to craft all"));
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Click to craft one"));
+        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m---------------------------"));
+        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Shift clique pour tous craft"));
+        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique pour en craft un"));
         meta.setLore(lore);
 
         // If it has a custom item id, remove it

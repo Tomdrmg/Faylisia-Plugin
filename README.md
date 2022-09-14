@@ -368,9 +368,11 @@ Exemple d'arme magique :
 package fr.blockincraft.faylisia.items;
 
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
+import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.Rarity;
 import fr.blockincraft.faylisia.items.weapons.WeaponAbilityItem;
+import fr.blockincraft.faylisia.utils.HandlersUtils;
 import org.bukkit.Material;
 
 public class Items {
@@ -392,7 +394,8 @@ public class Items {
             AbilitiesUtils.getEntitiesInRadius(player.getLocation(), 10.0).forEach(customEntity -> {
               long damageIn = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
                       new HandlersUtils.Parameter(player, Player.class),
-                      new HandlersUtils.Parameter(customEntity, CustomEntity.class)
+                      new HandlersUtils.Parameter(customEntity, CustomEntity.class),
+                      new HandlersUtils.Parameter(DamageType.MAGIC_DAMAGE, DamageType.class)
               });
 
               PlayerUtils.spawnDamageIndicator(damage, false, player, customEntity.getEntity().getLocation());

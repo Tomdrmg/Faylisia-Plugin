@@ -94,12 +94,13 @@ public interface Handlers {
      * This event was called when a {@link Player} damage a {@link CustomEntity}
      * @param player player which do damages
      * @param customEntity entity which will receive damages
+     * @param damageType type of damage inflicted
      * @param damage damages to do
      * @param inHand if the item which has the handler is in hand
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return damages to deal
      */
-    default long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, long damage, boolean inHand, boolean inArmorSlot) {
+    default long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return damage;
     }
@@ -108,12 +109,13 @@ public interface Handlers {
      * This event was called when a {@link Player} take damage from a {@link CustomEntity}
      * @param player player which receive the damages
      * @param customEntity entity which do damages
+     * @param damageType type of damage taken
      * @param damageTaken damages to take
      * @param inHand if the item which has the handler is in hand
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return damages to receive
      */
-    default long onTakeDamage(@NotNull Player player, @NotNull CustomEntity customEntity, long damageTaken, boolean inHand, boolean inArmorSlot) {
+    default long onTakeDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damageTaken, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return damageTaken;
     }

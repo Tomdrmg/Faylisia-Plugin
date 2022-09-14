@@ -1,11 +1,16 @@
 package fr.blockincraft.faylisia.commands;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
+import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
+import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacryma;
+import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.menu.viewer.ItemsViewerMenu;
 import fr.blockincraft.faylisia.menu.viewer.RecipeViewerMenu;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
@@ -146,33 +151,35 @@ public class ItemsExecutor implements CommandExecutor {
                 }
 
                 if (args[1].equalsIgnoreCase("@a")) {
-                    CustomItem item = getItem(args[2], sender);
+                    CustomItemStack item = getItemStack(args[2], sender);
                     if (item == null) return true;
 
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (args.length == 3) {
-                            PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
+                            PlayerUtils.giveOrDrop(target, item.getAsItemStack());
                         } else {
                             Integer amount = getInteger(args[3], sender);
                             if (amount == null) return true;
+                            item.setAmount(amount);
 
-                            PlayerUtils.giveOrDrop(target, new CustomItemStack(item, amount).getAsItemStack());
+                            PlayerUtils.giveOrDrop(target, item.getAsItemStack());
                         }
                     }
                 } else {
                     Player target = getPlayer(args[1], sender);
                     if (target == null) return true;
 
-                    CustomItem item = getItem(args[2], sender);
+                    CustomItemStack item = getItemStack(args[2], sender);
                     if (item == null) return true;
 
                     if (args.length == 3) {
-                        PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
+                        PlayerUtils.giveOrDrop(target, item.getAsItemStack());
                     } else {
                         Integer amount = getInteger(args[3], sender);
                         if (amount == null) return true;
 
-                        PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
+                        item.setAmount(amount);
+                        PlayerUtils.giveOrDrop(target, item.getAsItemStack());
                     }
                 }
             }
@@ -232,9 +239,50 @@ public class ItemsExecutor implements CommandExecutor {
 
         if (item == null || !item.isRegistered()) {
             sendInvalidItemMessage(sender, arg);
+            return null;
         }
 
         return item;
+    }
+
+    public CustomItemStack getItemStack(String arg, CommandSender sender) {
+        String[] elements = arg.split("\\|\\|");
+
+        if (elements.length != 1 && elements.length != 2) {
+            sendInvalidItemMessage(sender, arg);
+            return null;
+        }
+
+        CustomItem item = Faylisia.getInstance().getRegistry().getItemsById().get(elements[0].toLowerCase(Locale.ROOT));
+
+        if (item == null || !item.isRegistered()) {
+            sendInvalidItemMessage(sender, elements[0]);
+            return null;
+        }
+
+        CustomItemStack customItemStack = new CustomItemStack(item, 0);
+
+        if (elements.length == 2 && (item.isEnchantable() || item instanceof EnchantmentLacryma)) {
+            String json = elements[1];
+
+            ObjectMapper mapper = new ObjectMapper();
+            SimpleModule simpleModule = new SimpleModule();
+            simpleModule.addDeserializer(Map.class, new EnchantmentDeserializer());
+            mapper.registerModule(simpleModule);
+
+            try {
+                Map<CustomEnchantments, Integer> enchants = mapper.readValue(json, Map.class);
+
+                if (enchants != null) {
+                    enchants.forEach(item instanceof EnchantmentLacryma ? customItemStack::addStoredEnchantment : customItemStack::addEnchantment);
+                }
+            } catch (Exception ignored) {
+
+            }
+
+        }
+
+        return customItemStack;
     }
 
     public void sendInvalidItemMessage(CommandSender sender, String itemId) {
