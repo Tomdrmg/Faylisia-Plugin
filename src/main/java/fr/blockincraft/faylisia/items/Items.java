@@ -6,7 +6,7 @@ import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
+import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.items.management.Categories;

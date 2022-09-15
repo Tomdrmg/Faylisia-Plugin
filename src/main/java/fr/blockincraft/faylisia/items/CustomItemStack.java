@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.items.enchantment.BaseEnchantedItem;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
+import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.items.json.EnchantmentSerializer;
 import fr.blockincraft.faylisia.utils.ColorsUtils;

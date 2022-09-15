@@ -4,7 +4,7 @@ import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
+import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

@@ -9,7 +9,7 @@ import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
+import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.menu.viewer.ItemsViewerMenu;
 import fr.blockincraft.faylisia.menu.viewer.RecipeViewerMenu;

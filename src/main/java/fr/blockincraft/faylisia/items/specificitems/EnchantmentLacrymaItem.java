@@ -1,4 +1,4 @@
-package fr.blockincraft.faylisia.items.enchantment;
+package fr.blockincraft.faylisia.items.specificitems;
 
 import fr.blockincraft.faylisia.items.CustomItem;
 import org.bukkit.Material;

@@ -25,7 +25,7 @@ import java.util.Map;
  * A loot is an item with a probability to be harvest when kill mob or destroy block
  */
 @JsonSerialize(using = LootSerializer.class)
-public record Loot(int rolls, @NotNull CustomItem item, int probability, int on, @NotNull AmountFunction amount) {
+public record Loot(int rolls, @NotNull CustomItemStack item, int probability, int on, @NotNull AmountFunction amount) {
     private static final SecureRandom random = new SecureRandom();
     private static final Registry registry = Faylisia.getInstance().getRegistry();
 
@@ -42,18 +42,22 @@ public record Loot(int rolls, @NotNull CustomItem item, int probability, int on,
         for (int i = 0; i < rolls; i++) {
             int r = random.nextInt(on);
 
+            CustomItemStack copy = item.clone();
+
             // Calculate if it will be generated
             if (r < probability) {
                 // Calculate amount of item
                 int amount = this.amount.getAmount();
 
-                while (amount > item.getMaterial().getMaxStackSize()) {
-                    loots.add(new CustomItemStack(item, item.getMaterial().getMaxStackSize()).getAsItemStack());
-                    amount -= item.getMaterial().getMaxStackSize();
+                while (amount > item.getItem().getMaterial().getMaxStackSize()) {
+                    copy.setAmount(item.getItem().getMaterial().getMaxStackSize());
+                    loots.add(copy.getAsItemStack());
+                    amount -= item.getItem().getMaterial().getMaxStackSize();
                 }
 
                 if (amount > 0) {
-                    loots.add(new CustomItemStack(item, amount).getAsItemStack());
+                    copy.setAmount(amount);
+                    loots.add(copy.getAsItemStack());
                 }
             }
         }
@@ -80,7 +84,7 @@ public record Loot(int rolls, @NotNull CustomItem item, int probability, int on,
 
         probability = HandlersUtils.getValueWithHandlers(customPlayer, "getLootProbability", probability, int.class, new HandlersUtils.Parameter[]{
                 new HandlersUtils.Parameter(player, Player.class),
-                new HandlersUtils.Parameter(item, CustomItem.class),
+                new HandlersUtils.Parameter(item, CustomItemStack.class),
                 new HandlersUtils.Parameter(on, int.class),
                 new HandlersUtils.Parameter(this.rolls, int.class),
                 new HandlersUtils.Parameter(rare, boolean.class)
@@ -93,7 +97,7 @@ public record Loot(int rolls, @NotNull CustomItem item, int probability, int on,
 
         rolls = HandlersUtils.getValueWithHandlers(customPlayer, "getLootRolls", rolls, int.class, new HandlersUtils.Parameter[]{
                 new HandlersUtils.Parameter(player, Player.class),
-                new HandlersUtils.Parameter(item, CustomItem.class),
+                new HandlersUtils.Parameter(item, CustomItemStack.class),
                 new HandlersUtils.Parameter(probability, int.class),
                 new HandlersUtils.Parameter(on, int.class),
                 new HandlersUtils.Parameter(rare, boolean.class)
@@ -110,20 +114,24 @@ public record Loot(int rolls, @NotNull CustomItem item, int probability, int on,
 
                 amount = HandlersUtils.getValueWithHandlers(customPlayer, "getLootAmount", amount, int.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
-                        new HandlersUtils.Parameter(item, CustomItem.class),
+                        new HandlersUtils.Parameter(item, CustomItemStack.class),
                         new HandlersUtils.Parameter(probability, int.class),
                         new HandlersUtils.Parameter(on, int.class),
                         new HandlersUtils.Parameter(rolls, int.class),
                         new HandlersUtils.Parameter(rare, boolean.class)
                 });
 
-                while (amount > item.getMaterial().getMaxStackSize()) {
-                    loots.add(new CustomItemStack(item, item.getMaterial().getMaxStackSize()).getAsItemStack());
-                    amount -= item.getMaterial().getMaxStackSize();
+                CustomItemStack copy = item.clone();
+
+                while (amount > item.getItem().getMaterial().getMaxStackSize()) {
+                    copy.setAmount(item.getItem().getMaterial().getMaxStackSize());
+                    loots.add(copy.getAsItemStack());
+                    amount -= item.getItem().getMaterial().getMaxStackSize();
                 }
 
                 if (amount > 0) {
-                    loots.add(new CustomItemStack(item, amount).getAsItemStack());
+                    copy.setAmount(amount);
+                    loots.add(copy.getAsItemStack());
                 }
             }
         }
