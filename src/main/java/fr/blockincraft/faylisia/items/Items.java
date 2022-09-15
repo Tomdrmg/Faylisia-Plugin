@@ -6,7 +6,7 @@ import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacryma;
+import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.items.management.Categories;
@@ -207,9 +207,9 @@ public class Items {
             .setName("Dague")
             .setRarity(Rarity.COSMIC)
             .setCategory(Categories.COOL_DIAMOND);
-    public static final EnchantmentLacryma enchantmentLacryma = (EnchantmentLacryma) new EnchantmentLacryma(Material.ENCHANTED_BOOK, "enchantment_lacryma")
+    public static final EnchantmentLacrymaItem ENCHANTMENT_LACRYMA_ITEM = (EnchantmentLacrymaItem) new EnchantmentLacrymaItem(Material.ENCHANTED_BOOK, "enchantment_lacryma")
             .setName("Lacryma D'enchantement")
-            .setLore("&bUne lacryma magique qui peut stocker", "un ou plusieurs enchantements")
+            .setLore("&bUne lacryma magique qui peut", "&bstocker un ou plusieurs", "&benchantements")
             .setEnchantable(false)
             .setDisenchantable(false)
             .setRarity(Rarity.RARE);
@@ -260,7 +260,7 @@ public class Items {
                 CraftingRecipe.Direction.VERTICAL
         ));
 
-        enchantmentLacryma.setRecipe(new CraftingRecipe(1,
+        ENCHANTMENT_LACRYMA_ITEM.setRecipe(new CraftingRecipe(1,
                 null, new CustomItemStack(coolDiamond, 1), null,
                 new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
                 null, new CustomItemStack(coolDiamond, 1), null));
@@ -281,6 +281,6 @@ public class Items {
         testItem.register();
         dagger.register();
 
-        enchantmentLacryma.register();
+        ENCHANTMENT_LACRYMA_ITEM.register();
     }
 }

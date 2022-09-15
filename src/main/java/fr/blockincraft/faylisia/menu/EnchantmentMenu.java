@@ -4,8 +4,7 @@ import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
-import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacryma;
+import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,12 +18,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-public class EnchantementMenu extends ChestMenu {
+public class EnchantmentMenu extends ChestMenu {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
-    public static final int resultSlot = 15;
-    public static final int lacrymaSlot = 12;
+    public static final int resultSlot = 13;
+    public static final int lacrymaSlot = 16;
     public static final int itemSlot = 10;
     private static final ItemStack invalidRecipeItem;
 
@@ -39,7 +37,7 @@ public class EnchantementMenu extends ChestMenu {
         ItemMeta invalidRecipeMeta = invalidRecipeItem.getItemMeta();
 
         // change display name and lore
-        invalidRecipeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lInvalid recipe!"));
+        invalidRecipeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lFusion invalide!"));
         invalidRecipeMeta.setLore(Arrays.asList(
                 ChatColor.translateAlternateColorCodes('&', "&8Place un item a fusionner à gauche et"),
                 ChatColor.translateAlternateColorCodes('&', "&8une lacryma d'enchantement à droite"),
@@ -53,7 +51,7 @@ public class EnchantementMenu extends ChestMenu {
     /**
      * Initialize menu
      */
-    public EnchantementMenu() {
+    public EnchantmentMenu() {
         super("&b&lFusionneur", 3);
 
         this.setEmptySlotsClickable(true);
@@ -114,11 +112,11 @@ public class EnchantementMenu extends ChestMenu {
         CustomItemStack lacrymaCustomIs = CustomItemStack.fromItemStack(lacrymaIs);
 
         // Check if an enchanted lacryma was added and if she hasn't any stored enchantment
-        if (lacrymaCustomIs != null && lacrymaCustomIs.getItem() instanceof EnchantmentLacryma && lacrymaCustomIs.getStoredEnchantments().size() > 0 && lacrymaCustomIs.getAmount() == 1) {
+        if (lacrymaCustomIs != null && lacrymaCustomIs.getItem() instanceof EnchantmentLacrymaItem && lacrymaCustomIs.getStoredEnchantments().size() > 0 && lacrymaCustomIs.getAmount() == 1) {
             ItemStack itemIs = getItemInSlot(itemSlot);
             CustomItemStack itemCustomIs = CustomItemStack.fromItemStack(itemIs);
 
-            if (itemCustomIs != null && itemCustomIs.getItem() instanceof EnchantmentLacryma && itemCustomIs.getAmount() == 1) {
+            if (itemCustomIs != null && itemCustomIs.getItem() instanceof EnchantmentLacrymaItem && itemCustomIs.getAmount() == 1) {
                 CustomItemStack result = itemCustomIs.clone();
 
                 lacrymaCustomIs.getStoredEnchantments().forEach((enchants, lvl) -> {
@@ -172,8 +170,8 @@ public class EnchantementMenu extends ChestMenu {
                                 // Then put result in player cursor
                                 e.setCursor(result.getAsItemStack());
                                 // And remove items
-                                this.replaceExistingItem(itemSlot, new ItemStack(Material.AIR), e1 -> true);
-                                this.replaceExistingItem(lacrymaSlot, new ItemStack(Material.AIR), e1 -> true);
+                                this.replaceExistingItem(itemSlot, new ItemStack(Material.AIR));
+                                this.replaceExistingItem(lacrymaSlot, new ItemStack(Material.AIR));
                             }
 
                             // We refresh recipe because we update grid or recipe doesn't match again
@@ -182,6 +180,7 @@ public class EnchantementMenu extends ChestMenu {
                     }
                     return false;
                 });
+                return;
             } else if (itemCustomIs != null && itemCustomIs.getItem().isEnchantable() && itemCustomIs.getAmount() == 1) {
                 CustomItemStack result = itemCustomIs.clone();
 
@@ -238,8 +237,8 @@ public class EnchantementMenu extends ChestMenu {
                                 // Then put result in player cursor
                                 e.setCursor(result.getAsItemStack());
                                 // And remove items
-                                this.replaceExistingItem(itemSlot, new ItemStack(Material.AIR), e1 -> true);
-                                this.replaceExistingItem(lacrymaSlot, new ItemStack(Material.AIR), e1 -> true);
+                                this.replaceExistingItem(itemSlot, new ItemStack(Material.AIR));
+                                this.replaceExistingItem(lacrymaSlot, new ItemStack(Material.AIR));
                             }
 
                             // We refresh recipe because we update grid or recipe doesn't match again
@@ -248,6 +247,7 @@ public class EnchantementMenu extends ChestMenu {
                     }
                     return false;
                 });
+                return;
             }
         }
 
@@ -273,7 +273,7 @@ public class EnchantementMenu extends ChestMenu {
 
         // Add craft footer to lore
         List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m-------------------------------"));
+        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m--------------------------"));
         lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique pour fusioner l'item"));
         meta.setLore(lore);
 

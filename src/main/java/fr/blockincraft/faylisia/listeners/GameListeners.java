@@ -14,8 +14,8 @@ import fr.blockincraft.faylisia.map.Spawn;
 import fr.blockincraft.faylisia.menu.CraftingMenu;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.displays.Tab;
-import fr.blockincraft.faylisia.menu.DisenchantementMenu;
-import fr.blockincraft.faylisia.menu.EnchantementMenu;
+import fr.blockincraft.faylisia.menu.DisenchantmentMenu;
+import fr.blockincraft.faylisia.menu.EnchantmentMenu;
 import fr.blockincraft.faylisia.player.permission.Ranks;
 import fr.blockincraft.faylisia.utils.AreaUtils;
 import fr.blockincraft.faylisia.utils.FileUtils;
@@ -30,8 +30,6 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
-import org.bukkit.event.world.ChunkLoadEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.time.Instant;
@@ -375,10 +373,10 @@ public class GameListeners implements Listener {
             new CraftingMenu().open(e.getPlayer());
         }
         if (e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.GRINDSTONE) {
-            new DisenchantementMenu().open(e.getPlayer());
+            new DisenchantmentMenu().open(e.getPlayer());
         }
         if (e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.ANVIL) {
-            new EnchantementMenu().open(e.getPlayer());
+            new EnchantmentMenu().open(e.getPlayer());
         }
 
         e.setCancelled(true);

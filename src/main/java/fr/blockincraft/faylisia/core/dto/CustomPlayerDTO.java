@@ -7,6 +7,7 @@ import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.*;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
+import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.HandlerItem;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.items.weapons.DamageItem;
@@ -540,7 +541,8 @@ public class CustomPlayerDTO {
 
             damage = HandlersUtils.getValueWithHandlers(this, "onTakeDamage", damage, long.class, new HandlersUtils.Parameter[]{
                     new HandlersUtils.Parameter(player, Player.class),
-                    new HandlersUtils.Parameter(entity, CustomEntity.class)
+                    new HandlersUtils.Parameter(entity, CustomEntity.class),
+                    new HandlersUtils.Parameter(DamageType.MELEE_DAMAGE, DamageType.class)
             });
         }
 

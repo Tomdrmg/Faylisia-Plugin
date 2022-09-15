@@ -5,7 +5,7 @@ import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacryma;
+import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,10 +21,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class DisenchantementMenu extends ChestMenu {
+public class DisenchantmentMenu extends ChestMenu {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
-    public static final int resultSlot = 15;
-    public static final int lacrymaSlot = 12;
+    public static final int resultSlot = 13;
+    public static final int lacrymaSlot = 16;
     public static final int itemSlot = 10;
     private static final ItemStack invalidRecipeItem;
 
@@ -39,7 +39,7 @@ public class DisenchantementMenu extends ChestMenu {
         ItemMeta invalidRecipeMeta = invalidRecipeItem.getItemMeta();
 
         // change display name and lore
-        invalidRecipeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lInvalid recipe!"));
+        invalidRecipeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lFission invalide!"));
         invalidRecipeMeta.setLore(Arrays.asList(
                 ChatColor.translateAlternateColorCodes('&', "&8Place un item a fissioner à gauche"),
                 ChatColor.translateAlternateColorCodes('&', "&8et une lacryma d'enchantement à droite"),
@@ -53,7 +53,7 @@ public class DisenchantementMenu extends ChestMenu {
     /**
      * Initialize menu
      */
-    public DisenchantementMenu() {
+    public DisenchantmentMenu() {
         super("&b&lFissioneur", 3);
 
         this.setEmptySlotsClickable(true);
@@ -114,7 +114,7 @@ public class DisenchantementMenu extends ChestMenu {
         CustomItemStack lacrymaCustomIs = CustomItemStack.fromItemStack(lacrymaIs);
 
         // Check if an enchanted lacryma was added and if she hasn't any stored enchantment
-        if (lacrymaCustomIs != null && lacrymaCustomIs.getItem() instanceof EnchantmentLacryma && lacrymaCustomIs.getStoredEnchantments().size() == 0) {
+        if (lacrymaCustomIs != null && lacrymaCustomIs.getItem() instanceof EnchantmentLacrymaItem && lacrymaCustomIs.getStoredEnchantments().size() == 0) {
             ItemStack itemIs = getItemInSlot(itemSlot);
             CustomItemStack itemCustomIs = CustomItemStack.fromItemStack(itemIs);
 
@@ -156,14 +156,14 @@ public class DisenchantementMenu extends ChestMenu {
                                 // And remove items
                                 CustomItemStack itemCustomIsWithoutEnchants = itemCustomIs.clone();
                                 itemCustomIsWithoutEnchants.clearEnchantment();
-                                this.replaceExistingItem(itemSlot, itemCustomIsWithoutEnchants.getAsItemStack(), e1 -> true);
+                                this.replaceExistingItem(itemSlot, itemCustomIsWithoutEnchants.getAsItemStack());
 
                                 CustomItemStack lacrymaCustomIsMinusOne = lacrymaCustomIs.clone();
                                 if (lacrymaCustomIsMinusOne.getAmount() == 1) {
-                                    this.replaceExistingItem(lacrymaSlot, new ItemStack(Material.AIR), e1 -> true);
+                                    this.replaceExistingItem(lacrymaSlot, new ItemStack(Material.AIR));
                                 } else {
                                     lacrymaCustomIsMinusOne.setAmount(lacrymaCustomIsMinusOne.getAmount() - 1);
-                                    this.replaceExistingItem(lacrymaSlot, lacrymaCustomIsMinusOne.getAsItemStack(), e1 -> true);
+                                    this.replaceExistingItem(lacrymaSlot, lacrymaCustomIsMinusOne.getAsItemStack());
                                 }
                             }
 
@@ -173,6 +173,7 @@ public class DisenchantementMenu extends ChestMenu {
                     }
                     return false;
                 });
+                return;
             }
         }
 
@@ -198,7 +199,7 @@ public class DisenchantementMenu extends ChestMenu {
 
         // Add craft footer to lore
         List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m-------------------------------"));
+        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m--------------------------"));
         lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique pour fissioner l'item"));
         meta.setLore(lore);
 

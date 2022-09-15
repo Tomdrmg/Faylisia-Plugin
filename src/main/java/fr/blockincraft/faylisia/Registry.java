@@ -342,7 +342,7 @@ public class Registry {
 
             // Get as custom item stack to retrieve data like enchantments
             CustomItemStack customItemStack = CustomItemStack.fromItemStack(itemStack);
-            if (customItemStack == null) return;
+            if (customItemStack == null) continue;
 
             // Get an updated item stack
             ItemStack model = customItemStack.getAsItemStack();

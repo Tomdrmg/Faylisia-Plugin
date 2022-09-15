@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.items.enchantment.BaseEnchantedItem;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacryma;
+import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.items.json.EnchantmentSerializer;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
@@ -60,6 +60,10 @@ public class CustomItemStack implements Cloneable {
 
         if (item.isEnchantable()) {
             enchantments.forEach(customItemStack::addEnchantment);
+        }
+
+        if (item instanceof EnchantmentLacrymaItem) {
+            storedEnchantments.forEach(customItemStack::addStoredEnchantment);
         }
 
         return customItemStack;
@@ -158,7 +162,7 @@ public class CustomItemStack implements Cloneable {
      */
     @NotNull
     public Map<CustomEnchantments, Integer> getStoredEnchantments() {
-        if (!(item instanceof EnchantmentLacryma)) throw new NonEnchantmentLacrymaException();
+        if (!(item instanceof EnchantmentLacrymaItem)) throw new NonEnchantmentLacrymaException();
 
         return new HashMap<>(storedEnchantments);
     }
@@ -167,7 +171,7 @@ public class CustomItemStack implements Cloneable {
      * @param enchantment stored enchantment to remove
      */
     public void removeStoredEnchantment(@NotNull CustomEnchantments enchantment) {
-        if (!(item instanceof EnchantmentLacryma)) throw new NonEnchantmentLacrymaException();
+        if (!(item instanceof EnchantmentLacrymaItem)) throw new NonEnchantmentLacrymaException();
 
         storedEnchantments.remove(enchantment);
     }
@@ -176,7 +180,7 @@ public class CustomItemStack implements Cloneable {
      * Remove all stored enchantments
      */
     public void clearStoredEnchantment() {
-        if (!(item instanceof EnchantmentLacryma)) throw new NonEnchantmentLacrymaException();
+        if (!(item instanceof EnchantmentLacrymaItem)) throw new NonEnchantmentLacrymaException();
 
         storedEnchantments.clear();
     }
@@ -187,7 +191,7 @@ public class CustomItemStack implements Cloneable {
      * @param level level of the enchantment
      */
     public void addStoredEnchantment(@NotNull CustomEnchantments enchant, int level) {
-        if (!(item instanceof EnchantmentLacryma)) throw new NonEnchantmentLacrymaException();
+        if (!(item instanceof EnchantmentLacrymaItem)) throw new NonEnchantmentLacrymaException();
 
         storedEnchantments.put(enchant, level);
     }
@@ -198,7 +202,7 @@ public class CustomItemStack implements Cloneable {
      * @return if stack have enchantment
      */
     public boolean hasStoredEnchantment(@NotNull CustomEnchantments enchant) {
-        if (!item.isEnchantable()) throw new NonEnchantableException();
+        if (!(item instanceof EnchantmentLacrymaItem)) throw new NonEnchantmentLacrymaException();
 
         return storedEnchantments.containsKey(enchant);
     }
@@ -209,7 +213,7 @@ public class CustomItemStack implements Cloneable {
      * @return level of enchantment
      */
     public int getStoredEnchantmentLevel(@NotNull CustomEnchantments enchant) {
-        if (!(item instanceof EnchantmentLacryma)) throw new NonEnchantmentLacrymaException();
+        if (!(item instanceof EnchantmentLacrymaItem)) throw new NonEnchantmentLacrymaException();
 
         return storedEnchantments.get(enchant);
     }
@@ -253,7 +257,7 @@ public class CustomItemStack implements Cloneable {
         }
 
         // If custom item is an instance of EnchantmentLacryma and has stored echantments data then parse it
-        if (item instanceof EnchantmentLacryma && model.getItemMeta() != null && model.getItemMeta().getPersistentDataContainer().has(storedEnchantsKey, PersistentDataType.STRING)) {
+        if (item instanceof EnchantmentLacrymaItem && model.getItemMeta() != null && model.getItemMeta().getPersistentDataContainer().has(storedEnchantsKey, PersistentDataType.STRING)) {
             // Parse data
             String json = model.getItemMeta().getPersistentDataContainer().get(storedEnchantsKey, PersistentDataType.STRING);
 
@@ -267,7 +271,7 @@ public class CustomItemStack implements Cloneable {
 
                 // And add them
                 if (storedEnchantments != null) {
-                    storedEnchantments.forEach(customItemStack::addEnchantment);
+                    storedEnchantments.forEach(customItemStack::addStoredEnchantment);
                 }
             } catch (Exception ignored) {
 
@@ -293,7 +297,7 @@ public class CustomItemStack implements Cloneable {
             // Check if its same custom item
             if (customItemStack.item.getId().equals(item.getId())) {
                 // Check stored enchantments if item is an instance of EnchantmentLacryma
-                if (item instanceof EnchantmentLacryma) {
+                if (item instanceof EnchantmentLacrymaItem) {
                     for (Map.Entry<CustomEnchantments, Integer> entry : storedEnchantments.entrySet()) {
                         if (!customItemStack.hasStoredEnchantment(entry.getKey())) return false;
                         if (customItemStack.getStoredEnchantmentLevel(entry.getKey()) != entry.getValue()) return false;
@@ -330,7 +334,7 @@ public class CustomItemStack implements Cloneable {
         // Check if its same custom item
         if (customItemStack.item.getId().equals(item.getId())) {
             // Check stored enchantments if item is an instance of EnchantmentLacryma
-            if (item instanceof EnchantmentLacryma) {
+            if (item instanceof EnchantmentLacrymaItem) {
                 for (Map.Entry<CustomEnchantments, Integer> entry : storedEnchantments.entrySet()) {
                     if (!customItemStack.hasStoredEnchantment(entry.getKey())) return false;
                     if (customItemStack.getStoredEnchantmentLevel(entry.getKey()) != entry.getValue()) return false;
@@ -367,7 +371,7 @@ public class CustomItemStack implements Cloneable {
             // Check custom item is same (using id)
             if (item.getId().equals(customItemStack.item.getId()) && amount == customItemStack.amount) {
                 // Check stored enchantments if item is an instance of EnchantmentLacryma
-                if (item instanceof EnchantmentLacryma) {
+                if (item instanceof EnchantmentLacrymaItem) {
                     for (Map.Entry<CustomEnchantments, Integer> entry : storedEnchantments.entrySet()) {
                         if (!customItemStack.hasStoredEnchantment(entry.getKey())) return false;
                         if (customItemStack.getStoredEnchantmentLevel(entry.getKey()) != entry.getValue()) return false;
@@ -475,7 +479,7 @@ public class CustomItemStack implements Cloneable {
         }
 
         // Add lore and stored enchantments if item is an enchantment lacryma
-        if (item instanceof EnchantmentLacryma) {
+        if (item instanceof EnchantmentLacrymaItem) {
             // If it has one or more enchants, add a Bukkit enchantment to make enchanted effect on item
             if (storedEnchantments.size() > 0) {
                 itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
@@ -496,7 +500,7 @@ public class CustomItemStack implements Cloneable {
                             index++;
                         }
 
-                        List<Map.Entry<CustomEnchantments, Integer>> enchants = enchantments.entrySet().stream().sorted(
+                        List<Map.Entry<CustomEnchantments, Integer>> enchants = storedEnchantments.entrySet().stream().sorted(
                                 (o1, o2) -> o1.getKey().index - o2.getKey().index
                         ).toList();
 
@@ -532,7 +536,7 @@ public class CustomItemStack implements Cloneable {
             mapper.registerModule(module);
 
             try {
-                String json = mapper.writeValueAsString(enchantments);
+                String json = mapper.writeValueAsString(storedEnchantments);
 
                 ItemMeta meta = itemStack.getItemMeta();
 
@@ -561,7 +565,7 @@ public class CustomItemStack implements Cloneable {
 
     /**
      * Exception thrown when we try to use stored enchantments methods and the custom item is not an
-     * instance of {@link EnchantmentLacryma}
+     * instance of {@link EnchantmentLacrymaItem}
      */
     public static class NonEnchantmentLacrymaException extends RuntimeException {
         public NonEnchantmentLacrymaException() {

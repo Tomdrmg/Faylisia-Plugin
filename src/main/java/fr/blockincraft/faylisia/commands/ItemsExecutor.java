@@ -9,14 +9,13 @@ import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
-import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacryma;
+import fr.blockincraft.faylisia.items.enchantment.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.menu.viewer.ItemsViewerMenu;
 import fr.blockincraft.faylisia.menu.viewer.RecipeViewerMenu;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -55,11 +54,11 @@ public class ItemsExecutor implements CommandExecutor {
                 }
 
                 if (args[1].equalsIgnoreCase("@a")) {
-                    CustomItem item = getItem(args[2], sender);
+                    CustomItemStack item = getItemStack(args[2], sender);
                     if (item == null) return true;
 
                     Map<String, String> parameters = new HashMap<>();
-                    parameters.put("%item%", item.getName());
+                    parameters.put("%item%", item.getItem().getName());
 
                     Integer amount = null;
                     boolean multiple = false;
@@ -78,12 +77,13 @@ public class ItemsExecutor implements CommandExecutor {
 
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (!multiple) {
-                            PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
+                            PlayerUtils.giveOrDrop(target, item.getAsItemStack());
                             if (target != player) {
                                 target.sendMessage(Messages.RECEIVE_FROM_AN_ITEM.get(parameters));
                             }
                         } else {
-                            PlayerUtils.giveOrDrop(target, new CustomItemStack(item, amount).getAsItemStack());
+                            item.setAmount(amount);
+                            PlayerUtils.giveOrDrop(target, item.getAsItemStack());
                             if (target != player) {
                                 target.sendMessage(Messages.RECEIVE_FROM_MULTIPLE_ITEMS.get(parameters));
                             }
@@ -93,17 +93,17 @@ public class ItemsExecutor implements CommandExecutor {
                     Player target = getPlayer(args[1], sender);
                     if (target == null) return true;
 
-                    CustomItem item = getItem(args[2], sender);
+                    CustomItemStack item = getItemStack(args[2], sender);
                     if (item == null) return true;
 
                     CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
                     CustomPlayerDTO customTarget = registry.getOrRegisterPlayer(target.getUniqueId());
 
                     Map<String, String> parameters = new HashMap<>();
-                    parameters.put("%item%", item.getName());
+                    parameters.put("%item%", item.getItem().getName());
 
                     if (args.length == 3) {
-                        PlayerUtils.giveOrDrop(target, new CustomItemStack(item, 1).getAsItemStack());
+                        PlayerUtils.giveOrDrop(target, item.getAsItemStack());
 
                         if (target == player) {
                             player.sendMessage(Messages.GIVE_SELF_AN_ITEM.get(parameters));
@@ -117,7 +117,8 @@ public class ItemsExecutor implements CommandExecutor {
                         Integer amount = getInteger(args[3], sender);
                         if (amount == null) return true;
 
-                        PlayerUtils.giveOrDrop(target, new CustomItemStack(item, amount).getAsItemStack());
+                        item.setAmount(amount);
+                        PlayerUtils.giveOrDrop(target, item.getAsItemStack());
 
                         parameters.put("%amount%", String.valueOf(amount));
                         if (target == player) {
@@ -249,7 +250,7 @@ public class ItemsExecutor implements CommandExecutor {
         String[] elements = arg.split("\\|\\|");
 
         if (elements.length != 1 && elements.length != 2) {
-            sendInvalidItemMessage(sender, arg);
+            sendInvalidItemMessage(sender, elements[0]);
             return null;
         }
 
@@ -262,7 +263,7 @@ public class ItemsExecutor implements CommandExecutor {
 
         CustomItemStack customItemStack = new CustomItemStack(item, 0);
 
-        if (elements.length == 2 && (item.isEnchantable() || item instanceof EnchantmentLacryma)) {
+        if (elements.length == 2 && (item.isEnchantable() || item instanceof EnchantmentLacrymaItem)) {
             String json = elements[1];
 
             ObjectMapper mapper = new ObjectMapper();
@@ -274,7 +275,7 @@ public class ItemsExecutor implements CommandExecutor {
                 Map<CustomEnchantments, Integer> enchants = mapper.readValue(json, Map.class);
 
                 if (enchants != null) {
-                    enchants.forEach(item instanceof EnchantmentLacryma ? customItemStack::addStoredEnchantment : customItemStack::addEnchantment);
+                    enchants.forEach(item instanceof EnchantmentLacrymaItem ? customItemStack::addStoredEnchantment : customItemStack::addEnchantment);
                 }
             } catch (Exception ignored) {
 
