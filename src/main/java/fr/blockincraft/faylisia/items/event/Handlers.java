@@ -2,10 +2,10 @@ package fr.blockincraft.faylisia.items.event;
 
 import fr.blockincraft.faylisia.core.entity.CustomPlayer;
 import fr.blockincraft.faylisia.entity.CustomEntity;
-import fr.blockincraft.faylisia.entity.Loot;
+import fr.blockincraft.faylisia.entity.loot.Loot;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
-import fr.blockincraft.faylisia.items.weapons.DamageItem;
+import fr.blockincraft.faylisia.items.weapons.DamageItemModel;
 import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -38,7 +38,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return probability of the loot
      */
-    default int getLootProbability(@NotNull Player player, @NotNull CustomItemStack item, int on, int baseRolls, boolean isRare, int probability, boolean inHand, boolean inArmorSlot) {
+    default int getLootProbability(@NotNull Player player, @NotNull CustomItemStack item, int on, int baseRolls, boolean isRare, Loot.LootType lootType, int probability, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return probability;
     }
@@ -54,7 +54,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return rolls of the loot
      */
-    default int getLootRolls(@NotNull Player player, @NotNull CustomItemStack item, int probability, int on, boolean isRare, int rolls, boolean inHand, boolean inArmorSlot) {
+    default int getLootRolls(@NotNull Player player, @NotNull CustomItemStack item, int probability, int on, boolean isRare, Loot.LootType lootType, int rolls, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return rolls;
     }
@@ -72,7 +72,7 @@ public interface Handlers {
      * @param inArmorSlot if the item which has the handler is in an armor slot
      * @return amount of the loot
      */
-    default int getLootAmount(@NotNull Player player, @NotNull CustomItemStack item, int probability, int on, int rolls, boolean isRare, int amount, boolean inHand, boolean inArmorSlot) {
+    default int getLootAmount(@NotNull Player player, @NotNull CustomItemStack item, int probability, int on, int rolls, boolean isRare, Loot.LootType lootType, int amount, boolean inHand, boolean inArmorSlot) {
         onHandlerCall();
         return amount;
     }
@@ -233,7 +233,7 @@ public interface Handlers {
     }
 
     /**
-     * This event was called when we get item raw damages of a {@link DamageItem} <br/>
+     * This event was called when we get item raw damages of a {@link DamageItemModel} <br/>
      * Raw damages are damages without applying {@link Stats}
      * @param player player which has the item
      * @param customItem item which we get the raw damages

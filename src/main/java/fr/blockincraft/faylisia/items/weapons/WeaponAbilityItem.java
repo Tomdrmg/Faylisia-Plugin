@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeaponAbilityItem extends WeaponItem implements AbilityItem {
-    private Ability ability = (player, clickedBlock, hand) -> {};
+public class WeaponAbilityItem extends WeaponItem implements AbilityItemModel {
+    private Ability ability = (player, clickedBlock, hand) -> true;
     private String abilityName = "";
     private String[] abilityDesc = new String[0];
     private long useCost = 0;

@@ -4,7 +4,7 @@ main: fr.blockincraft.faylisia.Faylisia
 api-version: 1.13
 prefix: Faylisia
 authors: [ Blockincraft ]
-website: faylis.xyz
+website: faylisia.fr
 depend: [ ProtocolLib ]
 commands:
   break:
@@ -31,6 +31,18 @@ commands:
   link:
     description: Command to link acount with discord
     permission: faylisia.command.link
+  fly:
+    description: Command to enable or disable fly
+    permission: faylisia.command.fly
+  nick:
+    description: Command to change nickname
+    permission: faylisia.command.nick
+  invsee:
+    description: Command to see other inventories
+    permission: faylisia.command.invsee
+  cblocks:
+    description: Command to generate custom blocks
+    permission: faylisia.command.cblocks
 permissions:
   faylisia.command.break:
     default: op
@@ -48,6 +60,24 @@ permissions:
     default: op
   faylisia.command.link:
     default: true
+  faylisia.command.fly:
+    default: op
+  faylisia.command.invsee:
+    default: op
+  faylisia.command.nick:
+    default: op
+  faylisia.command.cblocks:
+    default: op
+  faylisia.nick.get:
+    default: op
+  faylisia.fly:
+    default: op
+  faylisia.invsee:
+    default: op
+  faylisia.nick:
+    default: op
+  faylisia.cblocks:
+    default: op
   faylisia.link:
     default: true
   faylisia.discord:

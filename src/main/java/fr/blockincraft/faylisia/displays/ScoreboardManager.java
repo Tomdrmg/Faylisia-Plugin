@@ -2,10 +2,14 @@ package fr.blockincraft.faylisia.displays;
 
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.blocks.CustomBlock;
+import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import fr.blockincraft.faylisia.core.entity.CustomPlayer;
 import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.displays.animation.FlashingAnimation;
 import fr.blockincraft.faylisia.displays.animation.LinearAnimation;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.TextUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -63,13 +67,17 @@ public class ScoreboardManager {
         if (body == null) {
             body = new AnimatedText[]{
                     new AnimatedText(""),
-                    new FlashingAnimation('f', 2, 2, 40)
-                            .addElement('7', String.valueOf(Region.regionChar))
-                            .setSuffix(" %region_name%")
-                            .build(),
+                    new AnimatedText("&6&lProfile:"),
+                    new AnimatedText("&e Nom: %used_name%"),
+                    new AnimatedText("&e Grade: %rank_name%"),
+                    new AnimatedText("&e Class: %class_name%"),
+                    new AnimatedText("&e Argent: %money%$"),
+                    new AnimatedText(""),
+                    new AnimatedText("&8&lInformations:"),
+                    new AnimatedText("&7 Lieu: %region_name%"),
                     new AnimatedText(""),
                     new LinearAnimation('f', 5, LinearAnimation.StartPosition.SIDE)
-                            .addElement('d', "faylis.xyz")
+                            .addElement('d', "faylisia.fr")
                             .build()
             };
 
@@ -79,8 +87,17 @@ public class ScoreboardManager {
         assert objective != null;
         objective.setDisplayName(ChatColor.translateAlternateColorCodes('&', title.get()));
 
+        CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
+
         for (int i = 0; i < body.length; i++) {
-            String teamName = ChatColor.COLOR_CHAR + String.valueOf(i);
+            String iStr = String.valueOf(i);
+            StringBuilder sb = new StringBuilder();
+
+            for (int l = 0; l < iStr.length(); l++) {
+                sb.append(ChatColor.COLOR_CHAR).append(iStr.charAt(l));
+            }
+
+            String teamName = sb.toString();
 
             Team lineTeam = scoreboard.getTeam(teamName);
             if (lineTeam == null) {
@@ -88,8 +105,13 @@ public class ScoreboardManager {
                 lineTeam.addEntry(teamName);
             }
 
-            lineTeam.setPrefix(ChatColor.translateAlternateColorCodes('&', body[i].get()
-                    .replace("%region_name%", ColorsUtils.translateAll(registry.getRegionAt(player.getLocation()).getName()))
+            lineTeam.setPrefix(ColorsUtils.translateAll(body[i].get()
+                    .replace("%region_name%", registry.getRegionAt(player.getLocation()).getName())
+                    .replace("%money%", TextUtils.valueWithCommas(customPlayer.getMoney()))
+                    .replace("%chat_name%", customPlayer.getRank().chatName.replace("%player_name%", customPlayer.getNameToUse()))
+                    .replace("%rank_name%", customPlayer.getRank().displayName)
+                    .replace("%class_name%", customPlayer.getClasses().name)
+                    .replace("%used_name%", customPlayer.getRank().playerName.replace("%player_name%", customPlayer.getNameToUse()))
             ));
 
             Score score = objective.getScore(teamName);

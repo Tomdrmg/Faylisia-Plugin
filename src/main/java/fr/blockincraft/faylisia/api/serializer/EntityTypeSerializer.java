@@ -4,6 +4,10 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import fr.blockincraft.faylisia.entity.CustomEntityType;
+import fr.blockincraft.faylisia.entity.interaction.DamageableEntityModel;
+import fr.blockincraft.faylisia.entity.interaction.DifficultyEntityModel;
+import fr.blockincraft.faylisia.entity.interaction.HostileEntityModel;
+import fr.blockincraft.faylisia.entity.loot.LootableEntityModel;
 
 import java.io.IOException;
 
@@ -15,12 +19,24 @@ public class EntityTypeSerializer extends JsonSerializer<CustomEntityType> {
         gen.writeObjectField("id", value.getId());
         gen.writeObjectField("entityType", value.getEntityType());
         gen.writeObjectField("name", value.getName());
-        gen.writeObjectField("rank", value.getRank());
-        gen.writeObjectField("damage", value.getDamage());
-        gen.writeObjectField("maxHealth", value.getMaxHealth());
         gen.writeObjectField("region", value.getRegion());
         gen.writeObjectField("tickBeforeRespawn", value.getTickBeforeRespawn());
-        gen.writeObjectField("loots", value.getLoots());
+
+        if (value instanceof DamageableEntityModel damageable) {
+            gen.writeObjectField("maxHealth", damageable.getMaxHealth());
+        }
+
+        if (value instanceof DifficultyEntityModel difficulty) {
+            gen.writeObjectField("level", difficulty.getLevel());
+        }
+
+        if (value instanceof HostileEntityModel hostile) {
+            gen.writeObjectField("damage", hostile.getDamage());
+        }
+
+        if (value instanceof LootableEntityModel lootable) {
+            gen.writeObjectField("loots", lootable.getLoots());
+        }
 
         gen.writeEndObject();
     }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import fr.blockincraft.faylisia.items.CustomItemStack;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.io.IOException;
@@ -16,12 +18,19 @@ public class PlayerInventorySerializer extends JsonSerializer<PlayerInventory> {
 
     public void serialize(PlayerInventory value, JsonGenerator gen, boolean withObject) throws IOException {
         if (withObject) gen.writeStartObject();
-        if (withObject) gen.writeFieldName("inventory");
 
-        gen.writeStartArray();
+        HumanEntity holder = value.getHolder();
+        gen.writeObjectField("owner", holder == null ? null : holder.getUniqueId());
+
+        gen.writeArrayFieldStart("content");
 
         for (int i = 0; i < value.getSize(); i++) {
-            gen.writeObjectField(String.valueOf(i), CustomItemStack.fromItemStack(value.getItem(i)));
+            gen.writeStartObject();
+
+            gen.writeObjectField("slot", i);
+            gen.writeObjectField("item", CustomItemStack.fromItemStack(value.getItem(i)));
+
+            gen.writeEndObject();
         }
 
         gen.writeEndArray();

@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
@@ -48,6 +47,17 @@ public enum Ranks {
                     .set("minecraft.command.weather", PermissionState.FALSE)
                     .set("faylisia.command.discord", PermissionState.FALSE)
                     .set("faylisia.discord", PermissionState.FALSE)
+                    .build()
+    ),
+    CREATOR(2,
+            "Createur",
+            "&9Createur",
+            "&8%player_name%",
+            "&9[Createur] %player_name%",
+            '9',
+            '9',
+            new PermissionBuilder()
+                    .set("faylisia.items.give", PermissionState.DEV)
                     .build()
     ),
     BUILDER(2,

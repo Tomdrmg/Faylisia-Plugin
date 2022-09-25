@@ -25,9 +25,9 @@ public class ClassMenu extends ChestMenu {
     // Bind class to their slot
     static {
         slotPerClasses = new HashMap<>();
-        slotPerClasses.put(Classes.WIZARD, 20);
-        slotPerClasses.put(Classes.MURDER, 22);
-        slotPerClasses.put(Classes.SABREUR, 24);
+        slotPerClasses.put(Classes.SWORDSMAN, 20);
+        slotPerClasses.put(Classes.MAGE, 22);
+        slotPerClasses.put(Classes.TANK, 24);
     }
 
     private final ChestMenu from;
@@ -97,9 +97,9 @@ public class ClassMenu extends ChestMenu {
         // Set class items depending on current player class,
         // If class isn't human replace selected class by human
         slotPerClasses.forEach((classes, slot) -> {
-            this.replaceExistingItem(slot, classes == player.getClasses() ? Classes.HUMAN.getAsItemStack() :  classes.getAsItemStack(), e -> {
+            this.replaceExistingItem(slot, classes == player.getClasses() ? Classes.EXPLORER.getAsItemStack() :  classes.getAsItemStack(), e -> {
                 // On click change player class
-                player.setClasses(classes == player.getClasses() ? Classes.HUMAN : classes);
+                player.setClasses(classes == player.getClasses() ? Classes.EXPLORER : classes);
 
                 // Send confirmation message
                 Player pl = Bukkit.getPlayer(player.getPlayer());

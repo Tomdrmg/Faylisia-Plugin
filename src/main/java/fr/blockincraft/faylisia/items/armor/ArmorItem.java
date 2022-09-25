@@ -1,17 +1,16 @@
 package fr.blockincraft.faylisia.items.armor;
 
 import fr.blockincraft.faylisia.items.CustomItem;
-import fr.blockincraft.faylisia.items.StatsItem;
+import fr.blockincraft.faylisia.items.StatsItemModel;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class ArmorItem extends CustomItem implements StatsItem {
+public class ArmorItem extends CustomItem implements StatsItemModel {
     // All materials that are armor items
     private static final Material[] armorMaterials = new Material[]{
             Material.LEATHER_HELMET,

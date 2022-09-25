@@ -1,5 +1,7 @@
 package fr.blockincraft.faylisia;
 
+import fr.blockincraft.faylisia.blocks.BlockType;
+import fr.blockincraft.faylisia.blocks.CustomBlock;
 import fr.blockincraft.faylisia.core.dto.DiscordTicketDTO;
 import fr.blockincraft.faylisia.core.service.CustomPlayerService;
 import fr.blockincraft.faylisia.core.service.DiscordTicketService;
@@ -10,7 +12,7 @@ import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.map.Region;
-import fr.blockincraft.faylisia.map.Shape;
+import fr.blockincraft.faylisia.map.shapes.Shape;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Member;
@@ -27,7 +29,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.security.SecureRandom;
 import java.util.*;
@@ -57,6 +58,9 @@ public class Registry {
     private final List<CustomEntityType> entityTypes = new ArrayList<>();
     private final Map<Entity, CustomEntity> entitiesByEntity = new HashMap<>();
     private final List<CustomEntity> entities = new ArrayList<>();
+    private final Map<String, BlockType> blockTypesById = new HashMap<>();
+    private final List<BlockType> blockTypes = new ArrayList<>();
+    private final List<CustomBlock> blocks = new ArrayList<>();
     private final Map<String, Region> regionsById = new HashMap<>();
     private final List<Region> regions = new ArrayList<>();
     private Region defaultRegion = null;
@@ -487,6 +491,38 @@ public class Registry {
     }
 
     /**
+     * This method get all {@link Region} at a position
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     * @param world world of the position
+     * @return all {@link Region} of the position
+     */
+    public Region[] getRegionsAt(int x, int y, int z, @NotNull World world) {
+        Set<Region> regions = new HashSet<>();
+        regions.add(defaultRegion);
+
+        for (Region region : this.regions) {
+            if (region.isIn(x, y, z, world)) {
+                regions.add(region);
+            }
+        }
+
+        return regions.toArray(new Region[0]);
+    }
+
+    /**
+     * This method get all {@link Region} at a position
+     * @param location position
+     * @return all {@link Region} of the position / null if world is null
+     */
+    @Nullable
+    public Region[] getRegionsAt(@NotNull Location location) {
+        if (location.getWorld() == null) return null;
+        return getRegionsAt(location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getWorld());
+    }
+
+    /**
      * This method get {@link Region} at a position
      * @param x x coordinate
      * @param y y coordinate
@@ -502,14 +538,9 @@ public class Registry {
         outer: while (region.hasSubRegion()) {
             // For each subregion we check if they contain position
             for (Region subRegion : region.getSubRegion(false)) {
-                // To do that we try in all shapes
-                for (Shape shape : subRegion.getAreas()) {
-                    // Check if position is in
-                    if (shape.contain(x, y, z, world)) {
-                        // If yes restart the while with the subregion
-                        region = subRegion;
-                        continue outer;
-                    }
+                if (subRegion.isIn(x, y, z, world)) {
+                    region = subRegion;
+                    continue outer;
                 }
             }
 
@@ -544,7 +575,6 @@ public class Registry {
     public boolean isInRegion(@NotNull Region region, int x, int y, int z, @NotNull World world, boolean strict) {
         Region regionIn = getRegionAt(x, y, z, world);
         if (regionIn == region) return true;
-
         if (!strict) {
             List<Region> allRegion = region.getSubRegion(true);
 
@@ -571,5 +601,72 @@ public class Registry {
      */
     public void setDefaultRegion(@NotNull Region defaultRegion) {
         this.defaultRegion = defaultRegion;
+    }
+
+    /**
+     * @return all {@link BlockType}
+     */
+    @NotNull
+    public List<BlockType> getBlockTypes() {
+        return new ArrayList<>(blockTypes);
+    }
+
+    /**
+     * This method check if an item id is used or no
+     * @param id id to check
+     * @return if it was used
+     */
+    public boolean blockTypeIdUsed(@NotNull String id) {
+        return blockTypesById.containsKey(id);
+    }
+
+    /**
+     * @param id id of block type
+     * @return block type associated to the id
+     */
+    @NotNull
+    public BlockType getBlockTypeById(@NotNull String id) {
+        return blockTypesById.get(id);
+    }
+
+    /**
+     * This method register a {@link BlockType} in this registry and in database
+     * @param blockType {@link BlockType} to register
+     */
+    public void registerBlockType(@NotNull BlockType blockType) {
+        blockTypesById.put(blockType.getId(), blockType);
+        blockTypes.add(blockType);
+    }
+
+    /**
+     * Register a {@link CustomBlock}
+     * @param block {@link CustomBlock} to register
+     */
+    public void registerBlock(@NotNull CustomBlock block) {
+        for (BlockType blockType : block.getStates()) {
+            if (!blockType.isRegistered()) throw new RuntimeException("Block type " + blockType.getId() + " isn't registered!");
+        }
+
+        blocks.add(block);
+    }
+
+    @Nullable
+    public CustomBlock getBlockAt(@NotNull Location location) {
+        if (location.getWorld() == null) return null;
+
+        for (CustomBlock block : blocks) {
+            if (block.getX() == location.getBlockX() && block.getY() == location.getBlockY() && block.getZ() == location.getBlockZ() && location.getWorld().getUID().equals(block.getWorld())) {
+                return block;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return all blocks
+     */
+    public List<CustomBlock> getBlocks() {
+        return new ArrayList<>(blocks);
     }
 }

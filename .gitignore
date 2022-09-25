@@ -1,6 +1,5 @@
 # User-specific stuff
 .idea/
-src/main/java/fr/Test.java
 src/main/java/fr/blockincraft/faylisia/configurable/DiscordData.java
 src/main/resources/hibernate.cfg.xml
 test

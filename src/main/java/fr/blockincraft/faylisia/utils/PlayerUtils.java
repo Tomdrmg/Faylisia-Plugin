@@ -3,16 +3,11 @@ package fr.blockincraft.faylisia.utils;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.injector.PacketFilterManager;
+import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.entity.CustomEntity;
-import fr.blockincraft.faylisia.items.CustomItem;
-import fr.blockincraft.faylisia.items.armor.ArmorItem;
-import fr.blockincraft.faylisia.items.armor.ArmorSet;
-import fr.blockincraft.faylisia.player.Stats;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -25,7 +20,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -175,6 +169,28 @@ public class PlayerUtils {
             }, 10);
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Send a packet to the player to change the current block state to another one (animation view)
+     * @param player player which will receive packet
+     * @param x x coordinate of block
+     * @param y x coordinate of block
+     * @param z x coordinate of block
+     * @param state new value (0 - 9 for animation and 10 or other to remove animation)
+     */
+    public static void setBlockBreakingState(Player player, int x, int y, int z, int state) {
+        PacketContainer packet = Faylisia.getInstance().getProtocolManager().createPacket(PacketType.Play.Server.BLOCK_BREAK_ANIMATION);
+
+        packet.getIntegers().write(0, ((x & 0xFFF) << 20) | ((z & 0xFFF) << 8) | (y & 0xFF));
+        packet.getIntegers().write(1, state);
+        packet.getBlockPositionModifier().write(0, new BlockPosition(x, y, z));
+
+        try {
+            Faylisia.getInstance().getProtocolManager().sendServerPacket(player, packet);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

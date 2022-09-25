@@ -2,7 +2,6 @@ package fr.blockincraft.faylisia.player.permission;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 /**

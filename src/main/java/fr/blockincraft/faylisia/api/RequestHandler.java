@@ -1,27 +1,38 @@
 package fr.blockincraft.faylisia.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.api.deserializer.CustomItemStackDeserializer;
 import fr.blockincraft.faylisia.api.objects.Response;
 import fr.blockincraft.faylisia.api.objects.State;
+import fr.blockincraft.faylisia.api.serializer.PlayerInventorySerializer;
+import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.utils.FileUtils;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.bukkit.Bukkit;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
 
 import java.io.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 public class RequestHandler extends HandlerWrapper {
+    private static final Registry registry = Faylisia.getInstance().getRegistry();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
         ServletOutputStream outputStream = response.getOutputStream();
         String uri = request.getRequestURI();
 
@@ -36,6 +47,23 @@ public class RequestHandler extends HandlerWrapper {
 
             response.setStatus(HttpServletResponse.SC_OK);
             outputStream.flush();
+            return;
+        }
+
+        if (uri.startsWith("/player/") && uri.length() > 8) {
+            returnPlayer(outputStream, response, uri.substring(8));
+            return;
+        }
+        if (uri.startsWith("/uuid/") && uri.length() > 6) {
+            returnUuidOf(outputStream, response, uri.substring(6));
+            return;
+        }
+        if (uri.startsWith("/inventory/") && uri.length() > 11) {
+            returnInventory(outputStream, response, uri.substring(11));
+            return;
+        }
+        if (uri.equals("/utils/build_display")) {
+            returnBuiltDisplay(outputStream, request, response);
             return;
         }
         if (uri.equals("/items")) {
@@ -64,6 +92,126 @@ public class RequestHandler extends HandlerWrapper {
         outputStream.flush();
     }
 
+    public void returnPlayer(ServletOutputStream outputStream, HttpServletResponse response, String uuidAsString) throws IOException {
+        try {
+            UUID uuid = UUID.fromString(uuidAsString);
+
+            CustomPlayerDTO player = registry.getPlayer(uuid);
+
+            if (player == null) {
+                String json = objectMapper.writeValueAsString(new Response("Player don't exist or never connected!"));
+
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                outputStream.println(json);
+                outputStream.flush();
+                return;
+            }
+
+            String json = objectMapper.writeValueAsString(new Response("player", player));
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            outputStream.println(json);
+            outputStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
+            outputStream.flush();
+        }
+    }
+
+    public void returnUuidOf(ServletOutputStream outputStream, HttpServletResponse response, String name) throws IOException {
+        UUID uuid = null;
+
+        for (Map.Entry<UUID, CustomPlayerDTO> entry : registry.getPlayers().entrySet()) {
+            if (entry.getValue().getLastName().equalsIgnoreCase(name)) {
+                uuid = entry.getKey();
+            }
+        }
+
+        try {
+            String json = objectMapper.writeValueAsString(new Response("UUID", uuid));
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            outputStream.println(json);
+            outputStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
+            outputStream.flush();
+        }
+    }
+
+    public void returnInventory(ServletOutputStream outputStream, HttpServletResponse response, String uuidAsString) throws IOException {
+        try {
+            UUID uuid = UUID.fromString(uuidAsString);
+
+            CustomPlayerDTO player = registry.getPlayer(uuid);
+
+            if (player == null || player.getLastInventoryAsJson() == null || player.getLastInventoryAsJson().isEmpty()) {
+                String json = objectMapper.writeValueAsString(new Response("Player don't or never connected!"));
+
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                outputStream.println(json);
+                outputStream.flush();
+                return;
+            }
+
+            String json = "{\"success\":true,\"inventory\":" + player.getLastInventoryAsJson() + "}";
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            outputStream.println(json);
+            outputStream.flush();
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
+            outputStream.flush();
+        }
+    }
+
+    public void returnBuiltDisplay(ServletOutputStream outputStream, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            BufferedReader reader = request.getReader();
+
+            String line;
+            StringBuilder sb = new StringBuilder();
+
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            SimpleModule module = new SimpleModule();
+            module.addDeserializer(CustomItemStack.class, new CustomItemStackDeserializer());
+            mapper.registerModule(module);
+
+            CustomItemStack customItemStack = mapper.readValue(sb.toString(), CustomItemStack.class);
+
+            if (customItemStack == null) {
+                String json = objectMapper.writeValueAsString(new Response("Invalid custom item stack data send"));
+
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                outputStream.println(json);
+                outputStream.flush();
+                return;
+            }
+
+            ItemStack model = customItemStack.getAsItemStack();
+
+            String json = objectMapper.writeValueAsString(new Response("display", new ItemDisplayData(model)));
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            outputStream.println(json);
+            outputStream.flush();
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
+            outputStream.flush();
+        }
+    }
+
     public void returnItems(ServletOutputStream outputStream, HttpServletResponse response) throws IOException {
         Registry registry = Faylisia.getInstance().getRegistry();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -75,7 +223,6 @@ public class RequestHandler extends HandlerWrapper {
             outputStream.println(json);
             outputStream.flush();
         } catch (Exception e) {
-            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
             outputStream.flush();
@@ -93,7 +240,6 @@ public class RequestHandler extends HandlerWrapper {
             outputStream.println(json);
             outputStream.flush();
         } catch (Exception e) {
-            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
             outputStream.flush();
@@ -111,10 +257,36 @@ public class RequestHandler extends HandlerWrapper {
             outputStream.println(json);
             outputStream.flush();
         } catch (Exception e) {
-            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             outputStream.println(objectMapper.writeValueAsString(new Response("Internal java error: " + e.getMessage())));
             outputStream.flush();
+        }
+    }
+
+    public static class ItemDisplayData {
+        private final String name;
+        private final String[] lore;
+
+        public ItemDisplayData(ItemStack itemStack) {
+            ItemMeta meta = itemStack.getItemMeta();
+
+            if (meta != null) {
+                this.name = meta.getDisplayName();
+
+                List<String> lore = meta.getLore();
+                this.lore = lore == null ? new String[0] : lore.toArray(new String[0]);
+            } else {
+                this.name = itemStack.getType().name().toLowerCase(Locale.ROOT);
+                this.lore = new String[0];
+            }
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String[] getLore() {
+            return lore;
         }
     }
 }

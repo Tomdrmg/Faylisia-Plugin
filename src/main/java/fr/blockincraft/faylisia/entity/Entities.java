@@ -1,6 +1,10 @@
 package fr.blockincraft.faylisia.entity;
 
+import fr.blockincraft.faylisia.entity.interaction.HostileMobEntityType;
+import fr.blockincraft.faylisia.entity.loot.Loot;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.Items;
+import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.map.Regions;
 import org.bukkit.entity.EntityType;
 
@@ -13,19 +17,22 @@ import java.util.Map;
  * We also register and set their locations here
  */
 public class Entities {
-    public static final CustomEntityType coolZombie = new CustomEntityType(EntityType.ZOMBIE, "cool_zombie", 2000, 20)
-            .setName("&dCool Zombie")
-            .setRank(EntitiesRanks.D)
-            .setRegion(Regions.SPAWN)
-            .setTickBeforeRespawn(600)
+    public static final HostileMobEntityType coolZombie = (HostileMobEntityType) new HostileMobEntityType(EntityType.ZOMBIE, "cool_zombie")
+            .setDamage(20)
+            .setDamageType(DamageType.MELEE_DAMAGE)
+            .setLevel(30)
+            .setMaxHealth(2000)
             .setLoots(
-                    new Loot(1, Items.coolDiamond, 1, 1, () -> {
+                    new Loot(1, new CustomItemStack(Items.coolDiamond, 1), 1, 1, () -> {
                         return new SecureRandom().nextInt(2) + 1;
-                    }),
-                    new Loot(1, Items.coolDiamondBlock, 1, 18, () -> {
+                    }, Loot.LootType.MOB),
+                    new Loot(1, new CustomItemStack(Items.coolDiamond, 1), 1, 18, () -> {
                         return 1;
-                    })
-            );
+                    }, Loot.LootType.MOB)
+            )
+            .setName("&dCool Zombie")
+            .setRegion(Regions.CITE)
+            .setTickBeforeRespawn(200);
 
     // Register all entities
     static {

@@ -58,6 +58,7 @@ public class HandlersUtils {
         List<Handlers> armorSetHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSetHandlers()));
         List<Handlers> armorSlotHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSlotHandlers()));
         List<Handlers> othersHandlers = new ArrayList<>(Arrays.asList(customPlayer.getOthersHandlers()));
+        List<Handlers> miscHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMiscHandlers()));
 
         // Make final params
         Object[] finalParams = new Object[params.length + 2];
@@ -100,6 +101,15 @@ public class HandlersUtils {
         finalParams[finalParams.length - 2] = false;
         finalParams[finalParams.length - 1] = false;
         for (Handlers handler : othersHandlers) {
+            try {
+                method.invoke(handler, finalParams);
+            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
+            }
+        }
+
+        for (Handlers handler : miscHandlers) {
             try {
                 method.invoke(handler, finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
@@ -161,6 +171,7 @@ public class HandlersUtils {
         List<Handlers> armorSetHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSetHandlers()));
         List<Handlers> armorSlotHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSlotHandlers()));
         List<Handlers> othersHandlers = new ArrayList<>(Arrays.asList(customPlayer.getOthersHandlers()));
+        List<Handlers> miscHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMiscHandlers()));
 
         // Make final params
         Object[] finalParams = new Object[params.length + 3];
@@ -209,6 +220,17 @@ public class HandlersUtils {
         finalParams[finalParams.length - 2] = false;
         finalParams[finalParams.length - 1] = false;
         for (Handlers handler : othersHandlers) {
+            finalParams[finalParams.length - 3] = value;
+
+            try {
+                value = (T) method.invoke(handler, finalParams);
+            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
+            }
+        }
+
+        for (Handlers handler : miscHandlers) {
             finalParams[finalParams.length - 3] = value;
 
             try {

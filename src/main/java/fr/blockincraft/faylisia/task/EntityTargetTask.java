@@ -32,7 +32,7 @@ public class EntityTargetTask extends BukkitRunnable {
         // Retrieve all custom entities
         for (CustomEntity entity : registry.getEntities()) {
             // Remove them if they are removed
-            if (entity.getEntity() == null || !entity.getEntity().isValid()) {
+            if (!entity.getEntity().isValid()) {
                 registry.removeEntity(entity);
             } else {
                 if (entity.getEntity() instanceof Mob mob) {

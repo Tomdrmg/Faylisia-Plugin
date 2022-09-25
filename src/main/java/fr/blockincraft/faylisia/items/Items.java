@@ -4,6 +4,7 @@ import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.entity.CustomEntity;
+import fr.blockincraft.faylisia.entity.CustomLivingEntity;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
 import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
@@ -11,19 +12,25 @@ import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.recipes.CraftingRecipe;
+import fr.blockincraft.faylisia.items.specificitems.StatsLacrymaItem;
+import fr.blockincraft.faylisia.items.tools.ToolItem;
+import fr.blockincraft.faylisia.items.tools.ToolType;
 import fr.blockincraft.faylisia.items.weapons.WeaponAbilityItem;
 import fr.blockincraft.faylisia.items.weapons.WeaponItem;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.AbilitiesUtils;
 import fr.blockincraft.faylisia.utils.HandlersUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BlockIterator;
+import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class contain all items, armor set and recipes
@@ -145,7 +152,7 @@ public class Items {
             .setDisenchantable(true)
             .setCategory(Categories.COOL_DIAMOND)
             .setRarity(Rarity.DEUS);
-    public static final WeaponAbilityItem testItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "test_item")
+    public static final WeaponAbilityItem boomItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "boom_item")
             .setAbilityName("Boom")
             .setAbilityDesc("&7Inflige &c10x &7les dégats aux monstres", "&7Dans un rayon de 10 blocs")
             .setAbility((player, clickedBlock, hand) -> {
@@ -153,22 +160,24 @@ public class Items {
 
                 long damage = (long) (customPlayer.getDamage(false) * 10);
 
-                AbilitiesUtils.getEntitiesInRadius(player.getLocation(), 10.0).forEach(customEntity -> {
+                AbilitiesUtils.getLivingEntitiesInRadius(player.getLocation(), 10.0).forEach(customEntity -> {
                     long damageIn = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
                             new HandlersUtils.Parameter(player, Player.class),
                             new HandlersUtils.Parameter(customEntity, CustomEntity.class),
                             new HandlersUtils.Parameter(DamageType.MAGIC_DAMAGE, DamageType.class)
                     });
 
-                    PlayerUtils.spawnDamageIndicator(damage, false, player, customEntity.getEntity().getLocation());
-                    customEntity.takeDamage(damage, player);
+                    PlayerUtils.spawnDamageIndicator(damageIn, false, player, customEntity.getEntity().getLocation());
+                    customEntity.takeDamage(damageIn, player);
                 });
+
+                return false;
             })
             .setCooldown(5)
             .setUseCost(20)
             .setDamage(20)
             .setStat(Stats.MAGICAL_RESERVE, 100)
-            .setName("Test Item")
+            .setName("Boom Item")
             .setRarity(Rarity.COSMIC)
             .setCategory(Categories.COOL_DIAMOND);
     public static final WeaponAbilityItem dagger = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "dagger")
@@ -179,8 +188,10 @@ public class Items {
 
                 long damage = (long) customPlayer.getDamage(true);
 
-                List<CustomEntity> entities = AbilitiesUtils.getEntitiesInRadius(player.getLocation(), 50.0);
+                List<CustomLivingEntity> entities = new ArrayList<>(AbilitiesUtils.getLivingEntitiesInRadius(player.getLocation(), 50.0));
                 Collections.shuffle(entities);
+
+                if (entities.size() == 0) return true;
 
                 for (int i = 0; i < 3 && i < entities.size(); i++) {
                     int finalI = i;
@@ -192,10 +203,14 @@ public class Items {
                         });
 
                         player.teleport(entities.get(finalI).getEntity().getLocation());
-                        PlayerUtils.spawnDamageIndicator(damageIn, true, player, entities.get(finalI).getEntity().getLocation());
-                        entities.get(finalI).takeDamage(damageIn, player);
+                        for (int j = 0; j < 2; j++) {
+                            PlayerUtils.spawnDamageIndicator(damageIn, true, player, entities.get(finalI).getEntity().getLocation());
+                            entities.get(finalI).takeDamage(damageIn, player);
+                        }
                     }, i * 3L);
                 }
+
+                return false;
             })
             .setCooldown(30)
             .setUseCost(100)
@@ -207,9 +222,142 @@ public class Items {
             .setName("Dague")
             .setRarity(Rarity.COSMIC)
             .setCategory(Categories.COOL_DIAMOND);
-    public static final EnchantmentLacrymaItem ENCHANTMENT_LACRYMA_ITEM = (EnchantmentLacrymaItem) new EnchantmentLacrymaItem(Material.ENCHANTED_BOOK, "enchantment_lacryma")
+    public static final EnchantmentLacrymaItem enchantmentLacryma = (EnchantmentLacrymaItem) new EnchantmentLacrymaItem(Material.ENCHANTED_BOOK, "enchantment_lacryma")
             .setName("Lacryma D'enchantement")
             .setLore("&bUne lacryma magique qui peut", "&bstocker un ou plusieurs", "&benchantements")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.RARE);
+    public static final StatsLacrymaItem smallEthernanosLacryma = (StatsLacrymaItem) new StatsLacrymaItem(Material.LAVA_BUCKET, "small_ethernanos_lacryma")
+            .setStat(Stats.MAGICAL_RESERVE, 100.0)
+            .setName("Petite Lacryma D'éthernanos")
+            .setLore("&bUne lacryma magique qui vous", "&bpermet d'augmenter votre", "&bréserve d'éthernanos")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.EPIC);
+    public static final StatsLacrymaItem mediumEthernanosLacryma = (StatsLacrymaItem) new StatsLacrymaItem(Material.LAVA_BUCKET, "medium_ethernanos_lacryma")
+            .setStat(Stats.MAGICAL_RESERVE, 1000.0)
+            .setName("Lacryma D'éthernanos Moyenne")
+            .setLore("&bUne lacryma magique qui vous", "&bpermet d'augmenter votre", "&bréserve d'éthernanos")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.EPIC);
+    public static final StatsLacrymaItem bigEthernanosLacryma = (StatsLacrymaItem) new StatsLacrymaItem(Material.LAVA_BUCKET, "big_ethernanos_lacryma")
+            .setStat(Stats.MAGICAL_RESERVE, 10000.0)
+            .setName("Grande Lacryma D'éthernanos")
+            .setLore("&bUne lacryma magique qui vous", "&bpermet d'augmenter votre", "&bréserve d'éthernanos")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.LEGENDARY);
+    public static final WeaponAbilityItem piouPiouLaser = (WeaponAbilityItem) new WeaponAbilityItem(Material.DIAMOND_SHOVEL, "piou_piou_laser")
+            .setAbilityName("Laser")
+            .setUseCost(50)
+            .setAbilityDesc("&7Tire un laser qui inflige", "&7des dégâts au entités")
+            .setAbility((player, clickedBlock, hand) -> {
+                CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
+
+                long damage = (long) customPlayer.getDamage(false);
+                double distance = 20;
+
+                Location viewLocation = player.getLocation().getDirection().toLocation(player.getWorld());
+                Set<CustomLivingEntity> entities = new HashSet<>();
+
+                for (double i = 0; i < distance; i += 0.5) {
+                    Location pointLocation = viewLocation.clone().multiply(i).add(player.getLocation()).add(0, 1.6, 0);
+                    double x = pointLocation.getX();
+                    double y = pointLocation.getY();
+                    double z = pointLocation.getZ();
+
+                    player.spawnParticle(Particle.REDSTONE, pointLocation, 0, 0, 0, 0, 1, new Particle.DustOptions(Color.fromRGB(0x4287f5), 2F));
+                    BoundingBox collision = new BoundingBox(x - 0.25, y - 0.25, z - 0.25, x + 0.25, y + 0.25, z + 0.25);
+
+                    registry.getEntities().forEach(customEntity -> {
+                        if (customEntity instanceof CustomLivingEntity && customEntity.getEntity().isValid() && customEntity.getEntity().getBoundingBox().overlaps(collision)) {
+                            entities.add((CustomLivingEntity) customEntity);
+                        }
+                    });
+                }
+
+                for (CustomLivingEntity entity : entities) {
+                    long damageIn = HandlersUtils.getValueWithHandlers(customPlayer, "onDamage", damage, long.class, new HandlersUtils.Parameter[]{
+                            new HandlersUtils.Parameter(player, Player.class),
+                            new HandlersUtils.Parameter(entity, CustomEntity.class),
+                            new HandlersUtils.Parameter(DamageType.MAGIC_DAMAGE, DamageType.class)
+                    });
+
+                    if (entity.getEntity() instanceof LivingEntity living) {
+                        living.damage(0);
+                    }
+                    PlayerUtils.spawnDamageIndicator(damageIn, false, player, entity.getEntity().getLocation());
+                    entity.takeDamage(damageIn, player);
+                }
+
+                return false;
+            })
+            .setDamage(520)
+            .setStat(Stats.STRENGTH, 165)
+            .setName("Piou Piou Laser")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.LEGENDARY);
+    public static final WeaponAbilityItem aspectOfTheEnd = (WeaponAbilityItem) new WeaponAbilityItem(Material.GOLDEN_SWORD, "aspect_of_the_end")
+            .setAbilityName("Téléportation instantanée")
+            .setUseCost(30)
+            .setAbilityDesc("&7Vous téléporte à 12 blocs")
+            .setAbility((player, clickedBlock, hand) -> {
+                BlockIterator iterator = new BlockIterator(player, 12);
+
+                Block previous = null;
+                while (iterator.hasNext()) {
+                    Block block = iterator.next();
+
+                    if (block.getType() != Material.AIR || block.getRelative(BlockFace.UP).getType() != Material.AIR) {
+                        if (previous == null) return true;
+                        Location location = previous.getLocation().clone();
+                        location.setDirection(player.getLocation().getDirection());
+                        player.teleport(location.clone().add(0.5, 0, 0.5));
+                        break;
+                    } else if (!iterator.hasNext()) {
+                        Location location = block.getLocation().clone();
+                        location.setDirection(player.getLocation().getDirection());
+                        player.teleport(location.clone().add(0.5, 0, 0.5));
+                    }
+
+                    previous = block;
+                }
+
+                return false;
+            })
+            .setDamage(50)
+            .setName("Aspect of the end")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.RARE);
+    public static final ToolItem testTool1 = (ToolItem) new ToolItem(Material.DIAMOND_AXE, "test_tool_1")
+            .setToolTypes(new ToolType[]{ToolType.FORAGING, ToolType.MINING, ToolType.FARMING})
+            .setBreakingLevel(1)
+            .setName("Outil 1")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.RARE);
+    public static final ToolItem testTool2 = (ToolItem) new ToolItem(Material.GOLDEN_AXE, "test_tool_2")
+            .setToolTypes(new ToolType[]{ToolType.FORAGING})
+            .setBreakingLevel(0)
+            .setName("Outil 2")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.RARE);
+    public static final ToolItem testTool3 = (ToolItem) new ToolItem(Material.IRON_AXE, "test_tool_3")
+            .setToolTypes(new ToolType[]{})
+            .setBreakingLevel(1)
+            .setName("Outil 3")
+            .setEnchantable(false)
+            .setDisenchantable(false)
+            .setRarity(Rarity.RARE);
+    public static final ToolItem testTool4 = (ToolItem) new ToolItem(Material.STONE_AXE, "test_tool_4")
+            .setToolTypes(new ToolType[]{})
+            .setBreakingLevel(0)
+            .setName("Outil 4")
             .setEnchantable(false)
             .setDisenchantable(false)
             .setRarity(Rarity.RARE);
@@ -249,7 +397,7 @@ public class Items {
                 CraftingRecipe.Direction.HORIZONTAL
         ));
 
-        testItem.setRecipe(new CraftingRecipe(1,
+        boomItem.setRecipe(new CraftingRecipe(1,
                 new CustomItemStack(coolDiamondBlock, 1),
                 new CustomItemStack(coolDiamondSword, 1),
                 CraftingRecipe.Direction.VERTICAL
@@ -259,11 +407,25 @@ public class Items {
                 new CustomItemStack(coolDiamondBlock, 1),
                 CraftingRecipe.Direction.VERTICAL
         ));
-
-        ENCHANTMENT_LACRYMA_ITEM.setRecipe(new CraftingRecipe(1,
+        enchantmentLacryma.setRecipe(new CraftingRecipe(1,
                 null, new CustomItemStack(coolDiamond, 1), null,
                 new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
                 null, new CustomItemStack(coolDiamond, 1), null));
+        smallEthernanosLacryma.setRecipe(new CraftingRecipe(1,
+                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
+                null, null, null,
+                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1)
+        ));
+        mediumEthernanosLacryma.setRecipe(new CraftingRecipe(1,
+                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1),
+                new CustomItemStack(coolDiamond, 1), new CustomItemStack(smallEthernanosLacryma, 2), new CustomItemStack(coolDiamond, 1),
+                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1)
+        ));
+        bigEthernanosLacryma.setRecipe(new CraftingRecipe(1,
+                new CustomItemStack(coolDiamondBlock, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamondBlock, 1),
+                new CustomItemStack(coolDiamond, 1), new CustomItemStack(mediumEthernanosLacryma, 2), new CustomItemStack(coolDiamond, 1),
+                new CustomItemStack(coolDiamondBlock, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamondBlock, 1)
+        ));
     }
 
     // Register items here
@@ -278,9 +440,20 @@ public class Items {
         coolDiamondLeggings.register();
         coolDiamondBoots.register();
 
-        testItem.register();
+        boomItem.register();
         dagger.register();
 
-        ENCHANTMENT_LACRYMA_ITEM.register();
+        enchantmentLacryma.register();
+        smallEthernanosLacryma.register();
+        mediumEthernanosLacryma.register();
+        bigEthernanosLacryma.register();
+
+        piouPiouLaser.register();
+        aspectOfTheEnd.register();
+
+        testTool1.register();
+        testTool2.register();
+        testTool3.register();
+        testTool4.register();
     }
 }

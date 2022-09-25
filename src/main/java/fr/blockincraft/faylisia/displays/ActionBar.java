@@ -9,6 +9,7 @@ import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.TextUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -30,15 +31,15 @@ public class ActionBar {
 
         WrappedChatComponent chat =  WrappedChatComponent.fromLegacyText(ColorsUtils.translateAll(format
                 .replace("%health_color%", "&" + Stats.HEALTH.color)
-                .replace("%health%", valueWithCommas(customPlayer.getHealth()))
-                .replace("%max_health%", valueWithCommas((long) Math.floor(customPlayer.getStat(Stats.HEALTH))))
+                .replace("%health%", TextUtils.valueWithCommas(customPlayer.getHealth()))
+                .replace("%max_health%", TextUtils.valueWithCommas((long) Math.floor(customPlayer.getStat(Stats.HEALTH))))
                 .replace("%health_icon%", String.valueOf(Stats.HEALTH.bigIcon))
                 .replace("%defense_color%", "&" + Stats.DEFENSE.color)
-                .replace("%defense%", customPlayer.getStat(Stats.DEFENSE) < 10.0 ? "\\_" + valueWithCommas((long) customPlayer.getStat(Stats.DEFENSE)) : valueWithCommas((long) customPlayer.getStat(Stats.DEFENSE)))
+                .replace("%defense%", customPlayer.getStat(Stats.DEFENSE) < 10.0 ? "\\_" + TextUtils.valueWithCommas((long) customPlayer.getStat(Stats.DEFENSE)) : TextUtils.valueWithCommas((long) customPlayer.getStat(Stats.DEFENSE)))
                 .replace("%defense_icon%", String.valueOf(Stats.DEFENSE.bigIcon))
                 .replace("%magical_reserve_color%", "&" + Stats.MAGICAL_RESERVE.color)
-                .replace("%magical_reserve%", valueWithCommas(customPlayer.getMagicalReserve()))
-                .replace("%max_magical_reserve%", valueWithCommas((long) Math.floor(customPlayer.getStat(Stats.MAGICAL_RESERVE))))
+                .replace("%magical_reserve%", TextUtils.valueWithCommas(customPlayer.getMagicalReserve()))
+                .replace("%max_magical_reserve%", TextUtils.valueWithCommas((long) Math.floor(customPlayer.getStat(Stats.MAGICAL_RESERVE))))
                 .replace("%magical_reserve_icon%", String.valueOf(Stats.MAGICAL_RESERVE.bigIcon))
         ));
 
@@ -49,27 +50,5 @@ public class ActionBar {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Transform a long like 10000 to a String with commas like "10,000"
-     * @param value long to transform
-     * @return String with commas
-     */
-    @NotNull
-    private static String valueWithCommas(long value) {
-        char[] valueAsChars = String.valueOf(value).toCharArray();
-
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < valueAsChars.length; i++) {
-            sb.append(valueAsChars[valueAsChars.length - i - 1]);
-            if ((i + 1) % 3 == 0 && i != valueAsChars.length - 1) {
-                sb.append(",");
-            }
-        }
-
-        sb.reverse();
-        return sb.toString();
     }
 }

@@ -107,7 +107,7 @@ public class Tab {
         wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", classes.skin.value, classes.skin.signature));
 
         PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, player.getPing(), EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromLegacyText(
-                ColorsUtils.translateAll(customPlayer.getRank().playerName.replace("%player_name%", customPlayer.getName().replace(" ", "\\_")))
+                ColorsUtils.translateAll(customPlayer.getRank().playerName.replace("%player_name%", customPlayer.getNameToUse().replace(" ", "\\_")))
         ));
 
         return playerInfoData;
@@ -137,6 +137,59 @@ public class Tab {
             } else {
                 players.add(getPlayerEmpty(i + 1 + i / 19));
             }
+        }
+
+        packet.getPlayerInfoDataLists().write(0, players);
+        packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.ADD_PLAYER);
+
+        try {
+            protocolManager.sendServerPacket(player, packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Update player name and vanish
+     * @param player player to update her tab
+     */
+    public static void refreshRealsPlayersInTabFor(@NotNull Player player) {
+        List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
+
+        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
+        List<PlayerInfoData> players = new ArrayList<>();
+
+        for (Player pl : onlinePlayers) {
+            CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(pl.getUniqueId());
+
+            WrappedGameProfile gameProfile = new WrappedGameProfile(pl.getUniqueId(), customPlayer.getNameToUse());
+            PlayerInfoData playerInfoData = new PlayerInfoData(gameProfile, pl.getPing(), EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromLegacyText(
+                    ColorsUtils.translateAll(customPlayer.getRank().playerName.replace("%player_name%", customPlayer.getNameToUse()))
+            ));
+
+            players.add(playerInfoData);
+        }
+
+        packet.getPlayerInfoDataLists().write(0, players);
+        packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.REMOVE_PLAYER);
+
+        try {
+            protocolManager.sendServerPacket(player, packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        players = new ArrayList<>();
+
+        for (Player pl : onlinePlayers) {
+            CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(pl.getUniqueId());
+
+            WrappedGameProfile gameProfile = new WrappedGameProfile(pl.getUniqueId(), customPlayer.getNameToUse());
+            PlayerInfoData playerInfoData = new PlayerInfoData(gameProfile, pl.getPing(), EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromLegacyText(
+                    ColorsUtils.translateAll(customPlayer.getRank().playerName.replace("%player_name%", customPlayer.getNameToUse()))
+            ));
+
+            players.add(playerInfoData);
         }
 
         packet.getPlayerInfoDataLists().write(0, players);
@@ -398,12 +451,12 @@ public class Tab {
         players.add(getRankElement(42, customPlayer.getRank()));
         players.add(getClassesElement(43, customPlayer.getClasses()));
 
-        players.add(getDamageElement(46, customPlayer.getRawDamage()));
+        players.add(getDamageElement(45, customPlayer.getRawDamage()));
 
         List<Stats> stats = Arrays.stream(Stats.values()).sorted((o1, o2) -> o1.index - o2.index).toList();
 
         for (int i = 0; i < stats.size(); i++) {
-            int slot = 47 + i;
+            int slot = 46 + i;
             Stats stat = stats.get(i);
             long value = Math.round(customPlayer.getStat(stat));
 
@@ -537,7 +590,7 @@ public class Tab {
                     new AnimatedText(""),
                     new AnimatedText("&8Vos ping: &7%ping%"),
                     new LinearAnimation('f', 5, LinearAnimation.StartPosition.SIDE)
-                            .addElement('d', "Site: faylis.xyz")
+                            .addElement('d', "Site: faylisia.fr")
                             .build(),
                     new AnimatedText("")
             };

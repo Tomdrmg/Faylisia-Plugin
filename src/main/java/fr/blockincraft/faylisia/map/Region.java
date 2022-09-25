@@ -2,26 +2,31 @@ package fr.blockincraft.faylisia.map;
 
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.map.shapes.Shape;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
  * A region represent one or multiple areas represented by {@link Shape} in the world where a player can be <br/>
  * Setters can only be used before the register was register with method {@link Region#register()}, else a {@link ChangeRegisteredRegion} was thrown
  */
-public class Region {
-    private static final Pattern idPattern = Pattern.compile("[a-z1-9_-]+");
+public abstract class Region {
+    private static final Pattern idPattern = Pattern.compile("[a-z\\d_-]+");
     private static final Registry registry = Faylisia.getInstance().getRegistry();
-    public static final char regionChar = '\uE022';
 
     private final String id;
-    private final List<Shape> areas = new ArrayList<>();
     private final List<Region> subRegion = new ArrayList<>();
     private String name;
     private boolean registered;
     private Region parent;
+    private EnterRegionAction enterAction = (player, previousRegions, newRegions) -> true;
+    private LeaveRegionAction leaveAction = (player, previousRegions, newRegions) -> true;
 
     /**
      * @param id region id
@@ -44,25 +49,54 @@ public class Region {
         return registered;
     }
 
+    public EnterRegionAction getEnterAction() {
+        return enterAction;
+    }
+
+    public LeaveRegionAction getLeaveAction() {
+        return leaveAction;
+    }
+
     /**
-     * @return A copy of the list with all areas
+     * Check if position is in a region
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     * @param world world
+     * @return if position is in
      */
-    public List<Shape> getAreas() {
-        return new ArrayList<>(areas);
-    }
-
-    public void setName(String name) {
-        if (registered) throw new ChangeRegisteredRegion();
-        this.name = name;
-    }
+    public abstract boolean isIn(int x, int y, int z, World world);
 
     /**
-     * @param shape area to add
+     * Change name of the region
+     * @param name new value
      * @return this instance
      */
-    public Region addArea(Shape shape) {
+    public Region setName(String name) {
         if (registered) throw new ChangeRegisteredRegion();
-        this.areas.add(shape);
+        this.name = name;
+        return this;
+    }
+
+    /**
+     * Change enter action of the region
+     * @param enterAction new value
+     * @return this instance
+     */
+    public Region setEnterAction(EnterRegionAction enterAction) {
+        if (registered) throw new ChangeRegisteredRegion();
+        this.enterAction = enterAction;
+        return this;
+    }
+
+    /**
+     * Change leave action of the region
+     * @param leaveAction new value
+     * @return this instance
+     */
+    public Region setLeaveAction(LeaveRegionAction leaveAction) {
+        if (registered) throw new ChangeRegisteredRegion();
+        this.leaveAction = leaveAction;
         return this;
     }
 
@@ -132,7 +166,7 @@ public class Region {
     /**
      * Threw when use setters of a {@link Region#registered} {@link Region}
      */
-    private static class ChangeRegisteredRegion extends RuntimeException {
+    protected static class ChangeRegisteredRegion extends RuntimeException {
         public ChangeRegisteredRegion() {
             super("You tried to edit a registered region!");
         }
@@ -145,5 +179,29 @@ public class Region {
         public InvalidBuildException(String cause) {
             super("Invalid region build: " + cause);
         }
+    }
+
+    @FunctionalInterface
+    public interface EnterRegionAction {
+        /**
+         * Action to do when a player enter the region
+         * @param player player which enter
+         * @param previousRegions regions at previous player location
+         * @param newRegions regions at new player location
+         * @return if player can enter
+         */
+        boolean onEnter(@NotNull Player player, @NotNull Set<Region> previousRegions, @NotNull Set<Region> newRegions);
+    }
+
+    @FunctionalInterface
+    public interface LeaveRegionAction {
+        /**
+         * Action to do when a player enter the region
+         * @param player player which enter
+         * @param previousRegions regions at previous player location
+         * @param newRegions regions at new player location
+         * @return if player can leave
+         */
+        boolean onLeave(@NotNull Player player, @NotNull Set<Region> previousRegions, @NotNull Set<Region> newRegions);
     }
 }

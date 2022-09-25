@@ -11,8 +11,8 @@ public enum Messages {
     BAR("bar", "&8&l&m---------------------------------------------"),
 
     // No join messages
-    NO_JOIN_IN_DEV("no_join_in_dev", "&dLe serveur est actuellement en développement, rejoin notre discord pour plus d'informations: &cdiscord.faylis.xyz"),
-    NO_JOIN_IN_MAINTENANCE("no_join_in_maintenance", "&dLe serveur est actuellement en maintenance, rejoin notre discord pour plus d'informations: &cdiscord.faylis.xyz"),
+    NO_JOIN_IN_DEV("no_join_in_dev", "&dLe serveur est actuellement en développement, rejoin notre discord pour plus d'informations: &cdiscord.faylisia.fr"),
+    NO_JOIN_IN_MAINTENANCE("no_join_in_maintenance", "&dLe serveur est actuellement en maintenance, rejoin notre discord pour plus d'informations: &cdiscord.faylisia.fr"),
     NO_JOIN_DURING_STARTING("no_join_during_starting", "&cLe serveur est en train de démarrer, veuillez réessayer dans quelques instants"),
     KICK_ON_DISABLE("kick_on_disable", "&cLe serveur redémarre, veuillez attendre quelques instants avant de vous reconnecter"),
 
@@ -25,13 +25,37 @@ public enum Messages {
     INVALID_COLOR("invalid_color", "%prefix% &cCouleur invalide '%color%'"),
 
     //Command base messages
-    HELP_MESSAGE("help_message", "%prefix% &bToutes les informations sur les commandes sont disponible sur le wiki: http://faylis.xyz/wiki/commands"),
-    WIKI_MESSAGE("wiki_message", "%prefix% &dLien vers le wiki: http://faylis.xyz/wiki"),
+    HELP_MESSAGE("help_message", "%prefix% &bToutes les informations sur les commandes sont disponible sur le wiki: http://faylisia.fr/wiki/commands"),
+    WIKI_MESSAGE("wiki_message", "%prefix% &dLien vers le wiki: http://faylisia.fr/wiki"),
     NO_PERMISSION_MESSAGE("no_permission_message", "%prefix% &cVous n'avez pas la permission de faire ceci!"),
+    ONLY_PLAYERS_COMMAND_MESSAGE("only_players_command_message", "%prefix% &cSeul les joueurs peuvent exécuté cette commande!"),
+
+    //Command parser messages
     UNKNOWN_RANK_MESSAGE("unknown_rank_message", "%prefix% &cAucun grade n'existe avec le nom '%rank%'!"),
+    UNKNOWN_ONLINE_PLAYER_MESSAGE("unknown_online_player_message", "%prefix% &cAucun joueur en ligne trouvé avec le nom '%target_name%'!"),
     UNKNOWN_PLAYER_MESSAGE("unknown_player_message", "%prefix% &cAucun joueur trouvé avec le nom '%target_name%'!"),
+    UNKNOWN_MATERIAL_MESSAGE("unknown_material_message", "%prefix% &cAucun matériaux trouvé avec le nom '%material_name%'!"),
+    NON_BLOCK_MATERIAL_MESSAGE("non_block_material_message", "%prefix% &cLe matériaux '%material_name%' n'est pas un block!"),
     INVALID_ITEM_MESSAGE("invalid_item_message", "%prefix% &cAucun objet existe avec l'identifiant '%item_id%'!"),
     INVALID_NUMBER_MESSAGE("invalid_number_message", "%prefix% &cNombre invalide: '%number%'!"),
+    INVALID_BOOLEAN_MESSAGE("invalid_boolean_message", "%prefix% &cBooléen invalide: '%boolean%'!"),
+    INVALID_STATE_MESSAGE("invalid_state_message", "%prefix% &cEtat invalide: '%state%'!"),
+    INVALID_NAME_LENGTH("invalid_name_length", "%prefix% &cLe nom doit contenir entre 3 et 16 caractères inclus!"),
+    INVALID_NAME_CONTENT("invalid_name_content", "%prefix% &cLe nom doit contenir uniquement des lettres majuscule et minuscule, des chiffres, des tiret du six et des tiret du huit."),
+
+    //Command cblocks messages
+    CBLOCKS_RESULT_MESSAGE("cblocks_result_message", "%prefix% &a%amount% blocs custom on était généré."),
+
+    //Command nick messages
+    NICK_ENABLED("nick_enabled", "%prefix% &aVotre surnom est maintenant activé."),
+    NICK_DISABLED("nick_disabled", "%prefix% &aVotre surnom est maintenant désactivé."),
+    ENABLED_NICK_STATE_MESSAGE("nick_state_message", "%prefix% &bLe joueur %player_name% est aussi connu en tant que %nickname%, son surnom est actif."),
+    DISABLED_NICK_STATE_MESSAGE("nick_state_message", "%prefix% &bLe joueur %player_name% est aussi connu en tant que %nickname%, son surnom est inactif."),
+    NICKNAME_CHANGED_MESSAGE("nickname_changed_message", "%prefix% &aVotre nouveau surnom est '%nickname%'."),
+
+    //Command fly messages
+    FLY_ENABLED("fly_enabled", "%prefix% &aVous pouvez maintenant voler."),
+    FLY_DISABLED("fly_disabled", "%prefix% &cVous ne pouvez maintenant plus voler"),
 
     //Command break messages
     BREAK_ENABLED("break_enabled", "%prefix% &aVous pouvez maintenant casser/placer des blocks."),
@@ -73,7 +97,7 @@ public enum Messages {
 
     //Link command messages
     INVALID_TOKEN("invalid_token", "%prefix% &cLe token est invalide!"),
-    ALREADY_LINK("already_link", "%prefix% &cVous êtes déja lié a un compte (%account_name%#%account_tag%)! Si vous pensez qu'il s'avère être une erreur, veuillez ouvrir un ticket sur le serveur discord: &ddiscord.faylis.xyz&c."),
+    ALREADY_LINK("already_link", "%prefix% &cVous êtes déja lié a un compte (%account_name%#%account_tag%)! Si vous pensez qu'il s'avère être une erreur, veuillez ouvrir un ticket sur le serveur discord: &ddiscord.faylisia.fr&c."),
     USER_HAS_LEAVE_THE_SERVER("player_has_leave_the_server", "%prefix% &cL'utilisateur a quitté le serveur discord!"),
     SUCCESS_LINK("success_link", "%prefix% &aVous avez bien lié votre compte à '&d%account_name%#%account_tag%&a'."),
 

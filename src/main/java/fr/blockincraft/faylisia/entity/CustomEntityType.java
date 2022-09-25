@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.api.serializer.EntityTypeSerializer;
+import fr.blockincraft.faylisia.entity.loot.Loot;
 import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.map.Regions;
 import fr.blockincraft.faylisia.player.Stats;
@@ -19,32 +20,24 @@ import java.util.regex.Pattern;
 @JsonSerialize(using = EntityTypeSerializer.class)
 public class CustomEntityType {
     public static final NamespacedKey idKey = new NamespacedKey(Faylisia.getInstance(), "custom-id");
-    private static final Pattern idPattern = Pattern.compile("[a-z1-9_-]+");
+    private static final Pattern idPattern = Pattern.compile("[a-z\\d_-]+");
     private static final Registry registry = Faylisia.getInstance().getRegistry();
 
     private boolean registered = false;
 
     private final EntityType entityType;
     private final String id;
-    private final long maxHealth;
-    private final long damage;
     private String name = null;
-    private EntitiesRanks rank = EntitiesRanks.E;
     private Region region = Regions.WILDERNESS;
     private long tickBeforeRespawn = 0;
-    private Loot[] loots = new Loot[0];
 
     /**
      * @param entityType entity type used to create this entity (like zombie)
      * @param id unique id of this entity type
-     * @param maxHealth maximum health of this entity
-     * @param damage damage of this entity
      */
-    public CustomEntityType(@NotNull EntityType entityType, @NotNull String id, long maxHealth, long damage) {
+    public CustomEntityType(@NotNull EntityType entityType, @NotNull String id) {
         this.entityType = entityType;
         this.id = id;
-        this.maxHealth = maxHealth;
-        this.damage = damage;
     }
 
     @NotNull
@@ -62,31 +55,17 @@ public class CustomEntityType {
         return name;
     }
 
-    public long getDamage() {
-        return damage;
-    }
-
-    public long getMaxHealth() {
-        return maxHealth;
-    }
-
-    @NotNull
-    public EntitiesRanks getRank() {
-        return rank;
-    }
-
     @NotNull
     public Region getRegion() {
         return region;
     }
 
-    @NotNull
-    public Loot[] getLoots() {
-        return loots;
-    }
-
     public long getTickBeforeRespawn() {
         return tickBeforeRespawn;
+    }
+
+    public boolean isRegistered() {
+        return registered;
     }
 
     /**
@@ -126,30 +105,6 @@ public class CustomEntityType {
     }
 
     /**
-     * Change entity rank
-     * @param rank new value
-     * @return this instance
-     */
-    @NotNull
-    public CustomEntityType setRank(@NotNull EntitiesRanks rank) {
-        if (registered) throw new ChangeRegisteredEntityType();
-        this.rank = rank;
-        return this;
-    }
-
-    /**
-     * Change entity loots
-     * @param loots new value
-     * @return this instance
-     */
-    @NotNull
-    public CustomEntityType setLoots(@NotNull Loot... loots) {
-        if (registered) throw new ChangeRegisteredEntityType();
-        this.loots = loots == null ? new Loot[0] : loots;
-        return this;
-    }
-
-    /**
      * Spawn an entity at this coordinates
      * @param x x coordinate
      * @param y y coordinate
@@ -169,16 +124,6 @@ public class CustomEntityType {
     }
 
     /**
-     * Construct entity display name to display health and rank if it
-     * @param health health of the entity
-     * @return name to display
-     */
-    @NotNull
-    public String getNameWithHealth(long health) {
-        return ColorsUtils.translateAll((rank != null ? rank.prefix + " " : "") + name + " &" + (health < maxHealth / 2 ? "e" : "a") + health + "&8/&a" + maxHealth + " &f" + Stats.HEALTH.bigIcon);
-    }
-
-    /**
      * Verify that all requirements are filled and register it in {@link Registry}
      */
     public void register() {
@@ -187,12 +132,19 @@ public class CustomEntityType {
         if (id.isEmpty()) throw new InvalidBuildException("Id cannot be empty/null!");
         if (!idPattern.matcher(id).matches()) throw new InvalidBuildException("Id can only contains pattern [a-z1-9_-]+!");
         if (registry.entityTypeIdUsed(id)) throw new InvalidBuildException("Id already used!");
-        if (maxHealth < 1) throw new InvalidBuildException("Max health cannot be equal to 0 or negative!");
-        if (damage < 0) throw new InvalidBuildException("Damage cannot be negative!");
         if (name == null) throw new InvalidBuildException("Name cannot be null!");
+
+        registerOthers();
 
         registered = true;
         registry.registerEntityType(this);
+    }
+
+    /**
+     * Used by subclass to register other params
+     */
+    public void registerOthers() {
+
     }
 
     /**

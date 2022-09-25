@@ -1,7 +1,7 @@
 package fr.blockincraft.faylisia.items.weapons;
 
 import fr.blockincraft.faylisia.items.CustomItem;
-import fr.blockincraft.faylisia.items.StatsItem;
+import fr.blockincraft.faylisia.items.StatsItemModel;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.Material;
@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * A custom item with damage and stats that is a weapon
  */
-public class WeaponItem extends CustomItem implements DamageItem, StatsItem {
+public class WeaponItem extends CustomItem implements DamageItemModel, StatsItemModel {
     private final Map<Stats, Double> stats = new HashMap<>();
     private int damage = 0;
 
@@ -89,7 +89,7 @@ public class WeaponItem extends CustomItem implements DamageItem, StatsItem {
      */
     @NotNull
     public WeaponItem removeStat(@NotNull Stats stat) {
-        if (isRegistered()) throw new CustomItem.ChangeRegisteredItem();
+        if (isRegistered()) throw new ChangeRegisteredItem();
         stats.remove(stat);
         return this;
     }
@@ -102,7 +102,7 @@ public class WeaponItem extends CustomItem implements DamageItem, StatsItem {
      */
     @NotNull
     public WeaponItem setStat(@NotNull Stats stat, double value) {
-        if (isRegistered()) throw new CustomItem.ChangeRegisteredItem();
+        if (isRegistered()) throw new ChangeRegisteredItem();
         stats.put(stat, value);
         return this;
     }

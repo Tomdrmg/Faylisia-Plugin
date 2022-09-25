@@ -99,7 +99,7 @@ public class ItemsViewerMenu extends ChestMenu {
         this.replaceExistingItem(4, wiki, e -> {
             if (e.getWhoClicked() instanceof Player player) {
                 BaseComponent message = new TextComponent(Messages.WIKI_MESSAGE.get());
-                message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "http://faylis.xyz/wiki"));
+                message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "http://faylisia.fr/wiki"));
                 player.spigot().sendMessage(message);
             }
             return false;

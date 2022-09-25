@@ -2,11 +2,16 @@ package fr.blockincraft.faylisia.listeners;
 
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.configurable.DiscordData;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.player.permission.Ranks;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
 import fr.blockincraft.faylisia.utils.exception.InvalidColorException;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +25,7 @@ import java.util.regex.Matcher;
 
 public class ChatListeners implements Listener {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
+    private static final JDA discordBot = Faylisia.getInstance().getDiscordBot();
 
     /**
      * Apply colors and {@link Ranks} prefix to chat messages
@@ -31,7 +37,7 @@ public class ChatListeners implements Listener {
 
         String message = e.getMessage();
 
-        e.setFormat(ChatColor.translateAlternateColorCodes('&', ColorsUtils.translateAll(rank.chatName.replace("%player_name%", custom.getName().replace(" ", "\\_"))) +" &8>> &f%2$s"));
+        e.setFormat(ChatColor.translateAlternateColorCodes('&', ColorsUtils.translateAll(rank.chatName.replace("%player_name%", custom.getNameToUse())) + " &8>> &f%2$s"));
         message = ChatColor.translateAlternateColorCodes('&', message);
         if (!e.getPlayer().hasPermission("faylisia.chat_color")) {
             message = ChatColor.stripColor(message);
@@ -80,5 +86,19 @@ public class ChatListeners implements Listener {
         }
 
         e.setMessage(message);
+
+        String discordMessage = net.md_5.bungee.api.ChatColor.stripColor(message);
+
+        TextChannel chatInGame = discordBot.getTextChannelById(DiscordData.chatInGameId);
+        if (chatInGame == null || !custom.isSendMessagesToDiscord()) return;
+
+        chatInGame.sendMessage(new MessageBuilder()
+                .setEmbeds(new EmbedBuilder()
+                        .setTitle(net.md_5.bungee.api.ChatColor.stripColor(ColorsUtils.translateAll(custom.getRank().chatName.replace("%player_name%", custom.getNameToUse().replace(" ", "\\_")))))
+                        .setDescription(discordMessage)
+                        .setColor(0x00C5FF)
+                        .setFooter(custom.getNameToUse(), "https://minotar.net/avatar/" + custom.getPlayer().toString() + ".png")
+                        .build())
+                .build()).queue();
     }
 }

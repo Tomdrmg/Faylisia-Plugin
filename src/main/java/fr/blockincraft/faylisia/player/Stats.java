@@ -18,7 +18,9 @@ public enum Stats {
     MAGICAL_RESERVE(6, "Éthernanos Max", 'd', '\uE007', '\uE018', 0.0, -1.0),
     SPEED(7, "Vitesse", 'f', '\uE008', '\uE019', 100.0, 500.0),
     LUCK(8, "Chance", 'b', '\uE009', '\uE020', 0.0, 1900.0),
-    KNOWLEDGE(9, "Savoir", 'e', '\uE010', '\uE021', 0.0, -1.0);
+    KNOWLEDGE(9, "Savoir", 'e', '\uE010', '\uE021', 0.0, -1.0),
+    MINING_SPEED(10, "Mining Speed", '6', '\uE010', '\uE021', 100.0, -1.0),
+    MINING_FORTUNE(11, "Mining Fortune", '6', '\uE010', '\uE021', 100.0, -1.0);
 
     public static final int handDamage = 5;
 

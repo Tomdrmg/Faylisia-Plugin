@@ -26,12 +26,14 @@ public class EnchantmentDeserializer extends StdDeserializer<Map<CustomEnchantme
     }
 
     @Override
-    public Map<CustomEnchantments, Integer> deserialize(JsonParser parser, DeserializationContext context) throws IOException, JacksonException {
+    public Map<CustomEnchantments, Integer> deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        return this.deserialize(parser.readValueAsTree(), "enchantments");
+    }
+
+    public Map<CustomEnchantments, Integer> deserialize(JsonNode node, String name) throws IOException {
         Map<CustomEnchantments, Integer> enchants = new HashMap<>();
 
-        JsonNode node = parser.readValueAsTree();
-
-        ArrayNode array = (ArrayNode) node.get("enchantments");
+        ArrayNode array = (ArrayNode) node.get(name);
 
         for (JsonNode n : array) {
             String enchantName = n.get("enchant").asText();

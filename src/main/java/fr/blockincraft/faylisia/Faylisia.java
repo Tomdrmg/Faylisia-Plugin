@@ -8,7 +8,9 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.*;
 import fr.blockincraft.faylisia.api.RequestHandler;
+import fr.blockincraft.faylisia.blocks.*;
 import fr.blockincraft.faylisia.commands.*;
+import fr.blockincraft.faylisia.commands.base.Command;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.configurable.DiscordData;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
@@ -27,12 +29,15 @@ import fr.blockincraft.faylisia.player.Classes;
 import fr.blockincraft.faylisia.displays.ScoreboardManager;
 import fr.blockincraft.faylisia.task.*;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.PlayerUtils;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.bukkit.*;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -43,6 +48,9 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -68,6 +76,10 @@ public final class Faylisia extends JavaPlugin {
     private Registry registry;
     private ScoreboardManager scoreBoardManager;
     private ProtocolManager protocolManager;
+
+    // Images used in game
+    private BufferedImage borderImage;
+    private BufferedImage regionsImage;
 
     /**
      * @return {@link Faylisia} instance
@@ -118,6 +130,14 @@ public final class Faylisia extends JavaPlugin {
         return protocolManager;
     }
 
+    public BufferedImage getBorderImage() {
+        return borderImage;
+    }
+
+    public BufferedImage getRegionsImage() {
+        return regionsImage;
+    }
+
     /**
      * {@link Plugin} load method
      */
@@ -133,7 +153,7 @@ public final class Faylisia extends JavaPlugin {
                 List<PlayerInfoData> players = event.getPacket().getPlayerInfoDataLists().read(0);
 
                 // If action isn't update latency
-                if (event.getPacket().getPlayerInfoAction().read(0) != EnumWrappers.PlayerInfoAction.UPDATE_LATENCY) {
+                if (event.getPacket().getPlayerInfoAction().read(0) != EnumWrappers.PlayerInfoAction.UPDATE_LATENCY && players != null) {
                     // For each player info data
                     for (PlayerInfoData player : players) {
                         // Check if name length is superior to 3 because fake player to do beautiful tab are 3 chars names
@@ -143,11 +163,13 @@ public final class Faylisia extends JavaPlugin {
                             Classes classes = custom.getClasses();
 
                             // Change the skin depending on the classes
-                            WrappedGameProfile gameProfile = new WrappedGameProfile(player.getProfile().getUUID(), custom.getName());
+                            WrappedGameProfile gameProfile = new WrappedGameProfile(player.getProfile().getUUID(), custom.getNameToUse());
                             gameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", classes.skin.value, classes.skin.signature));
 
                             // Create the player info data
-                            PlayerInfoData playerInfoData = new PlayerInfoData(gameProfile, player.getLatency(), player.getGameMode(), WrappedChatComponent.fromText(custom.getName()));
+                            PlayerInfoData playerInfoData = new PlayerInfoData(gameProfile, player.getLatency(), player.getGameMode(), WrappedChatComponent.fromLegacyText(
+                                    ColorsUtils.translateAll(custom.getRank().playerName.replace("%player_name%", custom.getNameToUse()))
+                            ));
 
                             // Add player info data to list
                             players.remove(player);
@@ -190,8 +212,8 @@ public final class Faylisia extends JavaPlugin {
                 profiles.add(new WrappedGameProfile(UUID.randomUUID(), ColorsUtils.translateAll("&d    Capacité du Serveur")));
                 profiles.add(new WrappedGameProfile(UUID.randomUUID(), ColorsUtils.translateAll(sb + " &d" + players + "&8/&d" + maxPlayers)));
                 profiles.add(new WrappedGameProfile(UUID.randomUUID(), ColorsUtils.translateAll("")));
-                profiles.add(new WrappedGameProfile(UUID.randomUUID(), ColorsUtils.translateAll("&dSite: faylis.xyz")));
-                profiles.add(new WrappedGameProfile(UUID.randomUUID(), ColorsUtils.translateAll("&dDiscord: discord.faylis.xyz")));
+                profiles.add(new WrappedGameProfile(UUID.randomUUID(), ColorsUtils.translateAll("&dSite: faylisia.fr")));
+                profiles.add(new WrappedGameProfile(UUID.randomUUID(), ColorsUtils.translateAll("&dDiscord: discord.faylisia.fr")));
                 profiles.add(new WrappedGameProfile(UUID.randomUUID(), ColorsUtils.translateAll("&8&l&m-------------------")));
 
                 // Replace profiles
@@ -201,6 +223,31 @@ public final class Faylisia extends JavaPlugin {
                 serverPing.setMotD(WrappedChatComponent.fromLegacyText(ColorsUtils.translateAll(Bukkit.getMotd())));
                 // Rewrite packet
                 event.getPacket().getServerPings().write(0, serverPing);
+            }
+        });
+        protocolManager.addPacketListener(new PacketAdapter(this, PacketType.Play.Client.BLOCK_DIG) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(event.getPlayer().getUniqueId());
+                if (customPlayer.getCanBreak() || event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+
+                switch (event.getPacket().getPlayerDigTypes().read(0)) {
+                    case START_DESTROY_BLOCK -> {
+                        BlockPosition pos = event.getPacket().getBlockPositionModifier().read(0);
+                        DiggingBlock diggingBlock = new DiggingBlock(pos.getX(), pos.getY(), pos.getZ(), registry.getBlockAt(new Location(event.getPlayer().getWorld(), pos.getX(), pos.getY(), pos.getZ())));
+
+                        if (customPlayer.checkCanBreakBlock(diggingBlock, true)) customPlayer.setDiggingBlock(diggingBlock);
+                    }
+                    case STOP_DESTROY_BLOCK, ABORT_DESTROY_BLOCK -> {
+                        DiggingBlock diggingBlock = customPlayer.getDiggingBlock();
+
+                        if (diggingBlock != null) {
+                            PlayerUtils.setBlockBreakingState(event.getPlayer(), diggingBlock.getX(), diggingBlock.getY(), diggingBlock.getZ(), 10);
+                        }
+
+                        customPlayer.setDiggingBlock(null);
+                    }
+                }
             }
         });
 
@@ -244,6 +291,17 @@ public final class Faylisia extends JavaPlugin {
             return;
         }
 
+        // Load images
+        try {
+            borderImage = ImageIO.read(new File(getDataFolder(), "border.png"));
+            regionsImage = ImageIO.read(new File(getDataFolder(), "regions.png"));
+        } catch (Exception e) {
+            // In case of error, stop the plugin
+            this.getLogger().log(Level.SEVERE, "Cannot load images server, stopping.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+
         // Initialize gamerules in all worlds
         initGameRules();
         // Remove all vanilla recipes
@@ -254,44 +312,39 @@ public final class Faylisia extends JavaPlugin {
         new Items();
         new Regions();
         new Entities();
+        new BlockTypes();
+        new Blocks();
+
+        for (CustomBlock block : registry.getBlocks()) {
+            World world = Bukkit.getWorld(block.getWorld());
+            if (world == null) continue;
+
+            BlockType type = block.getCurrentState();
+            if (type == null) continue;
+
+            world.setBlockData(block.getX(), block.getY(), block.getZ(), type.getMaterial().createBlockData());
+        }
 
         // Register listeners
         Bukkit.getPluginManager().registerEvents(new GameListeners(), instance);
         Bukkit.getPluginManager().registerEvents(new MenuListener(), instance);
         Bukkit.getPluginManager().registerEvents(new ChatListeners(), instance);
 
-        // Bind command completer/executors
-        PluginCommand itemCommand = Bukkit.getPluginCommand("items");
-        if (itemCommand != null) {
-            itemCommand.setExecutor(new ItemsExecutor());
-            itemCommand.setTabCompleter(new ItemsCompleter());
-        }
-        PluginCommand spawnCommand = Bukkit.getPluginCommand("spawn");
-        if (spawnCommand != null) {
-            spawnCommand.setExecutor(new SpawnExecutor());
-            spawnCommand.setTabCompleter(new SpawnCompleter());
-        }
-        PluginCommand breakCommand = Bukkit.getPluginCommand("break");
-        if (breakCommand != null) {
-            breakCommand.setExecutor(new BreakExecutor());
-        }
-        PluginCommand classCommand = Bukkit.getPluginCommand("class");
-        if (classCommand != null) {
-            classCommand.setExecutor(new ClassExecutor());
-        }
-        PluginCommand ranksCommand = Bukkit.getPluginCommand("ranks");
-        if (ranksCommand != null) {
-            ranksCommand.setExecutor(new RanksExecutor());
-            ranksCommand.setTabCompleter(new RanksCompleter());
-        }
-        PluginCommand discordCommand = Bukkit.getPluginCommand("discord");
-        if (discordCommand != null) {
-            discordCommand.setExecutor(new DiscordExecutor());
-            discordCommand.setTabCompleter(new DiscordCompleter());
-        }
-        PluginCommand linkCommand = Bukkit.getPluginCommand("link");
-        if (linkCommand != null) {
-            linkCommand.setExecutor(new LinkExecutor());
+        // Register commands
+        try {
+            new BreakCommand().register();
+            new ClassCommand().register();
+            new DiscordCommand().register();
+            new ItemsCommand().register();
+            new LinkCommand().register();
+            new RanksCommand().register();
+            new SpawnCommand().register();
+            new FlyCommand().register();
+            new InvseeCommand().register();
+            new CblocksCommand().register();
+            new NickCommand().register();
+        } catch (Command.CommandException e) {
+            e.printStackTrace();
         }
 
         // Start tasks
@@ -302,9 +355,43 @@ public final class Faylisia extends JavaPlugin {
         EntityQuitRegionTask.startTask();
         EntityTargetTask.startTask();
         EntityRemoveTask.startTask();
+        BlockBreakTask.startTask();
 
         // Make plugin initialized to true
         initialized = true;
+
+        if (false) {
+            try {
+                World world = Bukkit.getWorlds().get(0);
+
+                for (int x = 0; x < borderImage.getWidth(); x++) {
+                    for (int z = 0; z < borderImage.getHeight(); z++) {
+                        int color = borderImage.getRGB(x, z);
+                        int color2 = regionsImage.getRGB(x, z);
+                        if (color == 0xFF000000) {
+                            world.setBlockData(x - borderImage.getWidth() / 2, 41, z - borderImage.getHeight() / 2, Material.BEDROCK.createBlockData());
+                        } else if (color2 != 0) {
+                            world.setBlockData(x - borderImage.getWidth() / 2, 41, z - borderImage.getHeight() / 2, Material.WHITE_CONCRETE.createBlockData());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        DiscordListeners.doWhenReady(() -> {
+            TextChannel chatInGame = discordBot.getTextChannelById(DiscordData.chatInGameId);
+
+            if (chatInGame != null) {
+                chatInGame.sendMessage(new MessageBuilder()
+                        .setEmbeds(new EmbedBuilder()
+                                .setDescription("Le serveur démarre.")
+                                .setColor(0x29B600)
+                                .build())
+                        .build()).queue();
+            }
+        });
     }
 
     /**
@@ -312,6 +399,19 @@ public final class Faylisia extends JavaPlugin {
      */
     @Override
     public void onDisable() {
+        if (discordBot != null) {
+            TextChannel chatInGame = discordBot.getTextChannelById(DiscordData.chatInGameId);
+
+            if (chatInGame != null) {
+                chatInGame.sendMessage(new MessageBuilder()
+                        .setEmbeds(new EmbedBuilder()
+                                .setDescription("Le serveur s'arrête.")
+                                .setColor(0xB60000)
+                                .build())
+                        .build()).queue();
+            }
+        }
+
         // Close all inventories to prevent dupe
         for (Player player : Bukkit.getOnlinePlayers()) {
             ChestMenu menu = MenuListener.menus.get(player.getUniqueId());

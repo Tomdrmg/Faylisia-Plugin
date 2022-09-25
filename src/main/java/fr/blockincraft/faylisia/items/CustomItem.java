@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 @JsonSerialize(using = CustomItemSerializer.class)
 public class CustomItem {
     public static final NamespacedKey idKey = new NamespacedKey(Faylisia.getInstance(), "custom-id");
-    private static final Pattern idPattern = Pattern.compile("[a-z1-9_-]+");
+    private static final Pattern idPattern = Pattern.compile("[a-z\\d_-]+");
     private static final Registry registry = Faylisia.getInstance().getRegistry();
 
     private boolean registered = false;

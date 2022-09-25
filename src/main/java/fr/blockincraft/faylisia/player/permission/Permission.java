@@ -2,11 +2,9 @@ package fr.blockincraft.faylisia.player.permission;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 
 /**
- * This method contain a permission and an associated state <br/>
- * Lists of all permissions was here
+ * This method contain a permission and an associated state
  */
 public class Permission {
     // All perms
@@ -73,6 +71,10 @@ public class Permission {
             "faylisia.command.spawn",
             "faylisia.command.discord",
             "faylisia.command.link",
+            "faylisia.command.fly",
+            "faylisia.command.invsee",
+            "faylisia.command.nick",
+            "faylisia.command.cblocks",
             "faylisia.link",
             "faylisia.discord",
             "faylisia.chat_color",
@@ -87,7 +89,12 @@ public class Permission {
             "faylisia.menu.open",
             "faylisia.items.give",
             "faylisia.items.menu",
-            "faylisia.items.recipe"
+            "faylisia.items.recipe",
+            "faylisia.fly",
+            "faylisia.invsee",
+            "faylisia.nick",
+            "faylisia.cblocks",
+            "faylisia.nick.get"
     };
     // Others perms like world edit perms or other plugins perms
     public static final String[] otherPerms = new String[]{

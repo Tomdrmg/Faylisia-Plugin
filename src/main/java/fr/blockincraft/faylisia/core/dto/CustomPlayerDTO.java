@@ -1,16 +1,26 @@
 package fr.blockincraft.faylisia.core.dto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.api.serializer.CustomPlayerSerializer;
+import fr.blockincraft.faylisia.api.serializer.PlayerInventorySerializer;
+import fr.blockincraft.faylisia.blocks.BlockType;
+import fr.blockincraft.faylisia.blocks.CustomBlock;
+import fr.blockincraft.faylisia.blocks.DiggingBlock;
 import fr.blockincraft.faylisia.core.entity.CustomPlayer;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.*;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
 import fr.blockincraft.faylisia.items.event.DamageType;
-import fr.blockincraft.faylisia.items.event.HandlerItem;
+import fr.blockincraft.faylisia.items.event.HandlerItemModel;
 import fr.blockincraft.faylisia.items.event.Handlers;
-import fr.blockincraft.faylisia.items.weapons.DamageItem;
+import fr.blockincraft.faylisia.items.tools.ToolItemModel;
+import fr.blockincraft.faylisia.items.tools.ToolType;
+import fr.blockincraft.faylisia.items.weapons.DamageItemModel;
 import fr.blockincraft.faylisia.listeners.GameListeners;
 import fr.blockincraft.faylisia.player.permission.Ranks;
 import fr.blockincraft.faylisia.player.Stats;
@@ -22,22 +32,31 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.*;
 
+@JsonSerialize(using = CustomPlayerSerializer.class)
 public class CustomPlayerDTO {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
     private static final SecureRandom random = new SecureRandom();
 
     // Stored values
     private final UUID player;
-    private Classes classes = Classes.HUMAN;
+    private Classes classes = Classes.EXPLORER;
     private Ranks rank = Ranks.PLAYER;
     private boolean canBreak = false;
-    private String name;
+    private String lastName;
+    private boolean customNameEnabled;
+    private String customName;
+    private String lastInventoryAsJson;
     private Long discordUserId;
+    private long lastUpdate = 0;
+    private long money = 0;
+    private boolean sendMessagesToDiscord = true;
 
     // Non stored values
     private final Map<CustomItem, Long> lastUse = new HashMap<>();
@@ -46,23 +65,34 @@ public class CustomPlayerDTO {
     private long maxEffectiveHealth = 0;
     private long magicalReserve = 0;
     private long damage = 0;
+    private DiggingBlock diggingBlock;
 
     public CustomPlayerDTO(UUID player) {
+        Player pl = Bukkit.getPlayer(player);
+
         this.player = player;
-        this.name = Bukkit.getPlayer(player) == null ? "error" : Bukkit.getPlayer(player).getName();
+        this.lastName = pl == null ? "error" : pl.getName();
+        this.customName = pl == null ? "error" : pl.getName();
         refreshStats();
         setEffectiveHealth(maxEffectiveHealth);
         setMagicalReserve((long) getStat(Stats.MAGICAL_RESERVE));
         discordUserId = null;
+        lastUpdate = Date.from(Instant.now()).getTime();
     }
 
     public CustomPlayerDTO(CustomPlayer model) {
         this.player = model.getPlayer();
         this.classes = model.getClasses();
         this.rank = model.getRank();
-        this.canBreak = model.getCanBreak();
-        this.name = model.getName();
+        this.canBreak = model.isCanBreak();
+        this.lastName = model.getLastName();
+        this.customNameEnabled = model.isCustomNameEnabled();
+        this.customName = model.getCustomName();
+        this.lastInventoryAsJson = model.getLastInventoryAsJson();
         this.discordUserId = model.getDiscordUserId();
+        this.lastUpdate = model.getLastUpdate();
+        this.money = model.getMoney();
+        this.sendMessagesToDiscord = model.isSendMessagesToDiscord();
     }
 
     public Handlers[] getMainHandHandler() {
@@ -75,8 +105,8 @@ public class CustomPlayerDTO {
 
         List<Handlers> handlers = new ArrayList<>();
 
-        if (customItemStack.getItem() instanceof HandlerItem handlerItem) {
-            handlers.add(handlerItem.getHandlers());
+        if (customItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
+            handlers.add(handlerItemModel.getHandlers());
         }
 
         if (customItemStack.getItem().isEnchantable()) {
@@ -145,8 +175,8 @@ public class CustomPlayerDTO {
                 });
             }
 
-            if (helmetItemStack.getItem() instanceof HandlerItem handlerItem) {
-                handlers.add(handlerItem.getHandlers());
+            if (helmetItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
+                handlers.add(handlerItemModel.getHandlers());
             }
         }
 
@@ -158,8 +188,8 @@ public class CustomPlayerDTO {
                 });
             }
 
-            if (chestplateItemStack.getItem() instanceof HandlerItem handlerItem) {
-                handlers.add(handlerItem.getHandlers());
+            if (chestplateItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
+                handlers.add(handlerItemModel.getHandlers());
             }
         }
 
@@ -171,8 +201,8 @@ public class CustomPlayerDTO {
                 });
             }
 
-            if (leggingsItemStack.getItem() instanceof HandlerItem handlerItem) {
-                handlers.add(handlerItem.getHandlers());
+            if (leggingsItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
+                handlers.add(handlerItemModel.getHandlers());
             }
         }
 
@@ -184,8 +214,8 @@ public class CustomPlayerDTO {
                 });
             }
 
-            if (bootsItemStack.getItem() instanceof HandlerItem handlerItem) {
-                handlers.add(handlerItem.getHandlers());
+            if (bootsItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
+                handlers.add(handlerItemModel.getHandlers());
             }
         }
 
@@ -200,8 +230,6 @@ public class CustomPlayerDTO {
 
         List<Handlers> handlers = new ArrayList<>();
 
-        ItemStack mainHandItem = inventory.getItemInMainHand();
-
         CustomItemStack offHandItemStack = CustomItemStack.fromItemStack(inventory.getItemInOffHand());
         if (offHandItemStack != null) {
             if (offHandItemStack.getItem().isEnchantable()) {
@@ -210,25 +238,35 @@ public class CustomPlayerDTO {
                 });
             }
 
-            if (offHandItemStack.getItem() instanceof HandlerItem handlerItem) {
-                handlers.add(handlerItem.getHandlers());
+            if (offHandItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
+                handlers.add(handlerItemModel.getHandlers());
             }
         }
 
-        for (ItemStack itemStack : inventory.getStorageContents()) {
+        for (int i = 0; i < inventory.getStorageContents().length; i++) {
+            ItemStack itemStack = inventory.getStorageContents()[i];
             CustomItemStack customItemStack = CustomItemStack.fromItemStack(itemStack);
-            if (itemStack != mainHandItem && customItemStack != null) {
+
+            if (i != inventory.getHeldItemSlot() && customItemStack != null) {
                 if (customItemStack.getItem().isEnchantable()) {
                     customItemStack.getEnchantments().forEach((enchant, level) -> {
                         handlers.add(enchant.handlers.withLevel(level));
                     });
                 }
 
-                if (customItemStack.getItem() instanceof HandlerItem handlerItem) {
-                    handlers.add(handlerItem.getHandlers());
+                if (customItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
+                    handlers.add(handlerItemModel.getHandlers());
                 }
             }
         }
+
+        return handlers.toArray(new Handlers[0]);
+    }
+
+    public Handlers[] getMiscHandlers() {
+        List<Handlers> handlers = new ArrayList<>();
+
+        handlers.add(classes.handlers);
 
         return handlers.toArray(new Handlers[0]);
     }
@@ -258,19 +296,19 @@ public class CustomPlayerDTO {
         PlayerInventory inventory = player.getInventory();
 
         ItemStack mainHandItem = inventory.getItemInMainHand();
-        if (registry.getCustomItemByItemStack(mainHandItem) instanceof DamageItem damageItem) {
+        if (registry.getCustomItemByItemStack(mainHandItem) instanceof DamageItemModel damageItemModel) {
             CustomItem customItem = registry.getCustomItemByItemStack(mainHandItem);
 
-            long itemDamage = damageItem.getDamage();
+            long itemDamage = damageItemModel.getDamage();
             itemDamage = HandlersUtils.getValueWithHandlers(this, "calculateItemRawDamage", itemDamage, long.class, new HandlersUtils.Parameter[]{
                     new HandlersUtils.Parameter(player, Player.class),
                     new HandlersUtils.Parameter(customItem, CustomItem.class)
             });
             damage += itemDamage;
         }
-        if (registry.getCustomItemByItemStack(mainHandItem) instanceof StatsItem statsItem && statsItem.validStats(true, false)) {
+        if (registry.getCustomItemByItemStack(mainHandItem) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(true, false)) {
             CustomItem customItem = registry.getCustomItemByItemStack(mainHandItem);
-            statsItem.getStats().forEach((stat, value) -> {
+            statsItemModel.getStats().forEach((stat, value) -> {
                 double val = value;
                 val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
@@ -281,9 +319,9 @@ public class CustomPlayerDTO {
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getHelmet()) instanceof StatsItem statsItem && statsItem.validStats(false, true)) {
+        if (registry.getCustomItemByItemStack(inventory.getHelmet()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
             CustomItem customItem = registry.getCustomItemByItemStack(inventory.getHelmet());
-            statsItem.getStats().forEach((stat, value) -> {
+            statsItemModel.getStats().forEach((stat, value) -> {
                 double val = value;
                 val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
@@ -294,9 +332,9 @@ public class CustomPlayerDTO {
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getChestplate()) instanceof StatsItem statsItem && statsItem.validStats(false, true)) {
+        if (registry.getCustomItemByItemStack(inventory.getChestplate()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
             CustomItem customItem = registry.getCustomItemByItemStack(inventory.getChestplate());
-            statsItem.getStats().forEach((stat, value) -> {
+            statsItemModel.getStats().forEach((stat, value) -> {
                 double val = value;
                 val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
@@ -307,9 +345,9 @@ public class CustomPlayerDTO {
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getLeggings()) instanceof StatsItem statsItem && statsItem.validStats(false, true)) {
+        if (registry.getCustomItemByItemStack(inventory.getLeggings()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
             CustomItem customItem = registry.getCustomItemByItemStack(inventory.getLeggings());
-            statsItem.getStats().forEach((stat, value) -> {
+            statsItemModel.getStats().forEach((stat, value) -> {
                 double val = value;
                 val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
@@ -320,9 +358,9 @@ public class CustomPlayerDTO {
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getBoots()) instanceof StatsItem statsItem && statsItem.validStats(false, true)) {
+        if (registry.getCustomItemByItemStack(inventory.getBoots()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
             CustomItem customItem = registry.getCustomItemByItemStack(inventory.getBoots());
-            statsItem.getStats().forEach((stat, value) -> {
+            statsItemModel.getStats().forEach((stat, value) -> {
                 double val = value;
                 val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
@@ -333,9 +371,9 @@ public class CustomPlayerDTO {
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getItemInOffHand()) instanceof StatsItem statsItem && statsItem.validStats(false, false)) {
+        if (registry.getCustomItemByItemStack(inventory.getItemInOffHand()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, false)) {
             CustomItem customItem = registry.getCustomItemByItemStack(inventory.getItemInOffHand());
-            statsItem.getStats().forEach((stat, value) -> {
+            statsItemModel.getStats().forEach((stat, value) -> {
                 double val = value;
                 val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
@@ -346,10 +384,12 @@ public class CustomPlayerDTO {
             });
         }
 
-        for (ItemStack itemStack : inventory.getStorageContents()) {
-            if (itemStack != mainHandItem && registry.getCustomItemByItemStack(itemStack) instanceof StatsItem statsItem && statsItem.validStats(false, false)) {
+        for (int i = 0; i < inventory.getStorageContents().length; i++) {
+            ItemStack itemStack = inventory.getStorageContents()[i];
+
+            if (i != inventory.getHeldItemSlot() && registry.getCustomItemByItemStack(itemStack) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, false)) {
                 CustomItem customItem = registry.getCustomItemByItemStack(itemStack);
-                statsItem.getStats().forEach((stat, value) -> {
+                statsItemModel.getStats().forEach((stat, value) -> {
                     double val = value;
                     val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
                             new HandlersUtils.Parameter(player, Player.class),
@@ -499,9 +539,11 @@ public class CustomPlayerDTO {
 
     public void regenHealth() {
         long regen = (long) (effectiveHealth + maxEffectiveHealth / 100 * getStat(Stats.VITALITY));
+        if (regen == 0) regen = 1;
 
         Player player = Bukkit.getPlayer(this.player);
         if (player != null) {
+            
             regen = HandlersUtils.getValueWithHandlers(this, "onRegenHealth", regen, long.class, new HandlersUtils.Parameter[]{
                     new HandlersUtils.Parameter(player, Player.class)
             });
@@ -511,7 +553,8 @@ public class CustomPlayerDTO {
     }
 
     public void regenMagicalPower() {
-        long regen = (long) (magicalReserve + getStat(Stats.MAGICAL_RESERVE) / 100 * 2);
+        long regen = (long) (magicalReserve + getStat(Stats.MAGICAL_RESERVE) / 100 * getStat(Stats.VITALITY));
+        if (regen == 0) regen = 1;
 
         Player player = Bukkit.getPlayer(this.player);
         if (player != null) {
@@ -556,11 +599,12 @@ public class CustomPlayerDTO {
     public void setClasses(Classes classes) {
         if (classes == null) return;
         this.classes = classes;
-        registry.applyModification(this);
+        applyUpdate();
 
         Player player = Bukkit.getPlayer(this.player);
         if (player != null) {
             Tab.refreshStatsPartFor(player);
+
             for (Player playerIn : Bukkit.getOnlinePlayers()) {
                 Tab.refreshPlayerSkinOfFor(player, playerIn);
                 Tab.refreshPlayersInTabFor(playerIn);
@@ -579,7 +623,7 @@ public class CustomPlayerDTO {
     public void setRank(Ranks rank) {
         if (rank == null) return;
         this.rank = rank;
-        registry.applyModification(this);
+        applyUpdate();
 
         Player player = Bukkit.getPlayer(this.player);
         if (player != null) {
@@ -597,16 +641,53 @@ public class CustomPlayerDTO {
 
     public void setCanBreak(boolean canBreak) {
         this.canBreak = canBreak;
-        registry.applyModification(this);
+        applyUpdate();
     }
 
-    public String getName() {
-        return name;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setName(String name) {
-        this.name = name;
-        registry.applyModification(this);
+    public void setLastName(String name) {
+        this.lastName = name;
+        applyUpdate();
+    }
+
+    public String getCustomName() {
+        return customName;
+    }
+
+    public void setCustomName(String customName) {
+        this.customName = customName;
+        applyUpdate();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Tab.refreshPlayersInTabFor(player);
+            Tab.refreshRealsPlayersInTabFor(player);
+        }
+    }
+
+    public boolean isCustomNameEnabled() {
+        return customNameEnabled;
+    }
+
+    public void setCustomNameEnabled(boolean customNameEnabled) {
+        this.customNameEnabled = customNameEnabled;
+        applyUpdate();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Tab.refreshPlayersInTabFor(player);
+            Tab.refreshRealsPlayersInTabFor(player);
+        }
+    }
+
+    public String getLastInventoryAsJson() {
+        return lastInventoryAsJson;
+    }
+
+    public void setLastInventoryAsJson(String lastInventoryAsJson) {
+        this.lastInventoryAsJson = lastInventoryAsJson;
+        applyUpdate();
     }
 
     public Long getDiscordUserId() {
@@ -615,7 +696,7 @@ public class CustomPlayerDTO {
 
     public void setDiscordUserId(Long discordUserId) {
         this.discordUserId = discordUserId;
-        registry.applyModification(this);
+        applyUpdate();
     }
 
     public Long getLastUse(CustomItem item) {
@@ -628,5 +709,114 @@ public class CustomPlayerDTO {
 
     public void use(CustomItem item, long minus) {
         lastUse.put(item, Date.from(Instant.now()).getTime() - (minus > 0 ? minus : 0));
+    }
+
+    public String getNameToUse() {
+        return customNameEnabled ? customName : lastName;
+    }
+
+    public void updateLastInventory() {
+        Player pl = Bukkit.getPlayer(player);
+        if (pl == null) return;
+
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(PlayerInventory.class, new PlayerInventorySerializer());
+        mapper.registerModule(module);
+
+        try {
+            setLastInventoryAsJson(mapper.writeValueAsString(pl.getInventory()));
+        } catch (Exception ignored) {
+
+        }
+
+        applyUpdate();
+    }
+
+    private void applyUpdate() {
+        lastUpdate = Date.from(Instant.now()).getTime();
+        registry.applyModification(this);
+    }
+
+    public long getLastUpdate() {
+        return lastUpdate;
+    }
+
+    @Nullable
+    public DiggingBlock getDiggingBlock() {
+        return diggingBlock;
+    }
+
+    public void setDiggingBlock(@Nullable DiggingBlock diggingBlock) {
+        this.diggingBlock = diggingBlock;
+    }
+
+    public boolean checkCanBreakBlock(@NotNull DiggingBlock diggingBlock, boolean sendMessage) {
+        Player player = Bukkit.getPlayer(this.player);
+        if (player == null) return false;
+
+        if (diggingBlock.getBlock() != null && diggingBlock.getBlock().getCurrentState() != null) {
+            CustomBlock block = diggingBlock.getBlock();
+            BlockType state = block.getCurrentState();
+
+            CustomItemStack customItemStack = CustomItemStack.fromItemStack(player.getInventory().getItemInMainHand());
+
+            int breakingLevel = 0;
+            if (customItemStack != null && customItemStack.getItem() instanceof ToolItemModel toolItemModel) {
+                breakingLevel = toolItemModel.getBreakingLevel();
+            }
+
+            if (breakingLevel < state.getLevel()) {
+                if (sendMessage) {
+                    // Todo : send a message
+                }
+                return false;
+            }
+
+            List<ToolType> toolTypes = new ArrayList<>(List.of(ToolType.HAND));
+            if (customItemStack != null && customItemStack.getItem() instanceof ToolItemModel toolItemModel) {
+                toolTypes.addAll(List.of(toolItemModel.getToolTypes()));
+            }
+
+            boolean hasRequiredTool = false;
+
+            for (ToolType toolType : state.getToolTypes()) {
+                if (toolTypes.contains(toolType)) {
+                    hasRequiredTool = true;
+                    break;
+                }
+            }
+
+            if (!hasRequiredTool) {
+                if (sendMessage) {
+                    // Todo : send a message
+                }
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void setMoney(long money) {
+        this.money = money;
+        applyUpdate();
+    }
+
+    public boolean hasMoney(long needed) {
+        return money >= needed;
+    }
+
+    public long getMoney() {
+        return money;
+    }
+
+    public void setSendMessagesToDiscord(boolean sendMessagesToDiscord) {
+        this.sendMessagesToDiscord = sendMessagesToDiscord;
+        applyUpdate();
+    }
+
+    public boolean isSendMessagesToDiscord() {
+        return sendMessagesToDiscord;
     }
 }

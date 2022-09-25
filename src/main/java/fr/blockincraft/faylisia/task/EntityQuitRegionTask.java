@@ -2,9 +2,10 @@ package fr.blockincraft.faylisia.task;
 
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
-import fr.blockincraft.faylisia.displays.Tab;
 import fr.blockincraft.faylisia.entity.CustomEntity;
+import fr.blockincraft.faylisia.entity.CustomLivingEntity;
 import fr.blockincraft.faylisia.map.Region;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.Date;
@@ -32,8 +33,7 @@ public class EntityQuitRegionTask extends BukkitRunnable {
         // Retrieve all custom entities
         for (CustomEntity entity : registry.getEntities()) {
             // Only respawn if they aren't be hit in the last five seconds
-            if (entity.getEntityType().getRegion() != registry.getRegionAt(entity.getEntity().getLocation()) &&
-                    Date.from(Instant.now()).getTime() - entity.getLastDamage() > 5000) {
+            if (entity.getEntityType().getRegion() != registry.getRegionAt(entity.getEntity().getLocation()) && (!(entity instanceof CustomLivingEntity living) || Date.from(Instant.now()).getTime() - living.getLastDamage() > 5000)) {
                 entity.teleportToSpawn();
             }
         }

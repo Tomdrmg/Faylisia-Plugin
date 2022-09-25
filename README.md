@@ -384,8 +384,8 @@ public class Items {
           .setAbilityDesc("&7Inflige &c10x &7les dégats aux monstres", "&7Dans un rayon de 10 blocs") // On a défini la description de l'abilité
           // On a défini l'abilité de l'objet avec une fonction lambda (Il y aura toujours les mêmes 
           // paramètres "(player, clickedBlock, hand)"), pour les créer il y a des méthodes utiles
-          // dans la class AbilitiesUtils
-          // (Si besoin d'aide me mp discord)
+          // disponibles dans la class AbilitiesUtils. La fonction doit renvoyer si l'abilité est
+          // annulée 'true' si elle l'est, 'false' si elle ne l'est pas
           .setAbility((player, clickedBlock, hand) -> {
             CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
 
@@ -401,6 +401,8 @@ public class Items {
               PlayerUtils.spawnDamageIndicator(damage, false, player, customEntity.getEntity().getLocation());
               customEntity.takeDamage(damage, player);
             });
+            
+            return false;
           })
           .setCooldown(5) // On a défini le délai entre deux utilisations de l'abilité
           .setUseCost(20) // On a défini le coût d'énergie magique pour utiliser l'abilité

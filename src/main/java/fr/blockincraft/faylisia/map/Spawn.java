@@ -9,8 +9,8 @@ import org.bukkit.entity.Player;
 public class Spawn {
     // Spawn coordinates
     public static final int x = 0;
-    public static final int y = 42;
-    public static final int z = 0;
+    public static final int y = 100;
+    public static final int z = -28;
 
     /**
      * Teleport a player to spawn

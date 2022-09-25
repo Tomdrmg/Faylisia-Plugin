@@ -6,6 +6,7 @@ import fr.blockincraft.faylisia.configurable.DiscordData;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.core.dto.DiscordTicketDTO;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.MessageBuilder;
@@ -14,6 +15,7 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -24,19 +26,30 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DiscordListeners extends ListenerAdapter {
     private static final JDA discordBot = Faylisia.getInstance().getDiscordBot();
     private static final Registry registry = Faylisia.getInstance().getRegistry();
+    private static final List<Runnable> readyActions = new ArrayList<>();
+    private static boolean ready = false;
+
+    public static void doWhenReady(@NotNull Runnable action) {
+        if (ready) {
+            action.run();
+        } else {
+            readyActions.add(action);
+        }
+    }
 
     /**
      * When bot is ready, actualize stored data, roles and channels
      */
     @Override
     public void onReady(@NotNull ReadyEvent event) {
+        ready = true;
+
         // Retrieve guild
         // Return if guild doesn't exist
         Guild guild = discordBot.getGuildById(DiscordData.guildId);
@@ -44,38 +57,52 @@ public class DiscordListeners extends ListenerAdapter {
             return;
         }
 
-        // Get player role and apply it
-        // In case of user join discord when bot is off
-        Role playerRole = guild.getRoleById(DiscordData.playerRoleId);
-        if (playerRole != null) {
-            for (Member member : guild.getMembers()) {
-                boolean hasRole = false;
+        guild.loadMembers().onSuccess(members -> {
+            // Get player role and apply it
+            // In case of user join discord when bot is off
+            Role playerRole = guild.getRoleById(DiscordData.playerRoleId);
+            if (playerRole != null) {
+                for (Member member : members) {
+                    boolean hasRole = false;
 
-                for (Role role : member.getRoles()) {
-                    if (role == playerRole) {
-                        hasRole = true;
-                        break;
+                    for (Role role : member.getRoles()) {
+                        if (role == playerRole) {
+                            hasRole = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasRole) {
+                        guild.addRoleToMember(member, playerRole).queue();
                     }
                 }
-
-                if (!hasRole) {
-                    guild.addRoleToMember(member, playerRole).queue();
-                }
             }
-        }
 
-        // Get linked role and apply it or remove it for members which are linked or unlinked during bot is off
-        // Theoretically impossible but in case of data was changed directly in database
-        Role linkedRole = guild.getRoleById(DiscordData.linkedRoleId);
-        registry.getPlayers().forEach((id, custom) -> {
-            if (custom.getDiscordUserId() != null) {
-                Member member = guild.getMemberById(custom.getDiscordUserId());
-                if (member == null) {
-                    custom.setDiscordUserId(null);
-                } else {
-                    if (linkedRole != null) guild.addRoleToMember(member, linkedRole).queue();
-                    guild.modifyNickname(member, custom.getName()).queue();
+            // Get linked role and apply it or remove it for members which are linked or unlinked during bot is off
+            // Theoretically impossible but in case of data was changed directly in database
+            Role linkedRole = guild.getRoleById(DiscordData.linkedRoleId);
+            registry.getPlayers().forEach((id, custom) -> {
+                if (custom.getDiscordUserId() != null) {
+                    Member member = null;
+
+                    for (Member m : members) {
+                        if (m.getIdLong() == custom.getDiscordUserId()) {
+                            member = m;
+                            break;
+                        }
+                    }
+
+                    if (member == null) {
+                        custom.setDiscordUserId(null);
+                    } else {
+                        if (linkedRole != null) guild.addRoleToMember(member, linkedRole).queue();
+                        guild.modifyNickname(member, custom.getLastName()).queue();
+                    }
                 }
+            });
+
+            for (Runnable action : readyActions) {
+                action.run();
             }
         });
     }
@@ -279,7 +306,7 @@ public class DiscordListeners extends ListenerAdapter {
                 // Get linked account name
                 registry.getPlayers().forEach((id, custom) -> {
                     if (custom.getDiscordUserId() != null && custom.getDiscordUserId() == member.getIdLong()) {
-                        linkedName.set(custom.getName());
+                        linkedName.set(custom.getNameToUse());
                     }
                 });
 
@@ -350,6 +377,50 @@ public class DiscordListeners extends ListenerAdapter {
                 event.reply("Ton compte discord n'est maintenant plus lié à aucun compte Minecraft.")
                         .setEphemeral(true)
                         .queue();
+            }
+        }
+    }
+
+    @Override
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        if (event.isFromGuild()) {
+            Guild guild = event.getGuild();
+            if (guild.getIdLong() == DiscordData.guildId) {
+                TextChannel channel = event.getTextChannel();
+                if (channel.getIdLong() == DiscordData.chatInGameId) {
+                    Member member = event.getMember();
+                    if (member == null) {
+                        event.getMessage().delete().queue();
+                        return;
+                    }
+
+                    if (member.getIdLong() == discordBot.getSelfUser().getIdLong()) {
+                        return;
+                    }
+
+                    if (member.getRoles().stream().map(Role::getIdLong).toList().contains(DiscordData.linkedRoleId)) {
+                        AtomicReference<CustomPlayerDTO> customPlayer = new AtomicReference<>(null);
+
+                        registry.getPlayers().forEach((id, custom) -> {
+                            if (custom.getDiscordUserId() != null && custom.getDiscordUserId() == member.getIdLong()) {
+                                customPlayer.set(custom);
+                            }
+                        });
+
+                        if (customPlayer.get() == null) {
+                            event.getMessage().delete().queue();
+                            return;
+                        }
+
+                        CustomPlayerDTO finalCustomPlayer = customPlayer.get();
+
+                        Bukkit.getOnlinePlayers().forEach(player -> {
+                            player.sendMessage(ColorsUtils.translateAll("&9Discord &8- " + finalCustomPlayer.getRank().chatName.replace("%player_name%", finalCustomPlayer.getNameToUse()) + " &8>> &f" + event.getMessage().getContentDisplay()));
+                        });
+                    } else {
+                        event.getMessage().delete().queue();
+                    }
+                }
             }
         }
     }

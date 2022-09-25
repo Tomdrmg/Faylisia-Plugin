@@ -23,9 +23,13 @@ public class EnchantmentSerializer extends JsonSerializer<Map> {
      * @param withObject if we start with '{' and finish with '}'
      */
     public void serialize(Map<CustomEnchantments, Integer> value, JsonGenerator gen, SerializerProvider serializers, boolean withObject) throws IOException {
+        serialize(value, gen, serializers, withObject, "enchantments");
+    }
+
+    public void serialize(Map<CustomEnchantments, Integer> value, JsonGenerator gen, SerializerProvider serializers, boolean withObject, String name) throws IOException {
         if (withObject) gen.writeStartObject();
 
-        gen.writeArrayFieldStart("enchantments");
+        gen.writeArrayFieldStart(name);
 
         for (Map.Entry<CustomEnchantments, Integer> entry : value.entrySet()) {
             gen.writeStartObject();

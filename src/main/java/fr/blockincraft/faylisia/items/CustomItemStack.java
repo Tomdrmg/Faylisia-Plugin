@@ -1,9 +1,11 @@
 package fr.blockincraft.faylisia.items;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
-import fr.blockincraft.faylisia.items.enchantment.BaseEnchantedItem;
+import fr.blockincraft.faylisia.api.serializer.CustomItemStackSerializer;
+import fr.blockincraft.faylisia.items.enchantment.BaseEnchantedItemModel;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
@@ -26,6 +28,7 @@ import java.util.*;
  * You can convert it to an {@link ItemStack} using {@link CustomItemStack#getAsItemStack()} <br/>
  * When create a custom item stack using {@link CustomItemStack#fromItemStack(ItemStack)}, modifications will not be applied to the item stack
  */
+@JsonSerialize(using = CustomItemStackSerializer.class)
 public class CustomItemStack implements Cloneable {
     public static final NamespacedKey enchantsKey = new NamespacedKey(Faylisia.getInstance(), "custom-enchants");
     public static final NamespacedKey storedEnchantsKey = new NamespacedKey(Faylisia.getInstance(), "custom-stored-enchants");
@@ -48,7 +51,7 @@ public class CustomItemStack implements Cloneable {
         this.amount = amount;
 
         // Apply enchantments if item has base enchantments
-        if (item instanceof BaseEnchantedItem enchantedItem) {
+        if (item instanceof BaseEnchantedItemModel enchantedItem) {
             enchantments.putAll(enchantedItem.getEnchantments());
         }
     }

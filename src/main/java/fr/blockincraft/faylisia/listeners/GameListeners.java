@@ -1,12 +1,14 @@
 package fr.blockincraft.faylisia.listeners;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.configurable.DiscordData;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.displays.ScoreboardManager;
-import fr.blockincraft.faylisia.entity.CustomEntity;
-import fr.blockincraft.faylisia.entity.Entities;
-import fr.blockincraft.faylisia.entity.EntitySpawnLocation;
+import fr.blockincraft.faylisia.entity.*;
+import fr.blockincraft.faylisia.entity.interaction.HostileMobEntityType;
 import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.map.Region;
@@ -16,11 +18,13 @@ import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.displays.Tab;
 import fr.blockincraft.faylisia.menu.DisenchantmentMenu;
 import fr.blockincraft.faylisia.menu.EnchantmentMenu;
+import fr.blockincraft.faylisia.menu.InvseeMenu;
 import fr.blockincraft.faylisia.player.permission.Ranks;
-import fr.blockincraft.faylisia.utils.AreaUtils;
-import fr.blockincraft.faylisia.utils.FileUtils;
-import fr.blockincraft.faylisia.utils.HandlersUtils;
-import fr.blockincraft.faylisia.utils.PlayerUtils;
+import fr.blockincraft.faylisia.utils.*;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -37,6 +41,7 @@ import java.util.*;
 
 public class GameListeners implements Listener {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
+    private static final JDA discordBot = Faylisia.getInstance().getDiscordBot();
 
     /**
      * When player login, disallow it with a message depending on if server is in {@link Faylisia#development}
@@ -59,7 +64,7 @@ public class GameListeners implements Listener {
         // Apply resource pack
         try {
             e.getPlayer().setResourcePack(
-                    "http://faylis.xyz:11342/resource_pack", FileUtils.calcSHA1(FileUtils.getResourcePack()), true
+                    "http://faylisia.fr:11342/resource_pack", FileUtils.calcSHA1(FileUtils.getResourcePack()), true
             );
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -78,6 +83,23 @@ public class GameListeners implements Listener {
         customPlayer.refreshStats();
         customPlayer.setEffectiveHealth(customPlayer.getMaxEffectiveHealth());
         Ranks.applyPermissions(e.getPlayer(), customPlayer.getRank());
+        customPlayer.setLastName(e.getPlayer().getName());
+        customPlayer.updateLastInventory();
+
+        // Apply a client side mining fatigue effect to mining features
+        PacketContainer packet = Faylisia.getInstance().getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_EFFECT);
+
+        packet.getIntegers().write(0, e.getPlayer().getEntityId());
+        packet.getIntegers().write(1, 4);
+        packet.getBytes().write(0, (byte) 255);
+        packet.getIntegers().write(2, 32767);
+        packet.getBytes().write(1, (byte) 0);
+
+        try {
+            Faylisia.getInstance().getProtocolManager().sendServerPacket(e.getPlayer(), packet);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         // Update items if they are edited since last connection
         registry.refreshItems(e.getPlayer().getInventory());
@@ -97,8 +119,20 @@ public class GameListeners implements Listener {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getUniqueId() != e.getPlayer().getUniqueId()) {
                 Tab.refreshPlayersInTabFor(player);
+                Tab.refreshRealsPlayersInTabFor(player);
             }
         }
+
+        TextChannel chatInGame = discordBot.getTextChannelById(DiscordData.chatInGameId);
+        if (chatInGame == null) return;
+
+        chatInGame.sendMessage(new MessageBuilder()
+                .setEmbeds(new EmbedBuilder()
+                        .setDescription(net.md_5.bungee.api.ChatColor.stripColor(ColorsUtils.translateAll(customPlayer.getRank().chatName.replace("%player_name%", customPlayer.getNameToUse().replace(" ", "\\_")))) + " a rejoint le serveur !")
+                        .setColor(0x00FF11)
+                        .setFooter(customPlayer.getNameToUse(), "https://minotar.net/avatar/" + customPlayer.getPlayer().toString() + ".png")
+                        .build())
+                .build()).queue();
     }
 
     /**
@@ -119,9 +153,23 @@ public class GameListeners implements Listener {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.getUniqueId() != e.getPlayer().getUniqueId()) {
                     Tab.refreshPlayersInTabFor(player);
+                    Tab.refreshRealsPlayersInTabFor(player);
                 }
             }
         }, 1);
+
+        CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(e.getPlayer().getUniqueId());
+
+        TextChannel chatInGame = discordBot.getTextChannelById(DiscordData.chatInGameId);
+        if (chatInGame == null) return;
+
+        chatInGame.sendMessage(new MessageBuilder()
+                .setEmbeds(new EmbedBuilder()
+                        .setDescription(net.md_5.bungee.api.ChatColor.stripColor(ColorsUtils.translateAll(customPlayer.getRank().chatName.replace("%player_name%", customPlayer.getNameToUse().replace(" ", "\\_")))) + " a quitté le serveur.")
+                        .setColor(0xFF0000)
+                        .setFooter(customPlayer.getNameToUse(), "https://minotar.net/avatar/" + customPlayer.getPlayer().toString() + ".png")
+                        .build())
+                .build()).queue();
     }
 
     /**
@@ -241,15 +289,51 @@ public class GameListeners implements Listener {
 
         if (e.getTo() == null) return;
 
-        Region from = registry.getRegionAt(e.getFrom());
-        Region to = registry.getRegionAt(e.getTo());
+        Set<Region> leaved = new HashSet<>();
+        Set<Region> joined = new HashSet<>();
+
+        Set<Region> from = new HashSet<>(List.of(Objects.requireNonNull(registry.getRegionsAt(e.getFrom()))));
+        Set<Region> to = new HashSet<>(List.of(Objects.requireNonNull(registry.getRegionsAt(e.getTo()))));
+
+        for (Region region : to) {
+            if (!from.contains(region)) {
+                joined.add(region);
+            }
+        }
+
+        for (Region region : from) {
+            if (!to.contains(region)) {
+                leaved.add(region);
+            }
+        }
 
         // If player change region then refresh player stats
-        if (from != to) {
+        if (leaved.size() > 0 || joined.size() > 0) {
             CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(e.getPlayer().getUniqueId());
 
             customPlayer.refreshStats();
         }
+
+        // Check if event must be cancelled
+        boolean cancelled = false;
+
+        for (Region region : joined) {
+            if (!region.getEnterAction().onEnter(e.getPlayer(), from, to)) {
+                cancelled = true;
+                break;
+            }
+        }
+
+        if (!cancelled) {
+            for (Region region : leaved) {
+                if (!region.getLeaveAction().onLeave(e.getPlayer(), from, to)) {
+                    cancelled = true;
+                    break;
+                }
+            }
+        }
+
+        e.setCancelled(cancelled);
     }
 
     /**
@@ -292,7 +376,7 @@ public class GameListeners implements Listener {
                 // When player attack entity
                 CustomEntity entity = registry.getCustomEntityByEntity(subE.getEntity());
                 // Cancel if entity isn't a custom entity
-                if (entity == null) {
+                if (!(entity instanceof CustomLivingEntity livingEntity)) {
                     e.setCancelled(true);
                     return;
                 }
@@ -310,19 +394,19 @@ public class GameListeners implements Listener {
 
                 // Spawn damage indicator and apply custom damage to entity
                 PlayerUtils.spawnDamageIndicator(damage, critic, player, subE.getEntity().getLocation());
-                entity.takeDamage(damage, player);
+                livingEntity.takeDamage(damage, player);
             } else if (subE.getEntity() instanceof Player player && !(subE.getDamager() instanceof Player)) {
                 // When entity attack player
                 CustomEntity entity = registry.getCustomEntityByEntity(subE.getDamager());
                 // Cancel if entity isn't a custom entity
-                if (entity == null) {
+                if (!(entity instanceof HostileCustomLivingEntity hostileEntity)) {
                     e.setCancelled(true);
                     return;
                 }
 
                 // Apply custom damage to player
                 CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
-                customPlayer.takeDamage(entity.getDamageFor(player), entity);
+                customPlayer.takeDamage(hostileEntity.getDamageFor(player), entity);
             }
         }
 
@@ -450,7 +534,7 @@ public class GameListeners implements Listener {
     }
 
     /**
-     * Just refresh stats
+     * Just refresh stats and update json inventory to api
      */
     @EventHandler
     public void handleInventoryChange(InventoryClickEvent e) {
@@ -458,12 +542,19 @@ public class GameListeners implements Listener {
             Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
                 CustomPlayerDTO player = registry.getOrRegisterPlayer(p.getUniqueId());
                 player.refreshStats();
+                player.updateLastInventory();
+
+                MenuListener.menus.forEach((uuid, chestMenu) -> {
+                    if (chestMenu instanceof InvseeMenu invseeMenu && invseeMenu.getPlayer().getUniqueId().equals(p.getUniqueId())) {
+                        invseeMenu.refreshMenu();
+                    }
+                });
             });
         }
     }
 
     /**
-     * Just refresh stats
+     * Just refresh stats and update json inventory to api
      */
     @EventHandler
     public void handleInventoryChange(InventoryCloseEvent e) {
@@ -471,25 +562,39 @@ public class GameListeners implements Listener {
             Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
                 CustomPlayerDTO player = registry.getOrRegisterPlayer(p.getUniqueId());
                 player.refreshStats();
+                player.updateLastInventory();
                 Tab.refreshStatsPartFor(p);
+
+                MenuListener.menus.forEach((uuid, chestMenu) -> {
+                    if (chestMenu instanceof InvseeMenu invseeMenu && invseeMenu.getPlayer().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+                        invseeMenu.refreshMenu();
+                    }
+                });
             });
         }
     }
 
     /**
-     * Just refresh stats
+     * Just refresh stats and update json inventory to api
      */
     @EventHandler
     public void handleInventoryChange(PlayerDropItemEvent e) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
             CustomPlayerDTO player = registry.getOrRegisterPlayer(e.getPlayer().getUniqueId());
             player.refreshStats();
+            player.updateLastInventory();
             Tab.refreshStatsPartFor(e.getPlayer());
+
+            MenuListener.menus.forEach((uuid, chestMenu) -> {
+                if (chestMenu instanceof InvseeMenu invseeMenu && invseeMenu.getPlayer().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+                    invseeMenu.refreshMenu();
+                }
+            });
         }, 1);
     }
 
     /**
-     * Just refresh stats
+     * Just refresh stats and update json inventory to api
      */
     @EventHandler
     public void handleInventoryChange(EntityPickupItemEvent e) {
@@ -497,32 +602,53 @@ public class GameListeners implements Listener {
             Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
                 CustomPlayerDTO player = registry.getOrRegisterPlayer(p.getUniqueId());
                 player.refreshStats();
+                player.updateLastInventory();
                 Tab.refreshStatsPartFor(p);
+
+                MenuListener.menus.forEach((uuid, chestMenu) -> {
+                    if (chestMenu instanceof InvseeMenu invseeMenu && invseeMenu.getPlayer().getUniqueId().equals(p.getUniqueId())) {
+                        invseeMenu.refreshMenu();
+                    }
+                });
             }, 1);
         }
     }
 
     /**
-     * Just refresh stats
+     * Just refresh stats and update json inventory to api
      */
     @EventHandler
     public void handleInventoryChange(PlayerItemHeldEvent e) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
             CustomPlayerDTO player = registry.getOrRegisterPlayer(e.getPlayer().getUniqueId());
             player.refreshStats();
+            player.updateLastInventory();
             Tab.refreshStatsPartFor(e.getPlayer());
+
+            MenuListener.menus.forEach((uuid, chestMenu) -> {
+                if (chestMenu instanceof InvseeMenu invseeMenu && invseeMenu.getPlayer().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+                    invseeMenu.refreshMenu();
+                }
+            });
         }, 1);
     }
 
     /**
-     * Just refresh stats
+     * Just refresh stats and update json inventory to api
      */
     @EventHandler
     public void handleInventoryChange(PlayerSwapHandItemsEvent e) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(Faylisia.getInstance(), () -> {
             CustomPlayerDTO player = registry.getOrRegisterPlayer(e.getPlayer().getUniqueId());
             player.refreshStats();
+            player.updateLastInventory();
             Tab.refreshStatsPartFor(e.getPlayer());
+
+            MenuListener.menus.forEach((uuid, chestMenu) -> {
+                if (chestMenu instanceof InvseeMenu invseeMenu && invseeMenu.getPlayer().getUniqueId().equals(e.getPlayer().getUniqueId())) {
+                    invseeMenu.refreshMenu();
+                }
+            });
         }, 1);
     }
 
