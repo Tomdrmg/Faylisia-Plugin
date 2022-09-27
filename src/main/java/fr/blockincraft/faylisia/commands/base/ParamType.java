@@ -3,6 +3,7 @@ package fr.blockincraft.faylisia.commands.base;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
+import fr.blockincraft.faylisia.blocks.BlockType;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.items.CustomItem;
@@ -46,7 +47,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     PLAYER_NON_NICK(CustomPlayerDTO.class, (value, sender, sendError) -> {
         for (CustomPlayerDTO player : Faylisia.getInstance().getRegistry().getPlayers().values()) {
             if (player.getLastName().equalsIgnoreCase(value)) {
@@ -71,7 +72,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     ONLINE_PLAYER(Player.class, (value, sender, sendError) -> {
         if (sender instanceof Player player && value.equalsIgnoreCase("@s")) {
             return player;
@@ -106,7 +107,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     ONLINE_PLAYER_SUPPORT_ALL(Player[].class, (value, sender, sendError) -> {
         if (value.equalsIgnoreCase("@a")) {
             return Bukkit.getOnlinePlayers().toArray(new Player[0]);
@@ -143,7 +144,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     CUSTOM_ITEM(CustomItem.class, (value, sender, sendError) -> {
         CustomItem item = Faylisia.getInstance().getRegistry().getItemsById().get(value.toLowerCase(Locale.ROOT));
 
@@ -167,7 +168,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     CUSTOM_ITEM_STACK(CustomItemStack.class, (value, sender, sendError) -> {
         String[] elements = value.split("\\|\\|");
 
@@ -223,7 +224,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     AMOUNT(Integer.class, (value, sender, sendError) -> {
         try {
             return Integer.parseInt(value);
@@ -242,14 +243,14 @@ public enum ParamType {
         completion.add("<amount>");
 
         return completion;
-    }),
+    }, false),
     TOKEN(String.class, (value, sender, sendError) -> value, (currentValue, sender) -> {
         List<String> completion = new ArrayList<>();
 
         completion.add("<token>");
 
         return completion;
-    }),
+    }, false),
     RANK(Ranks.class, (value, sender, sendError) -> {
         for (Ranks rank : Ranks.values()) {
             if (rank.name.equalsIgnoreCase(value)) {
@@ -272,7 +273,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     X(Integer.class, (value, sender, sendError) -> {
         try {
             return Integer.parseInt(value);
@@ -294,7 +295,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     Y(Integer.class, (value, sender, sendError) -> {
         try {
             return Integer.parseInt(value);
@@ -316,7 +317,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     Z(Integer.class, (value, sender, sendError) -> {
         try {
             return Integer.parseInt(value);
@@ -338,7 +339,7 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     BLOCK_MATERIAL(Material.class, (value, sender, sendError) -> {
         for (Material material : Material.values()) {
             if (material.name().equalsIgnoreCase(value)) {
@@ -371,14 +372,14 @@ public enum ParamType {
         }
 
         return completion;
-    }),
+    }, false),
     TEXT(String.class, (value, sender, sendError) -> value, (currentValue, sender) -> {
         List<String> completion = new ArrayList<>();
 
         completion.add("<text>");
 
         return completion;
-    }),
+    }, false),
     BOOLEAN(Boolean.class, (value, sender, sendError) -> {
         if (value.equalsIgnoreCase("true")) {
             return true;
@@ -399,7 +400,7 @@ public enum ParamType {
         if ("false".startsWith(currentValue.toLowerCase(Locale.ROOT))) completion.add("false");
 
         return completion;
-    }),
+    }, false),
     ENABLE_STATE(Boolean.class, (value, sender, sendError) -> {
         if (value.equalsIgnoreCase("enable")) {
             return true;
@@ -420,7 +421,7 @@ public enum ParamType {
         if ("disable".startsWith(currentValue.toLowerCase(Locale.ROOT))) completion.add("disable");
 
         return completion;
-    }),
+    }, false),
     NAME(String.class, (value, sender, sendError) -> {
         if (!Pattern.compile("[a-zA-Z1-9_-]+").matcher(value).matches()) {
             if (sendError) sender.sendMessage(Messages.INVALID_NAME_CONTENT.get());
@@ -439,16 +440,40 @@ public enum ParamType {
         completion.add("<name>");
 
         return completion;
-    });
+    }, false),
+    MESSAGE(String.class, (value, sender, sendError) -> value, (currentValue, sender) -> {
+        List<String> completion = new ArrayList<>();
+
+        completion.add("<message>");
+
+        return completion;
+    }, true),
+    BLOCK_TYPE_LIST(BlockType[].class, (value, sender, sendError) -> {
+        List<BlockType> blockTypes = new ArrayList<>();
+
+        sender.
+    }, (currentValue, sender) -> {
+        List<String> completion = new ArrayList<>();
+        String[] args = currentValue.split(" ");
+        String current = args.length == 0 ? "" : args[args.length - 1];
+
+        for (BlockType blockType : Faylisia.getInstance().getRegistry().getBlockTypes()) {
+            if (blockType.getId().startsWith(current.toLowerCase(Locale.ROOT))) completion.add(blockType.getId());
+        }
+
+        return completion;
+    }, true);
 
     public final Class<?> type;
     public final ParamParser<?> parser;
     public final ParamCompleter completer;
+    public final boolean allEnd;
 
-    ParamType(@NotNull Class<?> type, @NotNull ParamParser<?> parser, @NotNull ParamCompleter completer) {
+    ParamType(@NotNull Class<?> type, @NotNull ParamParser<?> parser, @NotNull ParamCompleter completer, boolean allEnd) {
         this.type = type;
         this.parser = parser;
         this.completer = completer;
+        this.allEnd = allEnd;
     }
 
     @FunctionalInterface

@@ -43,6 +43,10 @@ public enum Messages {
     INVALID_NAME_LENGTH("invalid_name_length", "%prefix% &cLe nom doit contenir entre 3 et 16 caractères inclus!"),
     INVALID_NAME_CONTENT("invalid_name_content", "%prefix% &cLe nom doit contenir uniquement des lettres majuscule et minuscule, des chiffres, des tiret du six et des tiret du huit."),
 
+    //Command msg messages
+    MSG_FROM_MESSAGE("msg_from_message", "&8De &d%sender_name%&8: &d%message%"),
+    MSG_TO_MESSAGE("msg_to_message", "&8À &d%target_name%: &d%message%"),
+
     //Command cblocks messages
     CBLOCKS_RESULT_MESSAGE("cblocks_result_message", "%prefix% &a%amount% blocs custom on était généré."),
 

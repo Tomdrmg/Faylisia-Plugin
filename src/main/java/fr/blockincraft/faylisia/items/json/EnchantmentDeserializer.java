@@ -3,6 +3,7 @@ package fr.blockincraft.faylisia.items.json;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -16,15 +17,7 @@ import java.util.Map;
 /**
  * Deserializer to convert {@link String} to a list of enchantments of a {@link CustomItemStack}
  */
-public class EnchantmentDeserializer extends StdDeserializer<Map<CustomEnchantments, Integer>> {
-    public EnchantmentDeserializer() {
-        this(null);
-    }
-
-    public EnchantmentDeserializer(Class<?> vc) {
-        super(vc);
-    }
-
+public class EnchantmentDeserializer extends JsonDeserializer<Map<CustomEnchantments, Integer>> {
     @Override
     public Map<CustomEnchantments, Integer> deserialize(JsonParser parser, DeserializationContext context) throws IOException {
         return this.deserialize(parser.readValueAsTree(), "enchantments");

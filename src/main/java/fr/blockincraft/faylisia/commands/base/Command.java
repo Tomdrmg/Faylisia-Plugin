@@ -43,6 +43,8 @@ public abstract class Command {
                     CommandParam paramAnnotation = param.getAnnotation(CommandParam.class);
                     if (!param.getType().isAssignableFrom(paramAnnotation.type().type)) throw new CommandException("Param hasn't the same type of the parser!");
 
+                    if (paramAnnotation.type().allEnd && i != method.getParameterCount() - 1) throw new CommandException("This param can only be used as last!");
+
                     params.add(paramAnnotation.type());
                 }
 
@@ -138,7 +140,17 @@ public abstract class Command {
                     if (!prefixes[i].equalsIgnoreCase(params[i])) return false;
                 } else {
                     ParamType param = this.params[i - prefixes.length];
-                    if (param.parser.parse(params[i], sender, false) == null) return false;
+                    if (param.allEnd) {
+                        StringBuilder sb = new StringBuilder(params[i]);
+                        for (int l = i + 1; l < params.length; l++) {
+                            sb.append(" ").append(params[l]);
+                        }
+
+                        if (param.parser.parse(sb.toString(), sender, false) == null) return false;
+                        break;
+                    } else {
+                        if (param.parser.parse(params[i], sender, false) == null) return false;
+                    }
                 }
             }
 
@@ -153,7 +165,17 @@ public abstract class Command {
                     if (!prefixes[i].equalsIgnoreCase(params[i])) return CompletionState.INCOMPLETE;
                 } else {
                     ParamType param = this.params[i - prefixes.length];
-                    if (param.parser.parse(params[i], sender, true) == null) return CompletionState.INVALID_ARG;
+                    if (param.allEnd) {
+                        StringBuilder sb = new StringBuilder(params[i]);
+                        for (int l = i + 1; l < params.length; l++) {
+                            sb.append(" ").append(params[l]);
+                        }
+
+                        if (param.parser.parse(sb.toString(), sender, true) == null) return CompletionState.INVALID_ARG;
+                        break;
+                    } else {
+                        if (param.parser.parse(params[i], sender, true) == null) return CompletionState.INVALID_ARG;
+                    }
                 }
             }
 

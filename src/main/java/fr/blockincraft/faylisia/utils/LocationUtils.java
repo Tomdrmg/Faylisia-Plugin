@@ -56,7 +56,7 @@ public class LocationUtils {
      * @return x coordinate
      */
     public static int getX(long location) {
-        return (int) (location << 26 >> 38);
+        return (int) (location >> 38);
     }
 
     /**
@@ -65,7 +65,8 @@ public class LocationUtils {
      * @return y coordinate
      */
     public static int getY(long location) {
-        return (int) (location >> 38);
+        int y = (int) (location & 4095L);
+        return y >= 4000 ? y - 4096 : y;
     }
 
     /**
@@ -74,7 +75,6 @@ public class LocationUtils {
      * @return z coordinate
      */
     public static int getZ(long location) {
-        int y = (int) (location & 4095L);
-        return y >= 4000 ? y - 4096 : y;
+        return (int) (location << 26 >> 38);
     }
 }
