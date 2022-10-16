@@ -42,6 +42,7 @@ public enum Messages {
     INVALID_STATE_MESSAGE("invalid_state_message", "%prefix% &cEtat invalide: '%state%'!"),
     INVALID_NAME_LENGTH("invalid_name_length", "%prefix% &cLe nom doit contenir entre 3 et 16 caractères inclus!"),
     INVALID_NAME_CONTENT("invalid_name_content", "%prefix% &cLe nom doit contenir uniquement des lettres majuscule et minuscule, des chiffres, des tiret du six et des tiret du huit."),
+    INVALID_BLOCK_TYPE("invalid_block_type", "%prefix% &cAucun block type n'a comme id \"%id%\""),
 
     //Command msg messages
     MSG_FROM_MESSAGE("msg_from_message", "&8De &d%sender_name% &8>> &d%message%"),

@@ -405,11 +405,12 @@ public final class Faylisia extends JavaPlugin {
         blocks = new File(getDataFolder(), "storage/blocks.json");
         if (!blocks.exists()) {
             try {
+                blocks.mkdirs();
                 blocks.createNewFile();
             } catch (Exception e) {
                 e.printStackTrace();
                 // In case of error, stop the plugin
-                this.getLogger().log(Level.SEVERE, "Cannot load images server, stopping.");
+                this.getLogger().log(Level.SEVERE, "Cannot load blocks data file, stopping.");
                 Bukkit.getPluginManager().disablePlugin(this);
                 return;
             }

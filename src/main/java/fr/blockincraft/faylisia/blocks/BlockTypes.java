@@ -13,7 +13,7 @@ public class BlockTypes {
             .setLevel(0)
             .setToolTypes(new ToolType[]{ToolType.FORAGING})
             .setLoots(new Loot[]{
-                    new Loot(1, new CustomItemStack(Items.bark, 1), 1, 1, () -> 1, Loot.LootType.BLOCK)
+                    new Loot(1, new CustomItemStack(Items.BARK, 1), 1, 1, () -> 1, Loot.LootType.BLOCK)
             });
 
     static {

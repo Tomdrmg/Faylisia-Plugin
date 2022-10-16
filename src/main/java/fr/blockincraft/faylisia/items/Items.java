@@ -208,7 +208,7 @@ public class Items {
             .setDisenchantable(false)
             .setRarity(Rarity.RARE);
      **/
-    public static final WeaponAbilityItem spellItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.NETHERITE_SWORD, "spellItem")
+    public static final WeaponAbilityItem spellItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.NETHERITE_SWORD, "spell_item")
             .setAbility((player, clickedBlock, hand) -> {
                 Spell spell = new SpiralExplosionSpellWrapper(player, 10, 0x7bf542, 0xf54242);
                 spell.start();
@@ -226,7 +226,8 @@ public class Items {
     public static final CustomItem BARK = new CustomItem(Material.OAK_PLANKS, "bark")
             .setName("Écorce")
             .setRarity(Rarity.COMMON)
-            .setCustomModelData(1);
+            .setCustomModelData(1)
+            .setCategory(Categories.RESOURCES);
     public static final CustomItem WOODEN_TOOL_HANDLE = new CustomItem(Material.STICK, "wooden_tool_handle")
             .setName("Manche d'outils en bois")
             .setRarity(Rarity.COMMON)

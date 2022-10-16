@@ -22,14 +22,6 @@ public class Entities {
             .setDamageType(DamageType.MELEE_DAMAGE)
             .setLevel(30)
             .setMaxHealth(2000)
-            .setLoots(
-                    new Loot(1, new CustomItemStack(Items.coolDiamond, 1), 1, 1, () -> {
-                        return new SecureRandom().nextInt(2) + 1;
-                    }, Loot.LootType.MOB),
-                    new Loot(1, new CustomItemStack(Items.coolDiamond, 1), 1, 18, () -> {
-                        return 1;
-                    }, Loot.LootType.MOB)
-            )
             .setName("&dCool Zombie")
             .setRegion(Regions.CITE)
             .setTickBeforeRespawn(200);

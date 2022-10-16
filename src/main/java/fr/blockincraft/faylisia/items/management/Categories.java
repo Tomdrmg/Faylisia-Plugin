@@ -47,7 +47,7 @@ public enum Categories {
         ItemMeta meta = itemStack.getItemMeta();
 
         assert meta != null;
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name + " Category"));
+        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
         meta.setLore(Arrays.stream(lore).map(
                 text -> ChatColor.translateAlternateColorCodes('&', text.replace("%items%", String.valueOf(items.size())))
         ).toList());

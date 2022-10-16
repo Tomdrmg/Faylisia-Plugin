@@ -451,7 +451,27 @@ public enum ParamType {
     BLOCK_TYPE_LIST(BlockType[].class, (value, sender, sendError) -> {
         List<BlockType> blockTypes = new ArrayList<>();
 
-        sender.
+        String[] args = value.split(" ");
+
+        outer: for (String arg : args) {
+            for (BlockType blockType : Faylisia.getInstance().getRegistry().getBlockTypes()) {
+                if (arg.equalsIgnoreCase(blockType.getId())) {
+                    blockTypes.add(blockType);
+                    continue outer;
+                }
+            }
+
+            if (sendError) {
+                Map<String, String> params = new HashMap<>();
+
+                params.put("%id%", arg);
+
+                sender.sendMessage(Messages.INVALID_BLOCK_TYPE.get(params));
+            }
+            return null;
+        }
+
+        return blockTypes;
     }, (currentValue, sender) -> {
         List<String> completion = new ArrayList<>();
         String[] args = currentValue.split(" ");
