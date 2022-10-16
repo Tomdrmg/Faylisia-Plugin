@@ -1,5 +1,6 @@
 package fr.blockincraft.faylisia;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.blockincraft.faylisia.blocks.BlockType;
 import fr.blockincraft.faylisia.blocks.CustomBlock;
 import fr.blockincraft.faylisia.core.dto.DiscordTicketDTO;
@@ -11,6 +12,7 @@ import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.armor.ArmorSet;
 import fr.blockincraft.faylisia.items.management.Categories;
+import fr.blockincraft.faylisia.magic.SpellType;
 import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.map.shapes.Shape;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
@@ -30,6 +32,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.io.*;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.logging.Level;
@@ -45,6 +48,7 @@ public class Registry {
     private static final Logger logger = Faylisia.getInstance().getLogger();
     private static final CustomPlayerService customPlayerService = new CustomPlayerService();
     private static final DiscordTicketService ticketService = new DiscordTicketService();
+    public static File blocksFile;
 
     // Initialize registry in-game data
     // Custom players are stored in database
@@ -60,6 +64,8 @@ public class Registry {
     private final List<CustomEntity> entities = new ArrayList<>();
     private final Map<String, BlockType> blockTypesById = new HashMap<>();
     private final List<BlockType> blockTypes = new ArrayList<>();
+    private final Map<String, SpellType> spellTypesById = new HashMap<>();
+    private final List<SpellType> spellTypes = new ArrayList<>();
     private final List<CustomBlock> blocks = new ArrayList<>();
     private final Map<String, Region> regionsById = new HashMap<>();
     private final List<Region> regions = new ArrayList<>();
@@ -624,7 +630,7 @@ public class Registry {
      * @param id id of block type
      * @return block type associated to the id
      */
-    @NotNull
+    @Nullable
     public BlockType getBlockTypeById(@NotNull String id) {
         return blockTypesById.get(id);
     }
@@ -648,6 +654,17 @@ public class Registry {
         }
 
         blocks.add(block);
+        if (blocksFile != null) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String str = mapper.writeValueAsString(blocks);
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(blocksFile)));
+                writer.write(str);
+                writer.close();
+            } catch (Exception ignored) {
+
+            }
+        }
     }
 
     @Nullable
@@ -668,5 +685,62 @@ public class Registry {
      */
     public List<CustomBlock> getBlocks() {
         return new ArrayList<>(blocks);
+    }
+
+    /**
+     * Change blocks which store blocks
+     * @param file new file
+     */
+    public void setBlocksFile(File file) {
+        blocksFile = file;
+    }
+
+    public void reloadBlocks() throws IOException {
+        StringBuilder resultStringBuilder = new StringBuilder();
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(blocksFile)));
+        String line;
+        while ((line = br.readLine()) != null) {
+            resultStringBuilder.append(line).append("\n");
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        CustomBlock[] blocks = mapper.readValue(resultStringBuilder.toString(), CustomBlock[].class);
+        this.blocks.clear();
+        this.blocks.addAll(List.of(blocks));
+    }
+
+    /**
+     * @return all {@link SpellType}
+     */
+    @NotNull
+    public List<SpellType> getSpellTypes() {
+        return new ArrayList<>(spellTypes);
+    }
+
+    /**
+     * This method check if an item id is used or no
+     * @param id id to check
+     * @return if it was used
+     */
+    public boolean spellTypeIdUsed(@NotNull String id) {
+        return spellTypesById.containsKey(id);
+    }
+
+    /**
+     * @param id id of block type
+     * @return block type associated to the id
+     */
+    @Nullable
+    public SpellType getSpellTypeById(@NotNull String id) {
+        return spellTypesById.get(id);
+    }
+
+    /**
+     * This method register a {@link SpellType} in this registry and in database
+     * @param spellType {@link SpellType} to register
+     */
+    public void registerSpellType(@NotNull SpellType spellType) {
+        spellTypesById.put(spellType.getId(), spellType);
+        spellTypes.add(spellType);
     }
 }

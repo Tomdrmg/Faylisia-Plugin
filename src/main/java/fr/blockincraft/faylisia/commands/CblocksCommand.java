@@ -1,6 +1,9 @@
 package fr.blockincraft.faylisia.commands;
 
 import fr.blockincraft.faylisia.Faylisia;
+import fr.blockincraft.faylisia.Registry;
+import fr.blockincraft.faylisia.blocks.BlockType;
+import fr.blockincraft.faylisia.blocks.CustomBlock;
 import fr.blockincraft.faylisia.commands.base.Command;
 import fr.blockincraft.faylisia.commands.base.CommandAction;
 import fr.blockincraft.faylisia.commands.base.CommandParam;
@@ -9,11 +12,13 @@ import fr.blockincraft.faylisia.configurable.Messages;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -35,8 +40,8 @@ public class CblocksCommand extends Command {
                          @CommandParam(type = ParamType.BOOLEAN) Boolean restartAtRegen,
                          @CommandParam(type = ParamType.BLOCK_MATERIAL) Material material,
                          @CommandParam(type = ParamType.BLOCK_MATERIAL) Material finalBlock,
-                         @CommandParam(type = ParamType.TEXT) String text) {
-        List<String> lines = new ArrayList<>();
+                         @CommandParam(type = ParamType.BLOCK_TYPE_LIST) BlockType[] blockTypes) {
+        List<CustomBlock> blocks = new ArrayList<>();
         World world = player.getWorld();
 
         for (int x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
@@ -44,30 +49,27 @@ public class CblocksCommand extends Command {
                 for (int z = Math.min(z1, z2); z <= Math.max(z1, z2); z++) {
                     Block block = world.getBlockAt(x, y, z);
                     if (block.getType() == material) {
-                        lines.add("registry.registerBlock(new CustomBlock(" + x + ", " + y + ", " + z + ", UUID.fromString(\"" + world.getUID() + "\"), " + restartAtRegen + ", Material." + finalBlock.name() + ", " + text + "));");
+                        blocks.add(new CustomBlock(x, y, z, world.getUID(), restartAtRegen, finalBlock, blockTypes));
                     }
                 }
             }
         }
 
         Map<String, String> params = new HashMap<>();
-        params.put("%amount%", String.valueOf(lines.size()));
+        params.put("%amount%", String.valueOf(blocks.size()));
 
         player.sendMessage(Messages.CBLOCKS_RESULT_MESSAGE.get(params));
-        File file = new File(Faylisia.getInstance().getDataFolder(), player.getUniqueId() + "_" + Date.from(Instant.now()).getTime());
-        int i = 2;
-        while (file.exists()) {
-            file = new File(Faylisia.getInstance().getDataFolder(), player.getUniqueId() + "_" + Date.from(Instant.now()).getTime() + "_" + i);
-            i++;
-        }
 
+        Registry registry = Faylisia.getInstance().getRegistry();
+        for (CustomBlock b : blocks) {
+            registry.registerBlock(b);
+        }
+    }
+
+    @CommandAction(permission = "faylisia.cblocks", onlyPlayers = false, prefixes = {"reload"})
+    public void reload(CommandSender sender) {
         try {
-            file.createNewFile();
-            FileWriter writer = new FileWriter(file);
-            for (String line : lines) {
-                writer.write(line);
-                writer.write("\n");
-            }
+            Faylisia.getInstance().getRegistry().reloadBlocks();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -16,12 +16,9 @@ import java.util.List;
  * Categories are used to sort {@link CustomItem} for display in {@link CategoryViewerMenu}
  */
 public enum Categories {
-    COOL_DIAMOND(Material.DIAMOND_HORSE_ARMOR, -1, "&d&lCool Diamond",
-            "&8The most cool category",
-            "&8of the game",
-            "",
-            "&8Contient %items% items"
-    );
+    RESOURCES(Material.IRON_INGOT, 1, "&fRessources", "&7%items% items"),
+    TOOLS(Material.GOLDEN_SHOVEL, 1, "&bOutils", "&7%items% items"),
+    UPGRADES(Material.AMETHYST_SHARD, 1, "&eAméliorations", "&7%items% items");
 
     public final Material material;
     public final int customModelData;

@@ -48,6 +48,9 @@ public class CustomPlayer {
     @Column(name = "send_messages_to_discord", nullable = false)
     @ColumnDefault(value = "1")
     private boolean sendMessagesToDiscord;
+    @Column(name = "chat_spy", nullable = false)
+    @ColumnDefault(value = "0")
+    private boolean chatSpy;
 
     public CustomPlayer() {
 
@@ -66,6 +69,7 @@ public class CustomPlayer {
         this.lastUpdate = dto.getLastUpdate();
         this.money = dto.getMoney();
         this.sendMessagesToDiscord = dto.isSendMessagesToDiscord();
+        this.chatSpy = dto.isChatSpy();
     }
 
     public UUID getPlayer() {
@@ -114,5 +118,9 @@ public class CustomPlayer {
 
     public boolean isSendMessagesToDiscord() {
         return sendMessagesToDiscord;
+    }
+
+    public boolean isChatSpy() {
+        return chatSpy;
     }
 }

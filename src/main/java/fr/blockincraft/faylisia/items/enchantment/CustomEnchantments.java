@@ -1,10 +1,16 @@
 package fr.blockincraft.faylisia.items.enchantment;
 
+import fr.blockincraft.faylisia.Faylisia;
+import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import fr.blockincraft.faylisia.core.entity.CustomPlayer;
+import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.armor.ArmorItem;
+import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.EnchantmentHandlers;
 import fr.blockincraft.faylisia.items.event.Handlers;
+import fr.blockincraft.faylisia.items.weapons.DamageItemModel;
 import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -28,7 +34,15 @@ public enum CustomEnchantments {
         public double calculateItemStat(@NotNull Player player, @NotNull CustomItem customItem, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
             return inArmorSlot && stat == Stats.DEFENSE ? value + 25 * level : value;
         }
-    }, 4, 4, new Class[]{ArmorItem.class}, new CustomEnchantments[0]);
+    }, 4, 4, new Class[]{ArmorItem.class}, new CustomEnchantments[0]),
+    ABSORPTION(1, "Absorption", new EnchantmentHandlersIn(-1) {
+        @Override
+        public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot) {
+            CustomPlayerDTO custom = Faylisia.getInstance().getRegistry().getOrRegisterPlayer(player.getUniqueId());
+            custom.setEffectiveHealth((long) (custom.getEffectiveHealth() + custom.getEffectiveHealth() * 0.0015 * level));
+            return damage;
+        }
+    }, 5, 5, new Class[]{DamageItemModel.class}, new CustomEnchantments[0]);
 
     public final int index;
     public final String name;

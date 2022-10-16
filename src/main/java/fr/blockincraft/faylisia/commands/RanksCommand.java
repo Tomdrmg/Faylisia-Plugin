@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RanksCommand extends Command {
+public class  RanksCommand extends Command {
     @Override
     public @NotNull String getCommand() {
         return "ranks";

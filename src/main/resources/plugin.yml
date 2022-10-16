@@ -43,6 +43,12 @@ commands:
   cblocks:
     description: Command to generate custom blocks
     permission: faylisia.command.cblocks
+  msg:
+    description: Command to send private messages
+    permission: faylisia.command.msg
+  metadata:
+    description: Command to generate metadata files
+    permission: faylisia.command.metadata
 permissions:
   faylisia.command.break:
     default: op
@@ -68,6 +74,14 @@ permissions:
     default: op
   faylisia.command.cblocks:
     default: op
+  faylisia.command.msg:
+    default: true
+  faylisia.command.metadata:
+    default: op
+  faylisia.msg:
+    default: true
+  faylisia.msg.spy:
+    default: op
   faylisia.nick.get:
     default: op
   faylisia.fly:
@@ -81,6 +95,8 @@ permissions:
   faylisia.link:
     default: true
   faylisia.discord:
+    default: op
+  faylisia.metadata:
     default: op
   faylisia.chat_color:
     default: op

@@ -44,8 +44,11 @@ public enum Messages {
     INVALID_NAME_CONTENT("invalid_name_content", "%prefix% &cLe nom doit contenir uniquement des lettres majuscule et minuscule, des chiffres, des tiret du six et des tiret du huit."),
 
     //Command msg messages
-    MSG_FROM_MESSAGE("msg_from_message", "&8De &d%sender_name%&8: &d%message%"),
-    MSG_TO_MESSAGE("msg_to_message", "&8À &d%target_name%: &d%message%"),
+    MSG_FROM_MESSAGE("msg_from_message", "&8De &d%sender_name% &8>> &d%message%"),
+    MSG_TO_MESSAGE("msg_to_message", "&8À &d%target_name% &8>> &d%message%"),
+    MSG_SPY_FROM_TO_MESSAGE("msg_spy_from_to_message", "&dChatSpy &8- De &d%sender_name% &8à &d%target_name% &8>> &d%message%"),
+    CHAT_SPY_ENABLE_MESSAGE("chat_spy_enable_message", "%prefix% &bVous avez activé le chat spy."),
+    CHAT_SPY_DISABLE_MESSAGE("chat_spy_disable_message", "%prefix% &bVous avez désactivé le chat spy."),
 
     //Command cblocks messages
     CBLOCKS_RESULT_MESSAGE("cblocks_result_message", "%prefix% &a%amount% blocs custom on était généré."),

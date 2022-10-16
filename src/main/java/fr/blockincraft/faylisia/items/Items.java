@@ -13,10 +13,14 @@ import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.recipes.CraftingRecipe;
 import fr.blockincraft.faylisia.items.specificitems.StatsLacrymaItem;
+import fr.blockincraft.faylisia.items.tools.StatsToolItem;
 import fr.blockincraft.faylisia.items.tools.ToolItem;
 import fr.blockincraft.faylisia.items.tools.ToolType;
 import fr.blockincraft.faylisia.items.weapons.WeaponAbilityItem;
 import fr.blockincraft.faylisia.items.weapons.WeaponItem;
+import fr.blockincraft.faylisia.magic.Spell;
+import fr.blockincraft.faylisia.magic.SpellTypes;
+import fr.blockincraft.faylisia.magic.wrapper.SpiralExplosionSpellWrapper;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.AbilitiesUtils;
 import fr.blockincraft.faylisia.utils.HandlersUtils;
@@ -38,120 +42,12 @@ import java.util.*;
 public class Items {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
 
-
-
-    public static final ArmorSet coolDiamondSet = new ArmorSet("cool_diamond_set")
-            .setBonus(
-                    new ArmorSet.Bonus(
-                            "Berserk", 2, new Handlers() {
-                        @Override
-                        public double calculateItemStat(@NotNull Player player, @NotNull CustomItem customItem, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
-                            onHandlerCall();
-                            return inArmorSlot && stat == Stats.STRENGTH ? value * 1.5 : value;
-                        }
-
-                        @Override
-                        public double getDefaultStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
-                            onHandlerCall();
-                            return inArmorSlot && stat == Stats.STRENGTH ? value * 1.5 : value;
-                        }
-                    }, "&7Vous gagnez &c+50% &7de force", "&7quand il est actif."
-                    ),
-                    new ArmorSet.Bonus(
-                            "Divine protection", 3, new Handlers() {
-                        @Override
-                        public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
-                            onHandlerCall();
-                            return stat == Stats.DEFENSE && inArmorSlot ? value + 100 : value;
-                        }
-                    }, "&7Vous gagnez &c+100 &7de défense", "&7quand il est actif."
-                    ),
-                    new ArmorSet.Bonus(
-                            "Hulk Power", 4, new Handlers() {
-                        @Override
-                        public long getDamage(@NotNull Player player, long damage, boolean inHand, boolean inArmorSlot) {
-                            onHandlerCall();
-                            return inArmorSlot ? damage * 2 : damage;
-                        }
-                    }, "&7Vos dégats sont augmentés", "&7de &c100%&7."
-                    )
-            );
-
     // Register armor set here
     static {
-        coolDiamondSet.register();
+
     }
 
-    public static final CustomItem coolDiamond = new CustomItem(Material.DIAMOND, "cool_diamond")
-            .setName("Cool Diamond")
-            .setLore("&eA legendary diamond from", "&ethe coolest ore!")
-            .setEnchantable(false)
-            .setDisenchantable(false)
-            .setCategory(Categories.COOL_DIAMOND)
-            .setRarity(Rarity.COSMIC);
-    public static final CustomItem coolDiamondBlock = new CustomItem(Material.DIAMOND_BLOCK, "cool_diamond_block")
-            .setName("Cool Diamond Block")
-            .setLore("&eA legendary diamond block", "&erefined block from the", "&ecoolest ore!")
-            .setEnchantable(false)
-            .setDisenchantable(false)
-            .setCategory(Categories.COOL_DIAMOND)
-            .setRarity(Rarity.NOTHINGNESS);
-    public static final WeaponItem coolDiamondSword = (WeaponItem) new WeaponItem(Material.DIAMOND_SWORD, "cool_diamond_sword")
-            .setDamage(50)
-            .setName("Cool Diamond Sword")
-            .setLore("&eA beautiful sword forged", "&ewith the coolest ore!")
-            .setEnchantable(true)
-            .setDisenchantable(true)
-            .setCategory(Categories.COOL_DIAMOND)
-            .setRarity(Rarity.MYSTICAL);
-    public static final ArmorItem coolDiamondHelmet = (ArmorItem) new ArmorItem(Material.LEATHER_HELMET, "cool_diamond_helmet")
-            .setArmorSet(coolDiamondSet)
-            .setStat(Stats.STRENGTH, 7.5)
-            .setStat(Stats.SPEED, 50)
-            .setStat(Stats.HEALTH, 50)
-            .setName("Cool Diamond Helmet")
-            .setLore("&eA unique helmet made with", "&ethe coolest ore!")
-            .setColor(0xa103fc)
-            .setEnchantable(true)
-            .setDisenchantable(true)
-            .setCategory(Categories.COOL_DIAMOND)
-            .setRarity(Rarity.DEUS);
-    public static final ArmorItem coolDiamondChestplate = (ArmorItem) new ArmorItem(Material.LEATHER_CHESTPLATE, "cool_diamond_chestplate")
-            .setArmorSet(coolDiamondSet)
-            .setStat(Stats.STRENGTH, 7.5)
-            .setStat(Stats.SPEED, 50)
-            .setStat(Stats.HEALTH, 50)
-            .setName("Cool Diamond Chestplate")
-            .setLore("&eA unique chestplate made with", "&ethe coolest ore!")
-            .setColor(0xa103fc)
-            .setEnchantable(true)
-            .setDisenchantable(true)
-            .setCategory(Categories.COOL_DIAMOND)
-            .setRarity(Rarity.DEUS);
-    public static final ArmorItem coolDiamondLeggings = (ArmorItem) new ArmorItem(Material.LEATHER_LEGGINGS, "cool_diamond_leggings")
-            .setArmorSet(coolDiamondSet)
-            .setStat(Stats.STRENGTH, 7.5)
-            .setStat(Stats.SPEED, 50)
-            .setStat(Stats.HEALTH, 50)
-            .setName("Cool Diamond Leggings")
-            .setLore("&eUnique leggings made with", "&ethe coolest ore!")
-            .setColor(0xa103fc)
-            .setEnchantable(true)
-            .setDisenchantable(true)
-            .setCategory(Categories.COOL_DIAMOND)
-            .setRarity(Rarity.DEUS);
-    public static final ArmorItem coolDiamondBoots = (ArmorItem) new ArmorItem(Material.LEATHER_BOOTS, "cool_diamond_boots")
-            .setArmorSet(coolDiamondSet)
-            .setStat(Stats.STRENGTH, 7.5)
-            .setStat(Stats.SPEED, 50)
-            .setStat(Stats.HEALTH, 50)
-            .setName("Cool Diamond Boots")
-            .setLore("&eUnique boots made with", "&ethe coolest ore!")
-            .setColor(0xa103fc)
-            .setEnchantable(true)
-            .setDisenchantable(true)
-            .setCategory(Categories.COOL_DIAMOND)
-            .setRarity(Rarity.DEUS);
+    /**
     public static final WeaponAbilityItem boomItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "boom_item")
             .setAbilityName("Boom")
             .setAbilityDesc("&7Inflige &c10x &7les dégats aux monstres", "&7Dans un rayon de 10 blocs")
@@ -179,7 +75,6 @@ public class Items {
             .setStat(Stats.MAGICAL_RESERVE, 100)
             .setName("Boom Item")
             .setRarity(Rarity.COSMIC)
-            .setCategory(Categories.COOL_DIAMOND);
     public static final WeaponAbilityItem dagger = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "dagger")
             .setAbilityName("Rush")
             .setAbilityDesc("&7Se téléporte a 3 cibles dans un rayon", "&7de 50 blocs et leur assène deux", "&7coûts critiques")
@@ -221,27 +116,6 @@ public class Items {
             .setStat(Stats.CRITICAL_CHANCE, 30)
             .setName("Dague")
             .setRarity(Rarity.COSMIC)
-            .setCategory(Categories.COOL_DIAMOND);
-    public static final EnchantmentLacrymaItem enchantmentLacryma = (EnchantmentLacrymaItem) new EnchantmentLacrymaItem(Material.ENCHANTED_BOOK, "enchantment_lacryma")
-            .setName("Lacryma D'enchantement")
-            .setLore("&bUne lacryma magique qui peut", "&bstocker un ou plusieurs", "&benchantements")
-            .setEnchantable(false)
-            .setDisenchantable(false)
-            .setRarity(Rarity.RARE);
-    public static final StatsLacrymaItem smallEthernanosLacryma = (StatsLacrymaItem) new StatsLacrymaItem(Material.LAVA_BUCKET, "small_ethernanos_lacryma")
-            .setStat(Stats.MAGICAL_RESERVE, 100.0)
-            .setName("Petite Lacryma D'éthernanos")
-            .setLore("&bUne lacryma magique qui vous", "&bpermet d'augmenter votre", "&bréserve d'éthernanos")
-            .setEnchantable(false)
-            .setDisenchantable(false)
-            .setRarity(Rarity.EPIC);
-    public static final StatsLacrymaItem mediumEthernanosLacryma = (StatsLacrymaItem) new StatsLacrymaItem(Material.LAVA_BUCKET, "medium_ethernanos_lacryma")
-            .setStat(Stats.MAGICAL_RESERVE, 1000.0)
-            .setName("Lacryma D'éthernanos Moyenne")
-            .setLore("&bUne lacryma magique qui vous", "&bpermet d'augmenter votre", "&bréserve d'éthernanos")
-            .setEnchantable(false)
-            .setDisenchantable(false)
-            .setRarity(Rarity.EPIC);
     public static final StatsLacrymaItem bigEthernanosLacryma = (StatsLacrymaItem) new StatsLacrymaItem(Material.LAVA_BUCKET, "big_ethernanos_lacryma")
             .setStat(Stats.MAGICAL_RESERVE, 10000.0)
             .setName("Grande Lacryma D'éthernanos")
@@ -333,127 +207,99 @@ public class Items {
             .setEnchantable(false)
             .setDisenchantable(false)
             .setRarity(Rarity.RARE);
-    public static final ToolItem testTool1 = (ToolItem) new ToolItem(Material.DIAMOND_AXE, "test_tool_1")
-            .setToolTypes(new ToolType[]{ToolType.FORAGING, ToolType.MINING, ToolType.FARMING})
-            .setBreakingLevel(1)
-            .setName("Outil 1")
-            .setEnchantable(false)
-            .setDisenchantable(false)
-            .setRarity(Rarity.RARE);
-    public static final ToolItem testTool2 = (ToolItem) new ToolItem(Material.GOLDEN_AXE, "test_tool_2")
+     **/
+    public static final WeaponAbilityItem spellItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.NETHERITE_SWORD, "spellItem")
+            .setAbility((player, clickedBlock, hand) -> {
+                Spell spell = new SpiralExplosionSpellWrapper(player, 10, 0x7bf542, 0xf54242);
+                spell.start();
+                return false;
+            })
+            .setCooldown((int) SpellTypes.spiralExplosion.getCooldown())
+            .setAbilityName("Explosion spiral piou piou")
+            .setAbilityDesc("&7Fait une spiral de couleur qui termine", "&7avec une explosion! boum! boum!")
+            .setDamage(100)
+            .setEnchantable(true)
+            .setDisenchantable(true)
+            .setRarity(Rarity.NOTHINGNESS)
+            .setName("Spirale Boom");
+
+    public static final CustomItem BARK = new CustomItem(Material.OAK_PLANKS, "bark")
+            .setName("Écorce")
+            .setRarity(Rarity.COMMON)
+            .setCustomModelData(1);
+    public static final CustomItem WOODEN_TOOL_HANDLE = new CustomItem(Material.STICK, "wooden_tool_handle")
+            .setName("Manche d'outils en bois")
+            .setRarity(Rarity.COMMON)
+            .setCategory(Categories.TOOLS)
+            .setCustomModelData(1);
+    public static final CustomItem WOODEN_TOOL_BINDING = new CustomItem(Material.STICK, "wooden_tool_binding")
+            .setName("Reliure d'outils en bois")
+            .setRarity(Rarity.COMMON)
+            .setCategory(Categories.TOOLS)
+            .setCustomModelData(1);
+    public static final StatsToolItem WOODEN_AXE = (StatsToolItem) new StatsToolItem(Material.WOODEN_AXE, "wooden_axe")
+            .setStat(Stats.MINING_SPEED, 50)
             .setToolTypes(new ToolType[]{ToolType.FORAGING})
-            .setBreakingLevel(0)
-            .setName("Outil 2")
-            .setEnchantable(false)
-            .setDisenchantable(false)
-            .setRarity(Rarity.RARE);
-    public static final ToolItem testTool3 = (ToolItem) new ToolItem(Material.IRON_AXE, "test_tool_3")
-            .setToolTypes(new ToolType[]{})
             .setBreakingLevel(1)
-            .setName("Outil 3")
-            .setEnchantable(false)
-            .setDisenchantable(false)
-            .setRarity(Rarity.RARE);
-    public static final ToolItem testTool4 = (ToolItem) new ToolItem(Material.STONE_AXE, "test_tool_4")
-            .setToolTypes(new ToolType[]{})
-            .setBreakingLevel(0)
-            .setName("Outil 4")
-            .setEnchantable(false)
-            .setDisenchantable(false)
+            .setName("Hache en bois")
+            .setRarity(Rarity.COMMON)
+            .setCategory(Categories.TOOLS)
+            .setCustomModelData(1);
+    public static final StatsToolItem WOODEN_PICKAXE = (StatsToolItem) new StatsToolItem(Material.WOODEN_PICKAXE, "wooden_pickaxe")
+            .setStat(Stats.MINING_SPEED, 50)
+            .setToolTypes(new ToolType[]{ToolType.MINING})
+            .setBreakingLevel(1)
+            .setName("Pioche en bois")
+            .setRarity(Rarity.COMMON)
+            .setCategory(Categories.TOOLS)
+            .setCustomModelData(1);
+    public static final EnchantmentLacrymaItem ENCHANTMENT_LACRYMA = (EnchantmentLacrymaItem) new EnchantmentLacrymaItem(Material.ENCHANTED_BOOK, "enchantment_lacryma")
+            .setName("Lacryma D'enchantement")
+            .setLore("&bUne lacryma magique qui peut", "&bstocker un ou plusieurs", "&benchantements")
             .setRarity(Rarity.RARE);
 
     // Set recipes here
     static {
-        coolDiamond.setRecipe(new CraftingRecipe(9, new CustomItemStack(coolDiamondBlock, 1)));
-        coolDiamondBlock.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1)
+        WOODEN_TOOL_HANDLE.setRecipe(new CraftingRecipe(2,
+                new CustomItemStack(BARK, 1), null, new CustomItemStack(BARK, 1),
+                null, new CustomItemStack(BARK, 1), null,
+                new CustomItemStack(BARK, 1), null, new CustomItemStack(BARK, 1)
         ));
-        coolDiamondSword.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamond, 4),
-                new CustomItemStack(coolDiamond, 4),
-                new CustomItemStack(coolDiamondBlock, 1),
+        WOODEN_TOOL_BINDING.setRecipe(new CraftingRecipe(2,
+                new CustomItemStack(BARK, 1), null, new CustomItemStack(BARK, 1),
+                null, new CustomItemStack(BARK, 1), null,
+                new CustomItemStack(BARK, 1), null, new CustomItemStack(BARK, 1)
+        ));
+        WOODEN_AXE.setRecipe(new CraftingRecipe(1,
+                new CustomItemStack(BARK, 1), new CustomItemStack(BARK, 1),
+                new CustomItemStack(WOODEN_TOOL_BINDING, 1), new CustomItemStack(BARK, 1),
+                new CustomItemStack(WOODEN_TOOL_HANDLE, 1), null,
                 CraftingRecipe.Direction.VERTICAL
         ));
-        coolDiamondHelmet.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
-                CraftingRecipe.Direction.HORIZONTAL
-        ));
-        coolDiamondChestplate.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1)
-        ));
-        coolDiamondLeggings.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1)
-        ));
-        coolDiamondBoots.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
-                CraftingRecipe.Direction.HORIZONTAL
-        ));
-
-        boomItem.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamondBlock, 1),
-                new CustomItemStack(coolDiamondSword, 1),
-                CraftingRecipe.Direction.VERTICAL
-        ));
-        dagger.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamondSword, 1),
-                new CustomItemStack(coolDiamondBlock, 1),
-                CraftingRecipe.Direction.VERTICAL
-        ));
-        enchantmentLacryma.setRecipe(new CraftingRecipe(1,
-                null, new CustomItemStack(coolDiamond, 1), null,
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
-                null, new CustomItemStack(coolDiamond, 1), null));
-        smallEthernanosLacryma.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1),
-                null, null, null,
-                new CustomItemStack(coolDiamond, 1), null, new CustomItemStack(coolDiamond, 1)
-        ));
-        mediumEthernanosLacryma.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(smallEthernanosLacryma, 2), new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamond, 1)
-        ));
-        bigEthernanosLacryma.setRecipe(new CraftingRecipe(1,
-                new CustomItemStack(coolDiamondBlock, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamondBlock, 1),
-                new CustomItemStack(coolDiamond, 1), new CustomItemStack(mediumEthernanosLacryma, 2), new CustomItemStack(coolDiamond, 1),
-                new CustomItemStack(coolDiamondBlock, 1), new CustomItemStack(coolDiamond, 1), new CustomItemStack(coolDiamondBlock, 1)
+        WOODEN_PICKAXE.setRecipe(new CraftingRecipe(1,
+                new CustomItemStack(BARK, 1), new CustomItemStack(BARK, 1), new CustomItemStack(BARK, 1),
+                null, new CustomItemStack(WOODEN_TOOL_BINDING, 1), null,
+                null, new CustomItemStack(WOODEN_TOOL_HANDLE, 1), null
         ));
     }
 
     // Register items here
     static {
-        coolDiamond.register();
-        coolDiamondBlock.register();
-
-        coolDiamondSword.register();
-
-        coolDiamondHelmet.register();
-        coolDiamondChestplate.register();
-        coolDiamondLeggings.register();
-        coolDiamondBoots.register();
-
+        /**
         boomItem.register();
         dagger.register();
-
-        enchantmentLacryma.register();
-        smallEthernanosLacryma.register();
-        mediumEthernanosLacryma.register();
         bigEthernanosLacryma.register();
-
         piouPiouLaser.register();
         aspectOfTheEnd.register();
+         **/
+        spellItem.register();
 
-        testTool1.register();
-        testTool2.register();
-        testTool3.register();
-        testTool4.register();
+        BARK.register();
+        WOODEN_TOOL_BINDING.register();
+        WOODEN_TOOL_HANDLE.register();
+        WOODEN_AXE.register();
+        WOODEN_PICKAXE.register();
+
+        ENCHANTMENT_LACRYMA.register();
     }
 }

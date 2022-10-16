@@ -7,6 +7,7 @@ import fr.blockincraft.faylisia.commands.base.CommandParam;
 import fr.blockincraft.faylisia.commands.base.ParamType;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,7 @@ public class MsgCommand extends Command {
     }
 
     @CommandAction(permission = "faylisia.msg", onlyPlayers = true)
-    public void command(Player player, @CommandParam(type = ParamType.ONLINE_PLAYER) Player target, @CommandParam(type = ParamType.MESSAGE) String message) {
+    public void msg(Player player, @CommandParam(type = ParamType.ONLINE_PLAYER) Player target, @CommandParam(type = ParamType.MESSAGE) String message) {
         CustomPlayerDTO customPlayer = Faylisia.getInstance().getRegistry().getOrRegisterPlayer(player.getUniqueId());
         CustomPlayerDTO customTarget = Faylisia.getInstance().getRegistry().getOrRegisterPlayer(target.getUniqueId());
 
@@ -33,5 +34,21 @@ public class MsgCommand extends Command {
 
         target.sendMessage(Messages.MSG_FROM_MESSAGE.get(params));
         player.sendMessage(Messages.MSG_TO_MESSAGE.get(params));
+        for (CustomPlayerDTO custom : Faylisia.getInstance().getRegistry().getPlayers().values()) {
+            if (custom.isChatSpy()) {
+                Player pl = Bukkit.getPlayer(custom.getPlayer());
+                if (pl != null) {
+                    pl.sendMessage(Messages.MSG_SPY_FROM_TO_MESSAGE.get(params));
+                }
+            }
+        }
+    }
+
+    @CommandAction(permission = "faylisia.msg.spy", onlyPlayers = true, prefixes = {"spy"})
+    public void spy(Player player, @CommandParam(type = ParamType.ENABLE_STATE) Boolean enable) {
+        CustomPlayerDTO custom = Faylisia.getInstance().getRegistry().getOrRegisterPlayer(player.getUniqueId());
+        custom.setChatSpy(enable);
+
+        player.sendMessage(enable ? Messages.CHAT_SPY_ENABLE_MESSAGE.get() : Messages.CHAT_SPY_DISABLE_MESSAGE.get());
     }
 }

@@ -49,7 +49,16 @@ public enum Ranks {
                     .set("faylisia.discord", PermissionState.FALSE)
                     .build()
     ),
-    CREATOR(2,
+    DEVELOPER(
+            2,
+            "Developer",
+            "&dDéveloppeur",
+            "&d%player_name%",
+            "&d[Développeur] %player_name%",
+            'd',
+            'd'
+    ),
+    CREATOR(3,
             "Createur",
             "&9Createur",
             "&8%player_name%",
@@ -60,7 +69,7 @@ public enum Ranks {
                     .set("faylisia.items.give", PermissionState.DEV)
                     .build()
     ),
-    BUILDER(2,
+    BUILDER(4,
             "Builder",
             "&aBuilder",
             "&a%player_name%",
@@ -72,9 +81,11 @@ public enum Ranks {
                     .set("minecraft.command.gamemode", PermissionState.DEV)
                     .set("faylisia.command.break", PermissionState.DEV)
                     .set("faylisia.break", PermissionState.DEV)
+                    .set("faylisia.command.fly", PermissionState.DEV)
+                    .set("faylisia.fly", PermissionState.DEV)
                     .build()
     ),
-    MODERATOR(3,
+    MODERATOR(5,
             "Modérateur",
             "&9Modérateur",
             "&9%player_name%",
@@ -88,7 +99,7 @@ public enum Ranks {
                     .set("faylisia.chat_hex_color", PermissionState.TRUE)
                     .build()
     ),
-    PLAYER(4,
+    PLAYER(6,
             "Joueur",
             "&7Joueur",
             "&7%player_name%",
@@ -101,12 +112,14 @@ public enum Ranks {
                     .set("faylisia.command.items", PermissionState.TRUE)
                     .set("faylisia.command.spawn", PermissionState.TRUE)
                     .set("faylisia.command.link", PermissionState.TRUE)
+                    .set("faylisia.command.msg", PermissionState.TRUE)
                     .set("faylisia.class", PermissionState.TRUE)
                     .set("faylisia.items.menu", PermissionState.TRUE)
                     .set("faylisia.items.recipe", PermissionState.TRUE)
                     .set("faylisia.spawn.teleport", PermissionState.TRUE)
                     .set("faylisia.menu.open", PermissionState.TRUE)
                     .set("faylisia.link", PermissionState.TRUE)
+                    .set("faylisia.msg", PermissionState.TRUE)
                     .build()
     );
 

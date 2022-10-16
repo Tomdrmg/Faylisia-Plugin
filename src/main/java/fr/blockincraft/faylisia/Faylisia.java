@@ -77,6 +77,9 @@ public final class Faylisia extends JavaPlugin {
     private ScoreboardManager scoreBoardManager;
     private ProtocolManager protocolManager;
 
+    // Storage files
+    private File blocks;
+
     // Images used in game
     private BufferedImage borderImage;
     private BufferedImage regionsImage;
@@ -333,18 +336,24 @@ public final class Faylisia extends JavaPlugin {
         // Register commands
         try {
             new BreakCommand().register();
+            new CblocksCommand().register();
             new ClassCommand().register();
             new DiscordCommand().register();
-            new ItemsCommand().register();
-            new LinkCommand().register();
-            new RanksCommand().register();
-            new SpawnCommand().register();
             new FlyCommand().register();
             new InvseeCommand().register();
-            new CblocksCommand().register();
+            new ItemsCommand().register();
+            new LinkCommand().register();
+            new MetadataCommand().register();
+            new MsgCommand().register();
             new NickCommand().register();
+            new RanksCommand().register();
+            new SpawnCommand().register();
         } catch (Command.CommandException e) {
             e.printStackTrace();
+            // In case of error, stop the plugin
+            this.getLogger().log(Level.SEVERE, "Cannot load commands, stopping.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
         }
 
         // Start tasks
@@ -392,6 +401,21 @@ public final class Faylisia extends JavaPlugin {
                         .build()).queue();
             }
         });
+
+        blocks = new File(getDataFolder(), "storage/blocks.json");
+        if (!blocks.exists()) {
+            try {
+                blocks.createNewFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+                // In case of error, stop the plugin
+                this.getLogger().log(Level.SEVERE, "Cannot load images server, stopping.");
+                Bukkit.getPluginManager().disablePlugin(this);
+                return;
+            }
+        }
+
+        registry.setBlocksFile(blocks);
     }
 
     /**

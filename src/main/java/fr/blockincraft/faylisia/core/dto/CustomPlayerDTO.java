@@ -57,6 +57,7 @@ public class CustomPlayerDTO {
     private long lastUpdate = 0;
     private long money = 0;
     private boolean sendMessagesToDiscord = true;
+    private boolean chatSpy = false;
 
     // Non stored values
     private final Map<CustomItem, Long> lastUse = new HashMap<>();
@@ -93,6 +94,7 @@ public class CustomPlayerDTO {
         this.lastUpdate = model.getLastUpdate();
         this.money = model.getMoney();
         this.sendMessagesToDiscord = model.isSendMessagesToDiscord();
+        this.chatSpy = model.isChatSpy();
     }
 
     public Handlers[] getMainHandHandler() {
@@ -818,5 +820,14 @@ public class CustomPlayerDTO {
 
     public boolean isSendMessagesToDiscord() {
         return sendMessagesToDiscord;
+    }
+
+    public boolean isChatSpy() {
+        return chatSpy;
+    }
+
+    public void setChatSpy(boolean chatSpy) {
+        this.chatSpy = chatSpy;
+        applyUpdate();
     }
 }

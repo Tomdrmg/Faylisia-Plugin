@@ -1,5 +1,9 @@
 package fr.blockincraft.faylisia.blocks;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.blockincraft.faylisia.api.deserializer.BlockDeserializer;
+import fr.blockincraft.faylisia.api.serializer.BlockSerializer;
 import fr.blockincraft.faylisia.entity.loot.Loot;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.Bukkit;
@@ -12,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
+@JsonSerialize(using = BlockSerializer.class)
+@JsonDeserialize(using = BlockDeserializer.class)
 public class CustomBlock {
     private final int x;
     private final int y;
