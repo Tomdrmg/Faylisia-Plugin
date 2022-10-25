@@ -318,7 +318,7 @@ public class GameListeners implements Listener {
         boolean cancelled = false;
 
         for (Region region : joined) {
-            if (!region.getEnterAction().onEnter(e.getPlayer(), from, to)) {
+            if (!region.getEnterAction().onEnter(e.getPlayer(), from, to, region)) {
                 cancelled = true;
                 break;
             }
@@ -326,7 +326,7 @@ public class GameListeners implements Listener {
 
         if (!cancelled) {
             for (Region region : leaved) {
-                if (!region.getLeaveAction().onLeave(e.getPlayer(), from, to)) {
+                if (!region.getLeaveAction().onLeave(e.getPlayer(), from, to, region)) {
                     cancelled = true;
                     break;
                 }
@@ -658,15 +658,5 @@ public class GameListeners implements Listener {
     @EventHandler
     public void handleHunger(FoodLevelChangeEvent e) {
         e.setCancelled(true);
-    }
-
-    /**
-     * Cancel falling block changing (block to entity and entity to block)
-     */
-    @EventHandler
-    public void handleFallingBlock(EntityChangeBlockEvent e) {
-        if (e.getEntity() instanceof FallingBlock) {
-            e.setCancelled(true);
-        }
     }
 }

@@ -47,7 +47,6 @@ public class Items {
 
     }
 
-    /**
     public static final WeaponAbilityItem boomItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "boom_item")
             .setAbilityName("Boom")
             .setAbilityDesc("&7Inflige &c10x &7les dégats aux monstres", "&7Dans un rayon de 10 blocs")
@@ -74,7 +73,7 @@ public class Items {
             .setDamage(20)
             .setStat(Stats.MAGICAL_RESERVE, 100)
             .setName("Boom Item")
-            .setRarity(Rarity.COSMIC)
+            .setRarity(Rarity.COSMIC);
     public static final WeaponAbilityItem dagger = (WeaponAbilityItem) new WeaponAbilityItem(Material.IRON_SWORD, "dagger")
             .setAbilityName("Rush")
             .setAbilityDesc("&7Se téléporte a 3 cibles dans un rayon", "&7de 50 blocs et leur assène deux", "&7coûts critiques")
@@ -115,7 +114,7 @@ public class Items {
             .setStat(Stats.CRITICAL_DAMAGE, 50)
             .setStat(Stats.CRITICAL_CHANCE, 30)
             .setName("Dague")
-            .setRarity(Rarity.COSMIC)
+            .setRarity(Rarity.COSMIC);
     public static final StatsLacrymaItem bigEthernanosLacryma = (StatsLacrymaItem) new StatsLacrymaItem(Material.LAVA_BUCKET, "big_ethernanos_lacryma")
             .setStat(Stats.MAGICAL_RESERVE, 10000.0)
             .setName("Grande Lacryma D'éthernanos")
@@ -207,10 +206,9 @@ public class Items {
             .setEnchantable(false)
             .setDisenchantable(false)
             .setRarity(Rarity.RARE);
-     **/
     public static final WeaponAbilityItem spellItem = (WeaponAbilityItem) new WeaponAbilityItem(Material.NETHERITE_SWORD, "spell_item")
             .setAbility((player, clickedBlock, hand) -> {
-                Spell spell = new SpiralExplosionSpellWrapper(player, 10, 0x7bf542, 0xf54242);
+                Spell spell = new SpiralExplosionSpellWrapper(player, 15, 0x7bf542, 0xf54242);
                 spell.start();
                 return false;
             })
@@ -222,6 +220,12 @@ public class Items {
             .setDisenchantable(true)
             .setRarity(Rarity.NOTHINGNESS)
             .setName("Spirale Boom");
+
+    public static final ArmorItem SPEED_BOOTS = (ArmorItem) new ArmorItem(Material.DIAMOND_BOOTS, "speed_boots")
+            .setStat(Stats.SPEED, 1000)
+            .setName("Bottes de speed")
+            .setRarity(Rarity.NOTHINGNESS);
+
 
     public static final CustomItem BARK = new CustomItem(Material.OAK_PLANKS, "bark")
             .setName("Écorce")
@@ -286,14 +290,13 @@ public class Items {
 
     // Register items here
     static {
-        /**
         boomItem.register();
+        aspectOfTheEnd.register();
+        piouPiouLaser.register();
         dagger.register();
         bigEthernanosLacryma.register();
-        piouPiouLaser.register();
-        aspectOfTheEnd.register();
-         **/
         spellItem.register();
+        SPEED_BOOTS.register();
 
         BARK.register();
         WOODEN_TOOL_BINDING.register();

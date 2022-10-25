@@ -661,12 +661,36 @@ public class Registry {
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(blocksFile)));
                 writer.write(str);
                 writer.close();
-            } catch (Exception ignored) {
-
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
+    /**
+     * Remove a block and save blocks data
+     * @param block block to delete
+     */
+    public void removeBlock(@NotNull CustomBlock block) {
+        blocks.remove(block);
+        if (blocksFile != null) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String str = mapper.writeValueAsString(blocks);
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(blocksFile)));
+                writer.write(str);
+                writer.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Get a block at a position
+     * @param location location
+     * @return custom block at the location or null
+     */
     @Nullable
     public CustomBlock getBlockAt(@NotNull Location location) {
         if (location.getWorld() == null) return null;
@@ -706,7 +730,9 @@ public class Registry {
         ObjectMapper mapper = new ObjectMapper();
         CustomBlock[] blocks = mapper.readValue(resultStringBuilder.toString(), CustomBlock[].class);
         this.blocks.clear();
-        this.blocks.addAll(List.of(blocks));
+        for (CustomBlock block : blocks) {
+            if (block != null) this.blocks.add(block);
+        }
     }
 
     /**

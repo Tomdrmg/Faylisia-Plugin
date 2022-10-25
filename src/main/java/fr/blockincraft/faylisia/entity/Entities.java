@@ -17,18 +17,9 @@ import java.util.Map;
  * We also register and set their locations here
  */
 public class Entities {
-    public static final HostileMobEntityType coolZombie = (HostileMobEntityType) new HostileMobEntityType(EntityType.ZOMBIE, "cool_zombie")
-            .setDamage(20)
-            .setDamageType(DamageType.MELEE_DAMAGE)
-            .setLevel(30)
-            .setMaxHealth(2000)
-            .setName("&dCool Zombie")
-            .setRegion(Regions.CITE)
-            .setTickBeforeRespawn(200);
-
     // Register all entities
     static {
-        coolZombie.register();
+
     }
 
     // Store all spawn locations
@@ -37,9 +28,6 @@ public class Entities {
     // Initialize all spawn locations
     // Only put mobs that can respawn and that spawn naturally
     static {
-        spawnLocations.put(new EntitySpawnLocation(10, 42, 10, coolZombie), null);
-        spawnLocations.put(new EntitySpawnLocation(-10, 42, 10, coolZombie), null);
-        spawnLocations.put(new EntitySpawnLocation(10, 42, -10, coolZombie), null);
-        spawnLocations.put(new EntitySpawnLocation(-10, 42, -10, coolZombie), null);
+
     }
 }

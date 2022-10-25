@@ -74,11 +74,13 @@ public class ArmorItem extends CustomItem implements StatsItemModel {
     protected List<String> moreLore() {
         List<String> lore = new ArrayList<>();
 
-        for (ArmorSet.Bonus bonus : armorSet.getBonus()) {
-            lore.add("");
-            lore.add(ColorsUtils.translateAll("&d" + bonus.minimum() + " Pieces bonus - " + bonus.name() + "&d:"));
-            for (String descPart : bonus.description()) {
-                lore.add(ColorsUtils.translateAll(descPart));
+        if (this.armorSet != null) {
+            for (ArmorSet.Bonus bonus : armorSet.getBonus()) {
+                lore.add("");
+                lore.add(ColorsUtils.translateAll("&d" + bonus.minimum() + " Pieces bonus - " + bonus.name() + "&d:"));
+                for (String descPart : bonus.description()) {
+                    lore.add(ColorsUtils.translateAll(descPart));
+                }
             }
         }
 
@@ -96,7 +98,7 @@ public class ArmorItem extends CustomItem implements StatsItemModel {
         return this;
     }
 
-    @NotNull
+    @Nullable
     public ArmorSet getArmorSet() {
         return armorSet;
     }
@@ -104,7 +106,7 @@ public class ArmorItem extends CustomItem implements StatsItemModel {
     @Override
     protected void registerOthers() {
         if (!Arrays.asList(armorMaterials).contains(getMaterial())) throw new InvalidBuildException("Armor item can only be an armor material");
-        if (!armorSet.isRegistered()) throw new InvalidBuildException("Armor set must be registered before armor item");
+        if (armorSet != null && !armorSet.isRegistered()) throw new InvalidBuildException("Armor set must be registered before armor item");
     }
 
     @Override

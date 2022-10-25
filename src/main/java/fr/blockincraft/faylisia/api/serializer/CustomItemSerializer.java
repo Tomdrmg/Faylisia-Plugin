@@ -52,7 +52,7 @@ public class CustomItemSerializer extends JsonSerializer<CustomItem> {
         }
 
         if (value instanceof ArmorItem armorItem) {
-            gen.writeObjectField("armorSet", armorItem.getArmorSet().getId());
+            gen.writeObjectField("armorSet", armorItem.getArmorSet() == null ? "null" : armorItem.getArmorSet().getId());
         }
 
         if (value instanceof BaseEnchantedItemModel enchantedItem) {

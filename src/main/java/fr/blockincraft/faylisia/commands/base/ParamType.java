@@ -471,7 +471,7 @@ public enum ParamType {
             return null;
         }
 
-        return blockTypes;
+        return blockTypes.toArray(new BlockType[0]);
     }, (currentValue, sender) -> {
         List<String> completion = new ArrayList<>();
         String[] args = currentValue.split(" ");
@@ -482,7 +482,33 @@ public enum ParamType {
         }
 
         return completion;
-    }, true);
+    }, true),
+    FLY_SPEED(Integer.class, (value, sender, sendError) -> {
+        try {
+            int v = Integer.parseInt(value);
+
+            if (v >= 1 && v <= 10) {
+                return v;
+            }
+        } catch (Exception ignored) { }
+
+        if (sendError) {
+            Map<String, String> params = new HashMap<>();
+            sender.sendMessage(Messages.INVALID_FLY_SPEED_MESSAGE.get(params));
+        }
+
+        return null;
+    }, (currentValue, sender) -> {
+        List<String> completion = new ArrayList<>();
+
+        for (int i = 1; i <= 10; i++) {
+            if (String.valueOf(i).startsWith(currentValue.toLowerCase(Locale.ROOT))) {
+                completion.add(String.valueOf(i));
+            }
+        }
+
+        return completion;
+    }, false);
 
     public final Class<?> type;
     public final ParamParser<?> parser;

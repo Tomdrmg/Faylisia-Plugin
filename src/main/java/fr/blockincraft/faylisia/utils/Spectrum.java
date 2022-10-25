@@ -13,11 +13,15 @@ public class Spectrum {
 
     public int colorAt(int index) {
         if (index < 0 || index > length) throw new IndexOutOfBoundsException("Color index must be between 0 and " + length + "!");
+        // System.out.println("-----------------------------");
+        // System.out.println("index: " + index + ":");
+        // System.out.println("red: rs -> " + colorStart[0] + ", re -> " + colorEnd[0] + ", ch -> ");
+        // System.out.println("-----------------------------");
         return (calcChannel(index, colorStart[0], colorEnd[0]) << 16) | (calcChannel(index, colorStart[1], colorEnd[1]) << 8) | calcChannel(index, colorStart[2], colorEnd[2]);
     }
 
     private int calcChannel(int index, int chanelStart, int channelEnd) {
-        return (channelEnd - chanelStart) / length * index;
+        return Math.round(((float) (channelEnd - chanelStart)) / length * index + chanelStart);
     }
 
     public int getLength() {

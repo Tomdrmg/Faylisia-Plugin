@@ -10,6 +10,7 @@ import fr.blockincraft.faylisia.api.serializer.PlayerInventorySerializer;
 import fr.blockincraft.faylisia.blocks.BlockType;
 import fr.blockincraft.faylisia.blocks.CustomBlock;
 import fr.blockincraft.faylisia.blocks.DiggingBlock;
+import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.entity.CustomPlayer;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.*;
@@ -130,22 +131,30 @@ public class CustomPlayerDTO {
 
         if (registry.getCustomItemByItemStack(inventory.getHelmet()) instanceof ArmorItem armorItem) {
             ArmorSet armorSet = armorItem.getArmorSet();
-            armorSets.put(armorSet, 1);
+            if (armorSet != null) {
+                armorSets.put(armorSet, 1);
+            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getChestplate()) instanceof ArmorItem armorItem) {
             ArmorSet armorSet = armorItem.getArmorSet();
-            armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
+            if (armorSet != null) {
+                armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
+            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getLeggings()) instanceof ArmorItem armorItem) {
             ArmorSet armorSet = armorItem.getArmorSet();
-            armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
+            if (armorSet != null) {
+                armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
+            }
         }
 
         if (registry.getCustomItemByItemStack(inventory.getBoots()) instanceof ArmorItem armorItem) {
             ArmorSet armorSet = armorItem.getArmorSet();
-            armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
+            if (armorSet != null) {
+                armorSets.put(armorSet, armorSets.containsKey(armorSet) ? armorSets.get(armorSet) + 1 : 1);
+            }
         }
 
         List<Handlers> handlers = new ArrayList<>();
@@ -486,6 +495,10 @@ public class CustomPlayerDTO {
             });
         }
 
+        if (value > stat.maxValue && stat.maxValue != -1.0) {
+            value = stat.maxValue;
+        }
+
         return value;
     }
 
@@ -630,6 +643,7 @@ public class CustomPlayerDTO {
         Player player = Bukkit.getPlayer(this.player);
         if (player != null) {
             Tab.refreshStatsPartFor(player);
+            Ranks.applyPermissions(player, rank);
         }
 
         for (Player playerIn : Bukkit.getOnlinePlayers()) {
@@ -768,13 +782,6 @@ public class CustomPlayerDTO {
                 breakingLevel = toolItemModel.getBreakingLevel();
             }
 
-            if (breakingLevel < state.getLevel()) {
-                if (sendMessage) {
-                    // Todo : send a message
-                }
-                return false;
-            }
-
             List<ToolType> toolTypes = new ArrayList<>(List.of(ToolType.HAND));
             if (customItemStack != null && customItemStack.getItem() instanceof ToolItemModel toolItemModel) {
                 toolTypes.addAll(List.of(toolItemModel.getToolTypes()));
@@ -791,7 +798,18 @@ public class CustomPlayerDTO {
 
             if (!hasRequiredTool) {
                 if (sendMessage) {
-                    // Todo : send a message
+                    Map<String, String> params = new HashMap<>();
+                    params.put("%type%", ToolType.nameOfMultiple(state.getToolTypes(), "or", false));
+                    player.sendMessage(Messages.CANT_BREAK_BLOCK_BAD_TOOL_TYPE.get(params));
+                }
+                return false;
+            }
+
+            if (breakingLevel < state.getLevel()) {
+                if (sendMessage) {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("%level%", String.valueOf(state.getLevel()));
+                    player.sendMessage(Messages.CANT_BREAK_BLOCK_INSUFFISANT_BREAK_LEVEL.get(params));
                 }
                 return false;
             }

@@ -51,7 +51,7 @@ public enum Classes {
                     }
                 }
             },
-            Skins.EXPLORER,
+            Skins.BLOCKINCRAFT,
             Material.LEATHER_BOOTS,
             -1
     ),
@@ -75,7 +75,7 @@ public enum Classes {
                     return stat == Stats.STRENGTH ? value * 1.2 : value;
                 }
             },
-            Skins.SWORDSMAN,
+            Skins.BLOCKINCRAFT,
             Material.IRON_SWORD,
             -1
     ),
@@ -110,7 +110,7 @@ public enum Classes {
                     }
                 }
             },
-            Skins.MAGE,
+            Skins.BLOCKINCRAFT,
             Material.STICK,
             -1
     ),
@@ -146,7 +146,7 @@ public enum Classes {
                     }
                 }
             },
-            Skins.TANK,
+            Skins.BLOCKINCRAFT,
             Material.DIAMOND_CHESTPLATE,
             -1
     );

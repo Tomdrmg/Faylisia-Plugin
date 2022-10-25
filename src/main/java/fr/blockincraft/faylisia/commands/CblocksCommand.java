@@ -58,12 +58,40 @@ public class CblocksCommand extends Command {
         Map<String, String> params = new HashMap<>();
         params.put("%amount%", String.valueOf(blocks.size()));
 
-        player.sendMessage(Messages.CBLOCKS_RESULT_MESSAGE.get(params));
+        player.sendMessage(Messages.CBLOCKS_GENERATE_MESSAGE.get(params));
 
         Registry registry = Faylisia.getInstance().getRegistry();
         for (CustomBlock b : blocks) {
             registry.registerBlock(b);
         }
+    }
+
+    @CommandAction(permission = "faylisia.cblocks", onlyPlayers = true, prefixes = {"remove"})
+    public void remove(Player player,
+                         @CommandParam(type = ParamType.X) Integer x1,
+                         @CommandParam(type = ParamType.Y) Integer y1,
+                         @CommandParam(type = ParamType.Z) Integer z1,
+                         @CommandParam(type = ParamType.X) Integer x2,
+                         @CommandParam(type = ParamType.Y) Integer y2,
+                         @CommandParam(type = ParamType.Z) Integer z2) {
+        Registry registry = Faylisia.getInstance().getRegistry();
+        World world = player.getWorld();
+        int amount = 0;
+
+        for (CustomBlock block : registry.getBlocks()) {
+            if (block.getWorld().equals(world.getUID()) &&
+                    block.getX() >= Math.min(x1, x2) && block.getX() <= Math.max(x1, x2) &&
+                    block.getY() >= Math.min(y1, y2) && block.getY() <= Math.max(y1, y2) &&
+                    block.getZ() >= Math.min(z1, z2) && block.getZ() <= Math.max(z1, z2)) {
+                registry.removeBlock(block);
+                amount ++;
+            }
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("%amount%", String.valueOf(amount));
+
+        player.sendMessage(Messages.CBLOCKS_REMOVE_MESSAGE.get(params));
     }
 
     @CommandAction(permission = "faylisia.cblocks", onlyPlayers = false, prefixes = {"reload"})

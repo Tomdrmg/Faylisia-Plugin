@@ -38,6 +38,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.bukkit.*;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -340,6 +341,7 @@ public final class Faylisia extends JavaPlugin {
             new ClassCommand().register();
             new DiscordCommand().register();
             new FlyCommand().register();
+            new FlySpeedCommand().register();
             new InvseeCommand().register();
             new ItemsCommand().register();
             new LinkCommand().register();
@@ -372,18 +374,24 @@ public final class Faylisia extends JavaPlugin {
         if (false) {
             try {
                 World world = Bukkit.getWorlds().get(0);
+                BlockData blockData = Material.BEDROCK.createBlockData();
 
                 for (int x = 0; x < borderImage.getWidth(); x++) {
                     for (int z = 0; z < borderImage.getHeight(); z++) {
                         int color = borderImage.getRGB(x, z);
-                        int color2 = regionsImage.getRGB(x, z);
                         if (color == 0xFF000000) {
-                            world.setBlockData(x - borderImage.getWidth() / 2, 41, z - borderImage.getHeight() / 2, Material.BEDROCK.createBlockData());
-                        } else if (color2 != 0) {
-                            world.setBlockData(x - borderImage.getWidth() / 2, 41, z - borderImage.getHeight() / 2, Material.WHITE_CONCRETE.createBlockData());
+                            world.setBlockData(x - borderImage.getWidth() / 2, 20, z - borderImage.getHeight() / 2, blockData);
                         }
                     }
+
+                    if (x % 10 == 0) {
+                        System.out.println("Width: " + x + "/" + borderImage.getWidth() + " (" + (Math.round(100.0 / borderImage.getWidth() * x * 100) / 100) + "%)");
+                    }
                 }
+
+                System.out.println("Border Finish !");
+                world.save();
+                System.out.println("Border Saved !");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -405,7 +413,9 @@ public final class Faylisia extends JavaPlugin {
         blocks = new File(getDataFolder(), "storage/blocks.json");
         if (!blocks.exists()) {
             try {
-                blocks.mkdirs();
+                if (!blocks.getParentFile().exists()) {
+                    blocks.getParentFile().mkdirs();
+                }
                 blocks.createNewFile();
             } catch (Exception e) {
                 e.printStackTrace();

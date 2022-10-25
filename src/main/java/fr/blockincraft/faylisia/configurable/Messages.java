@@ -43,6 +43,10 @@ public enum Messages {
     INVALID_NAME_LENGTH("invalid_name_length", "%prefix% &cLe nom doit contenir entre 3 et 16 caractères inclus!"),
     INVALID_NAME_CONTENT("invalid_name_content", "%prefix% &cLe nom doit contenir uniquement des lettres majuscule et minuscule, des chiffres, des tiret du six et des tiret du huit."),
     INVALID_BLOCK_TYPE("invalid_block_type", "%prefix% &cAucun block type n'a comme id \"%id%\""),
+    INVALID_FLY_SPEED_MESSAGE("invalid_fly_speed_message", "%prefix% &cVitesse invalide, elle doit être un nombre compris entre 1 et 10 inclus!"),
+
+    //Command fly speed messages
+    NEW_FLY_PEED_SET("new_fly_speed_set", "%prefix% &aVotre vitesse est maintenant de %speed%%."),
 
     //Command msg messages
     MSG_FROM_MESSAGE("msg_from_message", "&8De &d%sender_name% &8>> &d%message%"),
@@ -52,7 +56,8 @@ public enum Messages {
     CHAT_SPY_DISABLE_MESSAGE("chat_spy_disable_message", "%prefix% &bVous avez désactivé le chat spy."),
 
     //Command cblocks messages
-    CBLOCKS_RESULT_MESSAGE("cblocks_result_message", "%prefix% &a%amount% blocs custom on était généré."),
+    CBLOCKS_GENERATE_MESSAGE("cblocks_generate_message", "%prefix% &a%amount% blocs custom on était générés."),
+    CBLOCKS_REMOVE_MESSAGE("cblocks_remove_message", "%prefix% &a%amount% blocs custom on était supprimés."),
 
     //Command nick messages
     NICK_ENABLED("nick_enabled", "%prefix% &aVotre surnom est maintenant activé."),
@@ -110,7 +115,11 @@ public enum Messages {
     SUCCESS_LINK("success_link", "%prefix% &aVous avez bien lié votre compte à '&d%account_name%#%account_tag%&a'."),
 
     //State messages
-    YOU_ARE_DIED("you_are_died", "%prefix% &cVous êtes mort!");
+    YOU_ARE_DIED("you_are_died", "%prefix% &cVous êtes mort!"),
+
+    //Breaking block messages
+    CANT_BREAK_BLOCK_BAD_TOOL_TYPE("cant_break_block_bad_tool_type", "%prefix% &cVous ne pouvez pas casser ce bloc, il vous faut un outil &b%type%&c!"),
+    CANT_BREAK_BLOCK_INSUFFISANT_BREAK_LEVEL("cant_break_block_insuffisant_break_level", "%prefix% &cVous ne pouvez pas casser ce bloc, il vous faut un outil avec un niveau de forage supérieur ou égale à &b%level%&c!");
 
     private static FileConfiguration config = null;
 

@@ -111,7 +111,7 @@ public abstract class Command {
         });
     }
 
-    public class CommandMethod {
+    /*public class CommandMethod {
         private final boolean onlyPlayers;
         private final String[] prefixes;
         private final String permission;
@@ -183,7 +183,7 @@ public abstract class Command {
         }
 
         public void call(@NotNull CommandSender sender, @NotNull String[] params) throws InvocationTargetException, IllegalAccessException, InvalidArgumentsException {
-            if (params.length != prefixes.length + this.params.length) throw new InvalidArgumentsException("invalid parameters amount");
+            if (params.length != prefixes.length + this.params.length && !(this.params[this.params.length - 1].allEnd)) throw new InvalidArgumentsException("invalid parameters amount");
             if (onlyPlayers && !(sender instanceof Player)) throw new InvalidArgumentsException("Only players can execute this command method!");
 
             List<Object> args = new ArrayList<>(List.of(onlyPlayers ? (Player) sender : sender));
@@ -212,6 +212,143 @@ public abstract class Command {
                 index -= prefixes.length;
                 if (index < params.length) {
                     return params[index].completer.complete(currentValue, sender);
+                } else {
+                    return new ArrayList<>();
+                }
+            }
+        }
+
+        public enum CompletionState {
+            INCOMPLETE,
+            INVALID_ARG,
+            COMPLETE
+        }
+
+        public static class InvalidArgumentsException extends Exception {
+            public InvalidArgumentsException(String ex) {
+                super("Invalid arguments or command method usage: " + ex);
+            }
+        }
+    }*/
+
+    public class CommandMethod {
+        private final boolean onlyPlayers;
+        private final String[] prefixes;
+        private final String permission;
+        private final ParamType[] params;
+        private final Method method;
+
+        public CommandMethod(boolean onlyPlayers, @NotNull String[] prefixes, @NotNull String permission, @NotNull ParamType[] params, @NotNull Method method) {
+            this.onlyPlayers = onlyPlayers;
+            this.prefixes = prefixes;
+            this.permission = permission;
+            this.params = params;
+            this.method = method;
+        }
+
+        public boolean canExecute(CommandSender sender) {
+            if (permission.equalsIgnoreCase("")) return true;
+
+            return sender.hasPermission(permission);
+        }
+
+        public boolean isStart(@NotNull CommandSender sender, @NotNull String[] params) {
+            if (params.length > prefixes.length + this.params.length && !(this.params.length > 0 && this.params[this.params.length - 1].allEnd)) return false;
+
+            for (int i = 0; i < params.length; i++) {
+                if (i < prefixes.length) {
+                    if (!prefixes[i].equalsIgnoreCase(params[i])) return false;
+                } else {
+                    ParamType param = this.params[i - prefixes.length];
+                    if (param.allEnd) {
+                        StringBuilder sb = new StringBuilder(params[i]);
+                        for (int l = i + 1; l < params.length; l++) {
+                            sb.append(" ").append(params[l]);
+                        }
+
+                        if (param.parser.parse(sb.toString(), sender, false) == null) return false;
+                        break;
+                    } else {
+                        if (param.parser.parse(params[i], sender, false) == null) return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public CompletionState isComplete(@NotNull CommandSender sender, @NotNull String[] params) {
+            if (params.length < prefixes.length + this.params.length || (params.length > prefixes.length + this.params.length && !(this.params.length > 0 && this.params[this.params.length - 1].allEnd))) return CompletionState.INCOMPLETE;
+
+            for (int i = 0; i < params.length; i++) {
+                if (i < prefixes.length) {
+                    if (!prefixes[i].equalsIgnoreCase(params[i])) return CompletionState.INCOMPLETE;
+                } else {
+                    ParamType param = this.params[i - prefixes.length];
+                    if (param.allEnd) {
+                        StringBuilder sb = new StringBuilder(params[i]);
+                        for (int l = i + 1; l < params.length; l++) {
+                            sb.append(" ").append(params[l]);
+                        }
+
+                        if (param.parser.parse(sb.toString(), sender, true) == null) return CompletionState.INVALID_ARG;
+                        break;
+                    } else {
+                        if (param.parser.parse(params[i], sender, true) == null) return CompletionState.INVALID_ARG;
+                    }
+                }
+            }
+
+            return CompletionState.COMPLETE;
+        }
+
+        public void call(@NotNull CommandSender sender, @NotNull String[] params) throws InvocationTargetException, IllegalAccessException, InvalidArgumentsException {
+            if (params.length != prefixes.length + this.params.length && !(this.params.length > 0 && this.params[this.params.length - 1].allEnd)) throw new InvalidArgumentsException("invalid parameters amount");
+            if (onlyPlayers && !(sender instanceof Player)) throw new InvalidArgumentsException("Only players can execute this command method!");
+
+            List<Object> args = new ArrayList<>(List.of(onlyPlayers ? (Player) sender : sender));
+
+            for (int i = prefixes.length; i < params.length; i++) {
+                Object o = null;
+
+                if (this.params[i - prefixes.length].allEnd) {
+                    StringBuilder sb = new StringBuilder(params[i]);
+
+                    for (int k = i + 1; k < params.length; k++) {
+                        sb.append(" ").append(params[k]);
+                    }
+
+                    o = this.params[i - prefixes.length].parser.parse(sb.toString(), sender, true);
+                    if (o == null) throw new InvalidArgumentsException("Param " + i + " (" + (i - prefixes.length) + ") is invalid!");
+                    args.add(o);
+                    break;
+                } else {
+                    o = this.params[i - prefixes.length].parser.parse(params[i], sender, true);
+                    if (o == null) throw new InvalidArgumentsException("Param " + i + " (" + (i - prefixes.length) + ") is invalid!");
+                }
+
+                args.add(o);
+            }
+
+            method.invoke(Command.this, args.toArray(new Object[0]));
+        }
+
+        @NotNull
+        public List<String> getCompletion(@NotNull CommandSender sender, int index, @NotNull String currentValue) {
+            if (index < prefixes.length) {
+                String p = prefixes[index];
+
+                if (p.toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT))) {
+                    return List.of(prefixes[index]);
+                } else {
+                    return new ArrayList<>();
+                }
+            } else {
+                index -= prefixes.length;
+                if (index < params.length) {
+                    return params[index].completer.complete(currentValue, sender);
+                } else if (this.params.length > 0 && this.params[this.params.length - 1].allEnd) {
+                    return params[params.length - 1].completer.complete(currentValue, sender);
                 } else {
                     return new ArrayList<>();
                 }

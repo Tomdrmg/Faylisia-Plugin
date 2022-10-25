@@ -25,8 +25,8 @@ public abstract class Region {
     private String name;
     private boolean registered;
     private Region parent;
-    private EnterRegionAction enterAction = (player, previousRegions, newRegions) -> true;
-    private LeaveRegionAction leaveAction = (player, previousRegions, newRegions) -> true;
+    private EnterRegionAction enterAction = (player, previousRegions, newRegions, thisRegion) -> true;
+    private LeaveRegionAction leaveAction = (player, previousRegions, newRegions, thisRegion) -> true;
 
     /**
      * @param id region id
@@ -190,7 +190,7 @@ public abstract class Region {
          * @param newRegions regions at new player location
          * @return if player can enter
          */
-        boolean onEnter(@NotNull Player player, @NotNull Set<Region> previousRegions, @NotNull Set<Region> newRegions);
+        boolean onEnter(@NotNull Player player, @NotNull Set<Region> previousRegions, @NotNull Set<Region> newRegions, @NotNull Region thisRegion);
     }
 
     @FunctionalInterface
@@ -202,6 +202,6 @@ public abstract class Region {
          * @param newRegions regions at new player location
          * @return if player can leave
          */
-        boolean onLeave(@NotNull Player player, @NotNull Set<Region> previousRegions, @NotNull Set<Region> newRegions);
+        boolean onLeave(@NotNull Player player, @NotNull Set<Region> previousRegions, @NotNull Set<Region> newRegions, @NotNull Region thisRegion);
     }
 }

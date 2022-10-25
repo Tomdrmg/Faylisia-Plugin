@@ -49,7 +49,7 @@ public class BlockDeserializer extends StdDeserializer<CustomBlock> {
         List<BlockType> types = new ArrayList<>();
         for (JsonNode n : ((ArrayNode) node.get("blockTypes"))) {
             BlockType type = Faylisia.getInstance().getRegistry().getBlockTypeById(n.asText());
-            if (type == null) throw new RuntimeException("Block type not found! (\"" + n.asText() + "\")");
+            if (type == null) return null;
             types.add(type);
         }
 

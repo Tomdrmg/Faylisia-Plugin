@@ -7,7 +7,7 @@ import org.bukkit.Particle;
 
 public class SpellTypes {
     public static final SpellType spiralExplosion = new SpellType("spiral_explosion")
-            .setCooldown(600)
+            .setCooldown(10)
             .setTickDuration(200)
             .setAction((player, x, y, z, world, params) -> {
                 world.createExplosion(x, y, z, 20.0f, false, false);
@@ -32,8 +32,8 @@ public class SpellTypes {
 
                 player.spawnParticle(Particle.REDSTONE, new Location(world, x + distX, displayY, z + distZ), 0, 0, 0, 0, 1, new Particle.DustOptions(Color.fromRGB(spectrum.colorAt((int) tick)), 2F));
                 player.spawnParticle(Particle.REDSTONE, new Location(world, x - distX, displayY, z - distZ), 0, 0, 0, 0, 1, new Particle.DustOptions(Color.fromRGB(spectrum.colorAt((int) tick)), 2F));
-                player.spawnParticle(Particle.REDSTONE, new Location(world, z + distZ, displayY, x - distX), 0, 0, 0, 0, 1, new Particle.DustOptions(Color.fromRGB(spectrum.colorAt((int) tick)), 2F));
-                player.spawnParticle(Particle.REDSTONE, new Location(world, z - distZ, displayY, x + distX), 0, 0, 0, 0, 1, new Particle.DustOptions(Color.fromRGB(spectrum.colorAt((int) tick)), 2F));
+                player.spawnParticle(Particle.REDSTONE, new Location(world, x + distZ, displayY, z - distX), 0, 0, 0, 0, 1, new Particle.DustOptions(Color.fromRGB(spectrum.colorAt((int) tick)), 2F));
+                player.spawnParticle(Particle.REDSTONE, new Location(world, x - distZ, displayY, z + distX), 0, 0, 0, 0, 1, new Particle.DustOptions(Color.fromRGB(spectrum.colorAt((int) tick)), 2F));
 
                 return false;
             });

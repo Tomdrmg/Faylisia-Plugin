@@ -49,6 +49,9 @@ commands:
   metadata:
     description: Command to generate metadata files
     permission: faylisia.command.metadata
+  flyspeed:
+    description: Command to change fly speed
+    permission: faylisia.command.flyspeed
 permissions:
   faylisia.command.break:
     default: op
@@ -77,6 +80,10 @@ permissions:
   faylisia.command.msg:
     default: true
   faylisia.command.metadata:
+    default: op
+  faylisia.command.flyspeed:
+    default: op
+  faylisia.flyspeed:
     default: op
   faylisia.msg:
     default: true

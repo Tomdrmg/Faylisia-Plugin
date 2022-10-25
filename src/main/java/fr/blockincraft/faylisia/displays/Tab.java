@@ -121,7 +121,7 @@ public class Tab {
         List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers()).stream().sorted((Comparator<Player>) (o1, o2) -> {
             CustomPlayerDTO p1 = registry.getOrRegisterPlayer(o1.getUniqueId());
             CustomPlayerDTO p2 = registry.getOrRegisterPlayer(o2.getUniqueId());
-            return p1.getRank().index - p2.getRank().index;
+            return p2.getRank().index - p1.getRank().index;
         }).collect(Collectors.toList());
 
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
@@ -588,7 +588,7 @@ public class Tab {
         if (footer == null) {
             footer = new AnimatedText[]{
                     new AnimatedText(""),
-                    new AnimatedText("&8Vos ping: &7%ping%"),
+                    // new AnimatedText("&8Vos ping: &7%ping%"),
                     new LinearAnimation('f', 5, LinearAnimation.StartPosition.SIDE)
                             .addElement('d', "Site: faylisia.fr")
                             .build(),

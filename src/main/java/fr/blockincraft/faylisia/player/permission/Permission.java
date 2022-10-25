@@ -55,6 +55,7 @@ public class Permission {
             "minecraft.command.msg",
             "minecraft.command.tellraw",
             "minecraft.command.testfor",
+            "minecraft.command.title",
             "minecraft.command.testforblock",
             "minecraft.command.time",
             "minecraft.command.toggledownfall",
@@ -75,6 +76,10 @@ public class Permission {
             "faylisia.command.invsee",
             "faylisia.command.nick",
             "faylisia.command.cblocks",
+            "faylisia.command.msg",
+            "faylisia.command.flyspeed",
+            "faylisia.command.metadata",
+            "faylisia.metadata",
             "faylisia.link",
             "faylisia.discord",
             "faylisia.chat_color",
@@ -94,7 +99,10 @@ public class Permission {
             "faylisia.invsee",
             "faylisia.nick",
             "faylisia.cblocks",
-            "faylisia.nick.get"
+            "faylisia.nick.get",
+            "faylisia.msg.spy",
+            "faylisia.msg",
+            "faylisia.flyspeed"
     };
     // Others perms like world edit perms or other plugins perms
     public static final String[] otherPerms = new String[]{

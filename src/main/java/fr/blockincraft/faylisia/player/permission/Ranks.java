@@ -58,18 +58,30 @@ public enum Ranks {
             'd',
             'd'
     ),
-    CREATOR(3,
-            "Createur",
-            "&9Createur",
-            "&8%player_name%",
-            "&9[Createur] %player_name%",
-            '9',
-            '9',
+    RESP_BUILDER(3,
+            "Responsable_Builder",
+            "&grad(Responsable\\_Builder #9df700 #099951)",
+            "&grad(%player_name% #9df700 #099951)",
+            "&grad([Responsable\\_Builder]\\_%player_name% #9df700 #099951)",
+            'a',
+            'a',
             new PermissionBuilder()
-                    .set("faylisia.items.give", PermissionState.DEV)
                     .build()
     ),
-    BUILDER(4,
+    CHEF_BUILDER(4,
+            "Chef_Builder",
+            "&aChef Builder",
+            "&a%player_name%",
+            "&a[Chef Builder] %player_name%",
+            'a',
+            'a',
+            new PermissionBuilder()
+                    .set("minecraft.command.teleport", PermissionState.DEV)
+                    .set("faylisia.command.flyspeed", PermissionState.DEV)
+                    .set("faylisia.flyspeed", PermissionState.DEV)
+                    .build()
+    ),
+    BUILDER(5,
             "Builder",
             "&aBuilder",
             "&a%player_name%",
@@ -83,9 +95,33 @@ public enum Ranks {
                     .set("faylisia.break", PermissionState.DEV)
                     .set("faylisia.command.fly", PermissionState.DEV)
                     .set("faylisia.fly", PermissionState.DEV)
+                    .set("minecraft.command.teleport", PermissionState.FALSE)
+                    .set("faylisia.spawn.teleport_others", PermissionState.FALSE)
+                    .set("faylisia.chat_color", PermissionState.FALSE)
+                    .set("faylisia.chat_hex_color", PermissionState.FALSE)
+                    .set("minecraft.command.teleport", PermissionState.FALSE)
+                    .set("faylisia.command.flyspeed", PermissionState.FALSE)
+                    .set("faylisia.flyspeed", PermissionState.FALSE)
                     .build()
     ),
-    MODERATOR(5,
+    RESP_MODERATOR(6,
+            "Responsable_Modérateur",
+            "&grad(Responsable\\_Modérateur #00f7b5 #0077f7)",
+            "&grad(%player_name% #00f7b5 #0077f7)",
+            "&grad([Responsable\\_Modérateur]\\_%player_name% #00f7b5 #0077f7)",
+            '9',
+            '9',
+            new PermissionBuilder()
+                    .set("minecraft.command.teleport", PermissionState.DEV)
+                    .set("faylisia.command.flyspeed", PermissionState.DEV)
+                    .set("faylisia.flyspeed", PermissionState.DEV)
+                    .set("minecraft.command.teleport", PermissionState.TRUE)
+                    .set("faylisia.spawn.teleport_others", PermissionState.TRUE)
+                    .set("faylisia.chat_color", PermissionState.TRUE)
+                    .set("faylisia.chat_hex_color", PermissionState.TRUE)
+                    .build()
+    ),
+    MODERATOR(7,
             "Modérateur",
             "&9Modérateur",
             "&9%player_name%",
@@ -99,7 +135,7 @@ public enum Ranks {
                     .set("faylisia.chat_hex_color", PermissionState.TRUE)
                     .build()
     ),
-    PLAYER(6,
+    PLAYER(8,
             "Joueur",
             "&7Joueur",
             "&7%player_name%",
