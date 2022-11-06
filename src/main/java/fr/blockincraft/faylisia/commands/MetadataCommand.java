@@ -5,6 +5,7 @@ import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.commands.base.Command;
 import fr.blockincraft.faylisia.commands.base.CommandAction;
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.management.Categories;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +40,7 @@ public class MetadataCommand extends Command {
                     """);
 
             for (CustomItem item : registry.getItems()) {
-                content.append("| ").append(item.getId()).append(" | ").append(item.getCustomModelData()).append(" |\n");
+                content.append("| ").append(item.getId()).append(" | ").append(item.getCustomModelData(new CustomItemStack(item, 1))).append(" |\n");
             }
 
             content.append("\n");

@@ -1,5 +1,6 @@
 package fr.blockincraft.faylisia.items.event;
 
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -10,5 +11,5 @@ public interface HandlerItemModel {
      * @return Item handlers
      */
     @NotNull
-    Handlers getHandlers();
+    Handlers getHandlers(CustomItemStack customItemStack);
 }

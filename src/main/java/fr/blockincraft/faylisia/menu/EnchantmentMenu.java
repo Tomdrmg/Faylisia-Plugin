@@ -5,6 +5,7 @@ import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -37,11 +38,11 @@ public class EnchantmentMenu extends ChestMenu {
         ItemMeta invalidRecipeMeta = invalidRecipeItem.getItemMeta();
 
         // change display name and lore
-        invalidRecipeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lFusion invalide!"));
+        invalidRecipeMeta.setDisplayName(ColorsUtils.translateAll("&c&lFusion invalide!"));
         invalidRecipeMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Place un item a fusionner à gauche et"),
-                ChatColor.translateAlternateColorCodes('&', "&8une lacryma d'enchantement à droite"),
-                ChatColor.translateAlternateColorCodes('&', "&8pour fusionner un item")
+                ColorsUtils.translateAll("&8Place un item a fusionner à gauche et"),
+                ColorsUtils.translateAll("&8une lacryma d'enchantement à droite"),
+                ColorsUtils.translateAll("&8pour fusionner un item")
         ));
 
         // Update meta
@@ -181,7 +182,7 @@ public class EnchantmentMenu extends ChestMenu {
                     return false;
                 });
                 return;
-            } else if (itemCustomIs != null && itemCustomIs.getItem().isEnchantable() && itemCustomIs.getAmount() == 1) {
+            } else if (itemCustomIs != null && itemCustomIs.getItem().isEnchantable(itemCustomIs) && itemCustomIs.getAmount() == 1) {
                 CustomItemStack result = itemCustomIs.clone();
 
                 lacrymaCustomIs.getStoredEnchantments().forEach((enchants, lvl) -> {
@@ -273,8 +274,8 @@ public class EnchantmentMenu extends ChestMenu {
 
         // Add craft footer to lore
         List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m--------------------------"));
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique pour fusioner l'item"));
+        lore.add(ColorsUtils.translateAll("&8&m--------------------------"));
+        lore.add(ColorsUtils.translateAll("&8Clique pour fusioner l'item"));
         meta.setLore(lore);
 
         // If it has a custom item id, remove it

@@ -9,6 +9,7 @@ import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.displays.ScoreboardManager;
 import fr.blockincraft.faylisia.entity.*;
 import fr.blockincraft.faylisia.entity.interaction.HostileMobEntityType;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.map.Region;
@@ -85,6 +86,13 @@ public class GameListeners implements Listener {
         Ranks.applyPermissions(e.getPlayer(), customPlayer.getRank());
         customPlayer.setLastName(e.getPlayer().getName());
         customPlayer.updateLastInventory();
+
+        if (!Faylisia.development) {
+            e.getPlayer().setFlySpeed((float) 0.1);
+            e.getPlayer().setAllowFlight(false);
+            e.getPlayer().setGameMode(GameMode.SURVIVAL);
+            customPlayer.setCanBreak(false);
+        }
 
         // Apply a client side mining fatigue effect to mining features
         PacketContainer packet = Faylisia.getInstance().getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_EFFECT);
@@ -435,7 +443,7 @@ public class GameListeners implements Listener {
 
     /**
      * Cancel interaction, this contains breaking/placing blocks and call all player <br/>
-     * {@link Handlers#onInteract(Player, Block, boolean, EquipmentSlot, boolean, boolean)} using {@link HandlersUtils}
+     * {@link Handlers#onInteract(Player, Block, boolean, EquipmentSlot, boolean, boolean, CustomItemStack)} using {@link HandlersUtils}
      */
     @EventHandler
     public void handleInteraction(PlayerInteractEvent e) {
@@ -471,6 +479,11 @@ public class GameListeners implements Listener {
      */
     @EventHandler
     public void handleEntityInteraction(PlayerInteractEntityEvent e) {
+        CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(e.getPlayer().getUniqueId());
+        if (customPlayer.getCanBreak()) {
+            return;
+        }
+
         e.setCancelled(true);
     }
 

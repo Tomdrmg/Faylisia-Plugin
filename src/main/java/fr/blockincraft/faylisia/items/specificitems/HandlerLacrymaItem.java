@@ -1,6 +1,7 @@
 package fr.blockincraft.faylisia.items.specificitems;
 
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.event.HandlerItemModel;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import org.bukkit.Material;
@@ -28,13 +29,13 @@ public class HandlerLacrymaItem extends CustomItem implements HandlerItemModel {
 
     @Override
     @NotNull
-    public Handlers getHandlers() {
+    public Handlers getHandlers(CustomItemStack customItemStack) {
         return handlers;
     }
 
     @Override
     @NotNull
-    protected String getType() {
+    protected String getType(CustomItemStack customItemStack) {
         return "LACRYMA";
     }
 }

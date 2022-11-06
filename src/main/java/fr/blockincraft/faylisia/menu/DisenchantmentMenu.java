@@ -6,6 +6,7 @@ import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -39,11 +40,11 @@ public class DisenchantmentMenu extends ChestMenu {
         ItemMeta invalidRecipeMeta = invalidRecipeItem.getItemMeta();
 
         // change display name and lore
-        invalidRecipeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lFission invalide!"));
+        invalidRecipeMeta.setDisplayName(ColorsUtils.translateAll("&c&lFission invalide!"));
         invalidRecipeMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Place un item a fissioner à gauche"),
-                ChatColor.translateAlternateColorCodes('&', "&8et une lacryma d'enchantement à droite"),
-                ChatColor.translateAlternateColorCodes('&', "&8pour fissioner un item")
+                ColorsUtils.translateAll("&8Place un item a fissioner à gauche"),
+                ColorsUtils.translateAll("&8et une lacryma d'enchantement à droite"),
+                ColorsUtils.translateAll("&8pour fissioner un item")
         ));
 
         // Update meta
@@ -118,7 +119,7 @@ public class DisenchantmentMenu extends ChestMenu {
             ItemStack itemIs = getItemInSlot(itemSlot);
             CustomItemStack itemCustomIs = CustomItemStack.fromItemStack(itemIs);
 
-            if (itemCustomIs != null && itemCustomIs.getItem().isDisenchantable() && itemCustomIs.getItem().isEnchantable() && itemCustomIs.getEnchantments().size() > 0 && itemCustomIs.getAmount() == 1) {
+            if (itemCustomIs != null && itemCustomIs.getItem().isDisenchantable(itemCustomIs) && itemCustomIs.getItem().isEnchantable(itemCustomIs) && itemCustomIs.getEnchantments().size() > 0 && itemCustomIs.getAmount() == 1) {
                 Map<CustomEnchantments, Integer> itemEnchants = itemCustomIs.getEnchantments();
 
                 CustomItemStack resultLacryma = lacrymaCustomIs.clone();
@@ -199,8 +200,8 @@ public class DisenchantmentMenu extends ChestMenu {
 
         // Add craft footer to lore
         List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m--------------------------"));
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique pour fissioner l'item"));
+        lore.add(ColorsUtils.translateAll("&8&m--------------------------"));
+        lore.add(ColorsUtils.translateAll("&8Clique pour fissioner l'item"));
         meta.setLore(lore);
 
         // If it has a custom item id, remove it

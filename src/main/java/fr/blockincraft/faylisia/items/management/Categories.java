@@ -2,6 +2,7 @@ package fr.blockincraft.faylisia.items.management;
 
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.menu.viewer.CategoryViewerMenu;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +19,8 @@ import java.util.List;
 public enum Categories {
     RESOURCES(Material.IRON_INGOT, 1, "&fRessources", "&7%items% items"),
     TOOLS(Material.GOLDEN_SHOVEL, 1, "&bOutils", "&7%items% items"),
-    UPGRADES(Material.AMETHYST_SHARD, 1, "&eAméliorations", "&7%items% items");
+    UPGRADES(Material.AMETHYST_SHARD, 1, "&eAméliorations", "&7%items% items"),
+    TEST(Material.BARRIER, 1, "&cTests", "&7%items% items");
 
     public final Material material;
     public final int customModelData;
@@ -47,9 +49,9 @@ public enum Categories {
         ItemMeta meta = itemStack.getItemMeta();
 
         assert meta != null;
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+        meta.setDisplayName(ColorsUtils.translateAll(name));
         meta.setLore(Arrays.stream(lore).map(
-                text -> ChatColor.translateAlternateColorCodes('&', text.replace("%items%", String.valueOf(items.size())))
+                text -> ColorsUtils.translateAll(text.replace("%items%", String.valueOf(items.size())))
         ).toList());
         meta.setCustomModelData(customModelData < 0 ? null : customModelData);
 

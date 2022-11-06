@@ -1,7 +1,6 @@
 package fr.blockincraft.faylisia.items.recipes;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import fr.blockincraft.faylisia.api.serializer.RecipeSerializer;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.menu.viewer.RecipeViewerMenu;
 import org.bukkit.inventory.ItemStack;
@@ -10,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-@JsonSerialize(using = RecipeSerializer.class)
 public interface Recipe {
     /**
      * Define an id of menu to use this recipe, used as information in api

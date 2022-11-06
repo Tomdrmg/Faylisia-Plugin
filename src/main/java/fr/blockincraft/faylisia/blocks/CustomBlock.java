@@ -2,9 +2,11 @@ package fr.blockincraft.faylisia.blocks;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.api.deserializer.BlockDeserializer;
 import fr.blockincraft.faylisia.api.serializer.BlockSerializer;
 import fr.blockincraft.faylisia.entity.loot.Loot;
+import fr.blockincraft.faylisia.utils.HandlersUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -116,6 +118,11 @@ public class CustomBlock {
         }
 
         tickSinceLastState = 0;
+        HandlersUtils.callHandlers(Faylisia.getInstance().getRegistry().getOrRegisterPlayer(player.getUniqueId()), "breakBlock", new HandlersUtils.Parameter[]{
+                new HandlersUtils.Parameter(player, Player.class),
+                new HandlersUtils.Parameter(this, CustomBlock.class),
+                new HandlersUtils.Parameter(states[state - 1], BlockType.class)
+        });
     }
 
     public void regenBlock() {

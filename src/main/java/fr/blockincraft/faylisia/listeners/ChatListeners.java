@@ -37,7 +37,7 @@ public class ChatListeners implements Listener {
 
         String message = e.getMessage();
 
-        e.setFormat(ChatColor.translateAlternateColorCodes('&', ColorsUtils.translateAll(rank.chatName.replace("%player_name%", custom.getNameToUse())) + " &8>> &f%2$s"));
+        e.setFormat(ColorsUtils.translateAll(rank.chatName.replace("%player_name%", custom.getNameToUse()) + " &8>> &f%2$s"));
         message = ChatColor.translateAlternateColorCodes('&', message);
         if (!e.getPlayer().hasPermission("faylisia.chat_color")) {
             message = ChatColor.stripColor(message);

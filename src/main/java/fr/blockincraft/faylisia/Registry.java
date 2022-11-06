@@ -354,15 +354,8 @@ public class Registry {
             CustomItemStack customItemStack = CustomItemStack.fromItemStack(itemStack);
             if (customItemStack == null) continue;
 
-            // Get an updated item stack
-            ItemStack model = customItemStack.getAsItemStack();
-
-            // Verify that updated meta isn't null
-            ItemMeta updatedMeta = model.getItemMeta();
-            if (updatedMeta == null) continue;
-
-            // Replace the item meta
-            itemStack.setItemMeta(updatedMeta);
+            // Update item stack
+            customItemStack.updateItemStack(itemStack);
         }
     }
 

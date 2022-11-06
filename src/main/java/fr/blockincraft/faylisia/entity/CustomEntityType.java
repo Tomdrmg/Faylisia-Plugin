@@ -1,15 +1,10 @@
 package fr.blockincraft.faylisia.entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
-import fr.blockincraft.faylisia.api.serializer.EntityTypeSerializer;
-import fr.blockincraft.faylisia.entity.loot.Loot;
 import fr.blockincraft.faylisia.map.Region;
 import fr.blockincraft.faylisia.map.Regions;
-import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.task.EntityQuitRegionTask;
-import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
-@JsonSerialize(using = EntityTypeSerializer.class)
 public class CustomEntityType {
     public static final NamespacedKey idKey = new NamespacedKey(Faylisia.getInstance(), "custom-id");
     private static final Pattern idPattern = Pattern.compile("[a-z\\d_-]+");
@@ -109,18 +103,29 @@ public class CustomEntityType {
      * @param x x coordinate
      * @param y y coordinate
      * @param z z coordinate
+     * @param world world
+     * @return entity created
+     */
+    @NotNull
+    public CustomEntity spawn(int x, int y, int z, @NotNull World world) {
+        if (!registered) throw new RuntimeException("CANNOT SPAWN AN NON REGISTERED ENTITY!");
+
+        return new CustomEntity(this, world, x, y, z);
+    }
+
+    /**
+     * Spawn an entity at this coordinates
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
      * @return entity created
      */
     @Nullable
     public CustomEntity spawn(int x, int y, int z) {
-        if (!registered) throw new RuntimeException("CANNOT SPAWN AN NON REGISTERED ENTITY!");
-
         World world = Bukkit.getWorld("world");
         if (world == null) return null;
 
-        CustomEntity customEntity = new CustomEntity(this, world, x, y, z);
-
-        return customEntity;
+        return spawn(x, y, z, world);
     }
 
     /**

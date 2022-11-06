@@ -4,6 +4,7 @@ import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.recipes.Recipe;
 import fr.blockincraft.faylisia.menu.ChestMenu;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -32,7 +33,7 @@ public class RecipeViewerMenu extends ChestMenu {
      * @param from previous menu
      */
     public RecipeViewerMenu(@NotNull CustomItem item, @Nullable ChestMenu from) {
-        super("&" + item.getRarity().getColorChar() + "&l" + item.getName(), 6);
+        super(item.getRarity(new CustomItemStack(item, 1)).colorChar + "&l" + item.getName(new CustomItemStack(item, 1)), 6);
         this.from = from;
 
         // Verify that item has recipe(s)
@@ -109,9 +110,9 @@ public class RecipeViewerMenu extends ChestMenu {
         ItemStack previousPage = new ItemStack(Material.PAPER);
         ItemMeta previousPageMeta = previousPage.getItemMeta();
 
-        previousPageMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&dPage Précédente"));
+        previousPageMeta.setDisplayName(ColorsUtils.translateAll("&dPage Précédente"));
         previousPageMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Page &7" + (recipeIndex + 1) + "&8/&7" + recipes.length)
+                ColorsUtils.translateAll("&8Page &7" + (recipeIndex + 1) + "&8/&7" + recipes.length)
         ));
 
         previousPage.setItemMeta(previousPageMeta);
@@ -128,10 +129,10 @@ public class RecipeViewerMenu extends ChestMenu {
             ItemStack returnItem = new ItemStack(Material.BARRIER);
             ItemMeta returnItemMeta = returnItem.getItemMeta();
 
-            returnItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&cRetour"));
+            returnItemMeta.setDisplayName(ColorsUtils.translateAll("&cRetour"));
             returnItemMeta.setLore(Arrays.asList(
-                    ChatColor.translateAlternateColorCodes('&', "&8Clique pour retourner"),
-                    ChatColor.translateAlternateColorCodes('&', "&8en arrière.")
+                    ColorsUtils.translateAll("&8Clique pour retourner"),
+                    ColorsUtils.translateAll("&8en arrière.")
             ));
 
             returnItem.setItemMeta(returnItemMeta);
@@ -147,10 +148,10 @@ public class RecipeViewerMenu extends ChestMenu {
             ItemStack closeItem = new ItemStack(Material.BARRIER);
             ItemMeta closeItemMeta = closeItem.getItemMeta();
 
-            closeItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&cFermer"));
+            closeItemMeta.setDisplayName(ColorsUtils.translateAll("&cFermer"));
             closeItemMeta.setLore(Arrays.asList(
-                    ChatColor.translateAlternateColorCodes('&', "&8Clique pour fermer"),
-                    ChatColor.translateAlternateColorCodes('&', "&8le menu.")
+                    ColorsUtils.translateAll("&8Clique pour fermer"),
+                    ColorsUtils.translateAll("&8le menu.")
             ));
 
             closeItem.setItemMeta(closeItemMeta);
@@ -166,9 +167,9 @@ public class RecipeViewerMenu extends ChestMenu {
         ItemStack nextPage = new ItemStack(Material.PAPER);
         ItemMeta nextPageMeta = nextPage.getItemMeta();
 
-        nextPageMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&dPage Suivante"));
+        nextPageMeta.setDisplayName(ColorsUtils.translateAll("&dPage Suivante"));
         nextPageMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Page &7" + (recipeIndex + 1) + "&8/&7" + recipes.length)
+                ColorsUtils.translateAll("&8Page &7" + (recipeIndex + 1) + "&8/&7" + recipes.length)
         ));
 
         nextPage.setItemMeta(nextPageMeta);

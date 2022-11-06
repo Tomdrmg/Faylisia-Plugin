@@ -3,6 +3,7 @@ package fr.blockincraft.faylisia.items.weapons;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.event.HandlerItemModel;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import org.bukkit.block.Block;
@@ -16,17 +17,17 @@ import java.util.Date;
 
 public interface AbilityItemModel extends HandlerItemModel {
     @NotNull
-    Ability getAbility();
+    Ability getAbility(CustomItemStack customItemStack);
 
     @NotNull
-    String getAbilityName();
+    String getAbilityName(CustomItemStack customItemStack);
 
     @NotNull
-    String[] getAbilityDesc();
+    String[] getAbilityDesc(CustomItemStack customItemStack);
 
-    long getUseCost();
+    long getUseCost(CustomItemStack customItemStack);
 
-    int getCooldown();
+    int getCooldown(CustomItemStack customItemStack);
 
     /**
      * Make {@link Handlers} to listen right click to use ability
@@ -34,12 +35,12 @@ public interface AbilityItemModel extends HandlerItemModel {
      */
     @Override
     @NotNull
-    default Handlers getHandlers() {
+    default Handlers getHandlers(CustomItemStack customItemStack) {
         if (!(this instanceof CustomItem customItem)) return new Handlers() {};
 
         return new Handlers() {
             @Override
-            public void onInteract(@NotNull Player player, @Nullable Block clickedBlock, boolean isRightClick, @NotNull EquipmentSlot hand, boolean inHand, boolean inArmorSlot) {
+            public void onInteract(@NotNull Player player, @Nullable Block clickedBlock, boolean isRightClick, @NotNull EquipmentSlot hand, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                 onHandlerCall();
                 CustomPlayerDTO customPlayer = Faylisia.getInstance().getRegistry().getOrRegisterPlayer(player.getUniqueId());
 
@@ -49,20 +50,20 @@ public interface AbilityItemModel extends HandlerItemModel {
                         if (Date.from(Instant.now()).getTime() - lastUse < 100) {
                             // Do this to prevent double interaction when clicking a block
                             return;
-                        } else if (Date.from(Instant.now()).getTime() - lastUse < getCooldown() * 1000L) {
+                        } else if (Date.from(Instant.now()).getTime() - lastUse < getCooldown(customItemStack) * 1000L) {
                             // Todo: send message
                             return;
                         }
                     }
 
-                    if (customPlayer.getMagicalReserve() >= getUseCost()) {
-                        if (!getAbility().useAbility(player, clickedBlock, hand)) {
-                            customPlayer.setMagicalReserve(customPlayer.getMagicalReserve() - getUseCost());
+                    if (customPlayer.getMagicalReserve() >= getUseCost(customItemStack)) {
+                        if (!getAbility(customItemStack).useAbility(player, clickedBlock, hand)) {
+                            customPlayer.setMagicalReserve(customPlayer.getMagicalReserve() - getUseCost(customItemStack));
                             customPlayer.use(customItem);
                             //Todo: send message
                         }
                     } else {
-                        customPlayer.use(customItem, getCooldown() * 1000L - 100);
+                        customPlayer.use(customItem, getCooldown(customItemStack) * 1000L - 100);
                         // Todo: send message
                     }
                 }

@@ -6,6 +6,7 @@ import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.blocks.BlockType;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import fr.blockincraft.faylisia.entity.CustomEntityType;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
@@ -194,7 +195,7 @@ public enum ParamType {
 
         CustomItemStack customItemStack = new CustomItemStack(item, 1);
 
-        if (elements.length == 2 && (item.isEnchantable() || item instanceof EnchantmentLacrymaItem)) {
+        if (elements.length == 2 && (item.isEnchantable(customItemStack) || item instanceof EnchantmentLacrymaItem)) {
             String json = elements[1];
 
             ObjectMapper mapper = new ObjectMapper();
@@ -253,7 +254,7 @@ public enum ParamType {
     }, false),
     RANK(Ranks.class, (value, sender, sendError) -> {
         for (Ranks rank : Ranks.values()) {
-            if (rank.name.equalsIgnoreCase(value)) {
+            if (rank.name().equalsIgnoreCase(value)) {
                 return rank;
             }
         }
@@ -269,7 +270,7 @@ public enum ParamType {
         List<String> completion = new ArrayList<>();
 
         for (Ranks value : Ranks.values()) {
-            completion.add(value.name);
+            if (value.name().startsWith(currentValue.toLowerCase(Locale.ROOT))) completion.add(value.name());
         }
 
         return completion;
@@ -507,6 +508,27 @@ public enum ParamType {
             }
         }
 
+        return completion;
+    }, false),
+    ENTITY_TYPE(CustomEntityType.class, (value, sender, sendError) -> {
+        for (CustomEntityType entityType : Faylisia.getInstance().getRegistry().getEntityTypes()) {
+            if (value.equalsIgnoreCase(entityType.getId())) return entityType;
+        }
+
+        if (sendError) {
+            Map<String, String> params = new HashMap<>();
+            params.put("%id%", value);
+            sender.sendMessage(Messages.INVALID_ENTITY_TYPE.get(params));
+        }
+
+        return null;
+    }, (currentValue, sender) -> {
+        List<String> completion = new ArrayList<>();
+
+        for (CustomEntityType entityType : Faylisia.getInstance().getRegistry().getEntityTypes()) {
+            if (entityType.getId().toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT))) completion.add(entityType.getId());
+        }
+        
         return completion;
     }, false);
 

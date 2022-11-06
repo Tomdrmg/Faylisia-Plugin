@@ -21,17 +21,20 @@ public interface StatsItemModel {
      * @param stat stat that we want the value
      * @return value of stat
      */
-    double getStat(@NotNull Stats stat);
+    double getStat(@NotNull Stats stat, CustomItemStack customItemStack);
 
     /**
      * @param stat stat that we want to check
      * @return if stat has a value
      */
-    boolean hasStat(@NotNull Stats stat);
+    default boolean hasStat(@NotNull Stats stat, CustomItemStack customItemStack) {
+        return getStat(stat, customItemStack) > 0;
+    }
 
     /**
-     * @return all stats and their values
+     * Return a copy of all default stats of this item /!\ Do not include enchants or others modifiers /!\
+     * @return copy of all default stats and their values
      */
     @NotNull
-    Map<Stats, Double> getStats();
+    Map<Stats, Double> getStats(CustomItemStack customItemStack);
 }

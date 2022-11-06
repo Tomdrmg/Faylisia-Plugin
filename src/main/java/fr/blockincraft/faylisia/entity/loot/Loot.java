@@ -1,30 +1,22 @@
 package fr.blockincraft.faylisia.entity.loot;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
-import fr.blockincraft.faylisia.api.serializer.LootSerializer;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
-import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
-import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.HandlersUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A loot is an item with a probability to be harvest when kill mob or destroy block
  */
-@JsonSerialize(using = LootSerializer.class)
 public record Loot(int rolls, @NotNull CustomItemStack item, int probability, int on, @NotNull AmountFunction amount, @NotNull LootType lootType) {
     private static final SecureRandom random = new SecureRandom();
     private static final Registry registry = Faylisia.getInstance().getRegistry();

@@ -11,8 +11,8 @@ public enum Messages {
     BAR("bar", "&8&l&m---------------------------------------------"),
 
     // No join messages
-    NO_JOIN_IN_DEV("no_join_in_dev", "&dLe serveur est actuellement en développement, rejoin notre discord pour plus d'informations: &cdiscord.faylisia.fr"),
-    NO_JOIN_IN_MAINTENANCE("no_join_in_maintenance", "&dLe serveur est actuellement en maintenance, rejoin notre discord pour plus d'informations: &cdiscord.faylisia.fr"),
+    NO_JOIN_IN_DEV("no_join_in_dev", "&dLe serveur est actuellement en développement, rejoins notre discord pour plus d'informations: &cdiscord.faylisia.fr"),
+    NO_JOIN_IN_MAINTENANCE("no_join_in_maintenance", "&dLe serveur est actuellement en maintenance, rejoins notre discord pour plus d'informations: &cdiscord.faylisia.fr"),
     NO_JOIN_DURING_STARTING("no_join_during_starting", "&cLe serveur est en train de démarrer, veuillez réessayer dans quelques instants"),
     KICK_ON_DISABLE("kick_on_disable", "&cLe serveur redémarre, veuillez attendre quelques instants avant de vous reconnecter"),
 
@@ -44,6 +44,7 @@ public enum Messages {
     INVALID_NAME_CONTENT("invalid_name_content", "%prefix% &cLe nom doit contenir uniquement des lettres majuscule et minuscule, des chiffres, des tiret du six et des tiret du huit."),
     INVALID_BLOCK_TYPE("invalid_block_type", "%prefix% &cAucun block type n'a comme id \"%id%\""),
     INVALID_FLY_SPEED_MESSAGE("invalid_fly_speed_message", "%prefix% &cVitesse invalide, elle doit être un nombre compris entre 1 et 10 inclus!"),
+    INVALID_ENTITY_TYPE("invalid_entity_type", "%prefix% &cAucun type d'entité avec l'identifiant \"%id%\" n'existe!"),
 
     //Command fly speed messages
     NEW_FLY_PEED_SET("new_fly_speed_set", "%prefix% &aVotre vitesse est maintenant de %speed%%."),

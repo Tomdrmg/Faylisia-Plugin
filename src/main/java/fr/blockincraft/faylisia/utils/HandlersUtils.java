@@ -1,6 +1,7 @@
 package fr.blockincraft.faylisia.utils;
 
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.event.Handlers;
 
 import java.lang.reflect.InvocationTargetException;
@@ -21,14 +22,15 @@ public class HandlersUtils {
         Handlers handlersModel = new Handlers() {};
 
         // Get all params type
-        Class<?>[] paramsType = new Class[params.length + 2];
+        Class<?>[] paramsType = new Class[params.length + 3];
 
         for (int i = 0; i < params.length; i++) {
             paramsType[i] = params[i].associatedClass;
         }
 
+        paramsType[paramsType.length - 3] = boolean.class;
         paramsType[paramsType.length - 2] = boolean.class;
-        paramsType[paramsType.length - 1] = boolean.class;
+        paramsType[paramsType.length - 1] = CustomItemStack.class;
 
         // Try to get handler method
         Method method = null;
@@ -54,64 +56,74 @@ public class HandlersUtils {
         }
 
         // Retrieve all handlers
-        List<Handlers> mainHandHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMainHandHandler()));
-        List<Handlers> armorSetHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSetHandlers()));
-        List<Handlers> armorSlotHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSlotHandlers()));
-        List<Handlers> othersHandlers = new ArrayList<>(Arrays.asList(customPlayer.getOthersHandlers()));
-        List<Handlers> miscHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMiscHandlers()));
+        List<CustomPlayerDTO.HandlersWithItemStack> mainHandHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMainHandHandler()));
+        List<CustomPlayerDTO.HandlersWithItemStack> armorSetHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSetHandlers()));
+        List<CustomPlayerDTO.HandlersWithItemStack> armorSlotHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSlotHandlers()));
+        List<CustomPlayerDTO.HandlersWithItemStack> othersHandlers = new ArrayList<>(Arrays.asList(customPlayer.getOthersHandlers()));
+        List<CustomPlayerDTO.HandlersWithItemStack> miscHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMiscHandlers()));
 
         // Make final params
-        Object[] finalParams = new Object[params.length + 2];
+        Object[] finalParams = new Object[params.length + 3];
         for (int i = 0; i < params.length; i++) {
             finalParams[i] = params[i].value;
         }
 
         // Call each handler
+        finalParams[finalParams.length - 3] = true;
+        finalParams[finalParams.length - 2] = false;
+        for (CustomPlayerDTO.HandlersWithItemStack handler : mainHandHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+
+            try {
+                method.invoke(handler.handlers(), finalParams);
+            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
+            }
+        }
+
+        finalParams[finalParams.length - 3] = false;
         finalParams[finalParams.length - 2] = true;
-        finalParams[finalParams.length - 1] = false;
-        for (Handlers handler : mainHandHandlers) {
+        for (CustomPlayerDTO.HandlersWithItemStack handler : armorSetHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+
             try {
-                method.invoke(handler, finalParams);
+                method.invoke(handler.handlers(), finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
+        for (CustomPlayerDTO.HandlersWithItemStack handler : armorSlotHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+
+            try {
+                method.invoke(handler.handlers(), finalParams);
+            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
+            }
+        }
+
+        finalParams[finalParams.length - 3] = false;
         finalParams[finalParams.length - 2] = false;
-        finalParams[finalParams.length - 1] = true;
-        for (Handlers handler : armorSetHandlers) {
+        for (CustomPlayerDTO.HandlersWithItemStack handler : othersHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+
             try {
-                method.invoke(handler, finalParams);
+                method.invoke(handler.handlers(), finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
-        for (Handlers handler : armorSlotHandlers) {
-            try {
-                method.invoke(handler, finalParams);
-            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
-            }
-        }
+        for (CustomPlayerDTO.HandlersWithItemStack handler : miscHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
 
-        finalParams[finalParams.length - 2] = false;
-        finalParams[finalParams.length - 1] = false;
-        for (Handlers handler : othersHandlers) {
             try {
-                method.invoke(handler, finalParams);
-            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
-            }
-        }
-
-        for (Handlers handler : miscHandlers) {
-            try {
-                method.invoke(handler, finalParams);
+                method.invoke(handler.handlers(), finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error when calling handler method: " + e.getMessage());
@@ -133,15 +145,16 @@ public class HandlersUtils {
         Handlers handlersModel = new Handlers() {};
 
         // Get all params type
-        Class<?>[] paramsType = new Class[params.length + 3];
+        Class<?>[] paramsType = new Class[params.length + 4];
 
         for (int i = 0; i < params.length; i++) {
             paramsType[i] = params[i].associatedClass;
         }
 
-        paramsType[paramsType.length - 3] = valueClass;
+        paramsType[paramsType.length - 4] = valueClass;
+        paramsType[paramsType.length - 3] = boolean.class;
         paramsType[paramsType.length - 2] = boolean.class;
-        paramsType[paramsType.length - 1] = boolean.class;
+        paramsType[paramsType.length - 1] = CustomItemStack.class;
 
         // Try to get handler method
         Method method = null;
@@ -167,74 +180,79 @@ public class HandlersUtils {
         }
 
         // Retrieve all handlers
-        List<Handlers> mainHandHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMainHandHandler()));
-        List<Handlers> armorSetHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSetHandlers()));
-        List<Handlers> armorSlotHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSlotHandlers()));
-        List<Handlers> othersHandlers = new ArrayList<>(Arrays.asList(customPlayer.getOthersHandlers()));
-        List<Handlers> miscHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMiscHandlers()));
+        List<CustomPlayerDTO.HandlersWithItemStack> mainHandHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMainHandHandler()));
+        List<CustomPlayerDTO.HandlersWithItemStack> armorSetHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSetHandlers()));
+        List<CustomPlayerDTO.HandlersWithItemStack> armorSlotHandlers = new ArrayList<>(Arrays.asList(customPlayer.getArmorSlotHandlers()));
+        List<CustomPlayerDTO.HandlersWithItemStack> othersHandlers = new ArrayList<>(Arrays.asList(customPlayer.getOthersHandlers()));
+        List<CustomPlayerDTO.HandlersWithItemStack> miscHandlers = new ArrayList<>(Arrays.asList(customPlayer.getMiscHandlers()));
 
         // Make final params
-        Object[] finalParams = new Object[params.length + 3];
+        Object[] finalParams = new Object[params.length + 4];
         for (int i = 0; i < params.length; i++) {
             finalParams[i] = params[i].value;
         }
 
         // Apply each handler on value
+        finalParams[finalParams.length - 3] = true;
+        finalParams[finalParams.length - 2] = false;
+        for (CustomPlayerDTO.HandlersWithItemStack handler : mainHandHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+            finalParams[finalParams.length - 4] = value;
+
+            try {
+                value = (T) method.invoke(handler.handlers(), finalParams);
+            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
+            }
+        }
+
+        finalParams[finalParams.length - 3] = false;
         finalParams[finalParams.length - 2] = true;
-        finalParams[finalParams.length - 1] = false;
-        for (Handlers handler : mainHandHandlers) {
-            finalParams[finalParams.length - 3] = value;
+        for (CustomPlayerDTO.HandlersWithItemStack handler : armorSetHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+            finalParams[finalParams.length - 4] = value;
 
             try {
-                value = (T) method.invoke(handler, finalParams);
+                value = (T) method.invoke(handler.handlers(), finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
+        for (CustomPlayerDTO.HandlersWithItemStack handler : armorSlotHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+            finalParams[finalParams.length - 4] = value;
+
+            try {
+                value = (T) method.invoke(handler.handlers(), finalParams);
+            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
+            }
+        }
+
+        finalParams[finalParams.length - 3] = false;
         finalParams[finalParams.length - 2] = false;
-        finalParams[finalParams.length - 1] = true;
-        for (Handlers handler : armorSetHandlers) {
-            finalParams[finalParams.length - 3] = value;
+        for (CustomPlayerDTO.HandlersWithItemStack handler : othersHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+            finalParams[finalParams.length - 4] = value;
 
             try {
-                value = (T) method.invoke(handler, finalParams);
+                value = (T) method.invoke(handler.handlers(), finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error when calling handler method: " + e.getMessage());
             }
         }
 
-        for (Handlers handler : armorSlotHandlers) {
-            finalParams[finalParams.length - 3] = value;
+        for (CustomPlayerDTO.HandlersWithItemStack handler : miscHandlers) {
+            finalParams[finalParams.length - 1] = handler.itemStack();
+            finalParams[finalParams.length - 4] = value;
 
             try {
-                value = (T) method.invoke(handler, finalParams);
-            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
-            }
-        }
-
-        finalParams[finalParams.length - 2] = false;
-        finalParams[finalParams.length - 1] = false;
-        for (Handlers handler : othersHandlers) {
-            finalParams[finalParams.length - 3] = value;
-
-            try {
-                value = (T) method.invoke(handler, finalParams);
-            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Error when calling handler method: " + e.getMessage());
-            }
-        }
-
-        for (Handlers handler : miscHandlers) {
-            finalParams[finalParams.length - 3] = value;
-
-            try {
-                value = (T) method.invoke(handler, finalParams);
+                value = (T) method.invoke(handler.handlers(), finalParams);
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error when calling handler method: " + e.getMessage());

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
-import fr.blockincraft.faylisia.api.serializer.CustomPlayerSerializer;
 import fr.blockincraft.faylisia.api.serializer.PlayerInventorySerializer;
 import fr.blockincraft.faylisia.blocks.BlockType;
 import fr.blockincraft.faylisia.blocks.CustomBlock;
@@ -40,7 +39,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.*;
 
-@JsonSerialize(using = CustomPlayerSerializer.class)
 public class CustomPlayerDTO {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
     private static final SecureRandom random = new SecureRandom();
@@ -66,7 +64,6 @@ public class CustomPlayerDTO {
     private long effectiveHealth = 0;
     private long maxEffectiveHealth = 0;
     private long magicalReserve = 0;
-    private long damage = 0;
     private DiggingBlock diggingBlock;
 
     public CustomPlayerDTO(UUID player) {
@@ -98,30 +95,30 @@ public class CustomPlayerDTO {
         this.chatSpy = model.isChatSpy();
     }
 
-    public Handlers[] getMainHandHandler() {
+    public HandlersWithItemStack[] getMainHandHandler() {
         Player player = Bukkit.getPlayer(this.player);
-        if (player == null) return new Handlers[0];
+        if (player == null) return new HandlersWithItemStack[0];
 
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
         CustomItemStack customItemStack = CustomItemStack.fromItemStack(mainHandItem);
-        if (customItemStack == null) return new Handlers[0];
+        if (customItemStack == null) return new HandlersWithItemStack[0];
 
-        List<Handlers> handlers = new ArrayList<>();
+        List<HandlersWithItemStack> handlers = new ArrayList<>();
 
         if (customItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
-            handlers.add(handlerItemModel.getHandlers());
+            handlers.add(new HandlersWithItemStack(handlerItemModel.getHandlers(customItemStack), customItemStack));
         }
 
-        if (customItemStack.getItem().isEnchantable()) {
+        if (customItemStack.getItem().isEnchantable(customItemStack)) {
             customItemStack.getEnchantments().forEach((enchant, level) -> {
-                handlers.add(enchant.handlers.withLevel(level));
+                handlers.add(new HandlersWithItemStack(enchant.handlers.withLevel(level), customItemStack));
             });
         }
 
-        return handlers.toArray(new Handlers[0]);
+        return handlers.toArray(new HandlersWithItemStack[0]);
     }
 
-    public Handlers[] getArmorSetHandlers() {
+    public HandlersWithItemStack[] getArmorSetHandlers() {
         Player player = Bukkit.getPlayer(this.player);
         if (player == null) return null;
 
@@ -157,100 +154,100 @@ public class CustomPlayerDTO {
             }
         }
 
-        List<Handlers> handlers = new ArrayList<>();
+        List<HandlersWithItemStack> handlers = new ArrayList<>();
 
         armorSets.forEach((armorSet, pieces) -> {
             for (ArmorSet.Bonus bonus : armorSet.getBonus()) {
                 if (bonus.minimum() <= pieces) {
-                    handlers.add(bonus.handlers());
+                    handlers.add(new HandlersWithItemStack(bonus.handlers(), null));
                 }
             }
         });
 
-        return handlers.toArray(new Handlers[0]);
+        return handlers.toArray(new HandlersWithItemStack[0]);
     }
 
-    public Handlers[] getArmorSlotHandlers() {
+    public HandlersWithItemStack[] getArmorSlotHandlers() {
         Player player = Bukkit.getPlayer(this.player);
         if (player == null) return null;
 
         PlayerInventory inventory = player.getInventory();
 
-        List<Handlers> handlers = new ArrayList<>();
+        List<HandlersWithItemStack> handlers = new ArrayList<>();
 
         CustomItemStack helmetItemStack = CustomItemStack.fromItemStack(inventory.getHelmet());
         if (helmetItemStack != null) {
-            if (helmetItemStack.getItem().isEnchantable()) {
+            if (helmetItemStack.getItem().isEnchantable(helmetItemStack)) {
                 helmetItemStack.getEnchantments().forEach((enchant, level) -> {
-                    handlers.add(enchant.handlers.withLevel(level));
+                    handlers.add(new HandlersWithItemStack(enchant.handlers.withLevel(level), helmetItemStack));
                 });
             }
 
             if (helmetItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
-                handlers.add(handlerItemModel.getHandlers());
+                handlers.add(new HandlersWithItemStack(handlerItemModel.getHandlers(helmetItemStack), helmetItemStack));
             }
         }
 
         CustomItemStack chestplateItemStack = CustomItemStack.fromItemStack(inventory.getChestplate());
         if (chestplateItemStack != null) {
-            if (chestplateItemStack.getItem().isEnchantable()) {
+            if (chestplateItemStack.getItem().isEnchantable(chestplateItemStack)) {
                 chestplateItemStack.getEnchantments().forEach((enchant, level) -> {
-                    handlers.add(enchant.handlers.withLevel(level));
+                    handlers.add(new HandlersWithItemStack(enchant.handlers.withLevel(level), chestplateItemStack));
                 });
             }
 
             if (chestplateItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
-                handlers.add(handlerItemModel.getHandlers());
+                handlers.add(new HandlersWithItemStack(handlerItemModel.getHandlers(chestplateItemStack), chestplateItemStack));
             }
         }
 
         CustomItemStack leggingsItemStack = CustomItemStack.fromItemStack(inventory.getLeggings());
         if (leggingsItemStack != null) {
-            if (leggingsItemStack.getItem().isEnchantable()) {
+            if (leggingsItemStack.getItem().isEnchantable(leggingsItemStack)) {
                 leggingsItemStack.getEnchantments().forEach((enchant, level) -> {
-                    handlers.add(enchant.handlers.withLevel(level));
+                    handlers.add(new HandlersWithItemStack(enchant.handlers.withLevel(level), leggingsItemStack));
                 });
             }
 
             if (leggingsItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
-                handlers.add(handlerItemModel.getHandlers());
+                handlers.add(new HandlersWithItemStack(handlerItemModel.getHandlers(leggingsItemStack),leggingsItemStack));
             }
         }
 
         CustomItemStack bootsItemStack = CustomItemStack.fromItemStack(inventory.getBoots());
         if (bootsItemStack != null) {
-            if (bootsItemStack.getItem().isEnchantable()) {
+            if (bootsItemStack.getItem().isEnchantable(bootsItemStack)) {
                 bootsItemStack.getEnchantments().forEach((enchant, level) -> {
-                    handlers.add(enchant.handlers.withLevel(level));
+                    handlers.add(new HandlersWithItemStack(enchant.handlers.withLevel(level), bootsItemStack));
                 });
             }
 
             if (bootsItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
-                handlers.add(handlerItemModel.getHandlers());
+                handlers.add(new HandlersWithItemStack(handlerItemModel.getHandlers(bootsItemStack), bootsItemStack));
             }
         }
 
-        return handlers.toArray(new Handlers[0]);
+        return handlers.toArray(new HandlersWithItemStack[0]);
     }
 
-    public Handlers[] getOthersHandlers() {
+    public HandlersWithItemStack[] getOthersHandlers() {
         Player player = Bukkit.getPlayer(this.player);
         if (player == null) return null;
 
         PlayerInventory inventory = player.getInventory();
 
-        List<Handlers> handlers = new ArrayList<>();
+        List<HandlersWithItemStack> handlers = new ArrayList<>();
 
         CustomItemStack offHandItemStack = CustomItemStack.fromItemStack(inventory.getItemInOffHand());
         if (offHandItemStack != null) {
-            if (offHandItemStack.getItem().isEnchantable()) {
+            if (offHandItemStack.getItem().isEnchantable(offHandItemStack)) {
                 offHandItemStack.getEnchantments().forEach((enchant, level) -> {
-                    handlers.add(enchant.handlers.withLevel(level));
+                    handlers.add(new HandlersWithItemStack(enchant.handlers.withLevel(level), offHandItemStack));
                 });
             }
 
             if (offHandItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
-                handlers.add(handlerItemModel.getHandlers());
+                handlers.add(new HandlersWithItemStack(handlerItemModel.getHandlers(offHandItemStack), offHandItemStack));
             }
         }
 
@@ -259,27 +256,27 @@ public class CustomPlayerDTO {
             CustomItemStack customItemStack = CustomItemStack.fromItemStack(itemStack);
 
             if (i != inventory.getHeldItemSlot() && customItemStack != null) {
-                if (customItemStack.getItem().isEnchantable()) {
+                if (customItemStack.getItem().isEnchantable(customItemStack)) {
                     customItemStack.getEnchantments().forEach((enchant, level) -> {
-                        handlers.add(enchant.handlers.withLevel(level));
+                        handlers.add(new HandlersWithItemStack(enchant.handlers.withLevel(level), customItemStack));
                     });
                 }
 
                 if (customItemStack.getItem() instanceof HandlerItemModel handlerItemModel) {
-                    handlers.add(handlerItemModel.getHandlers());
+                    handlers.add(new HandlersWithItemStack(handlerItemModel.getHandlers(customItemStack), customItemStack));
                 }
             }
         }
 
-        return handlers.toArray(new Handlers[0]);
+        return handlers.toArray(new HandlersWithItemStack[0]);
     }
 
-    public Handlers[] getMiscHandlers() {
-        List<Handlers> handlers = new ArrayList<>();
+    public HandlersWithItemStack[] getMiscHandlers() {
+        List<HandlersWithItemStack> handlers = new ArrayList<>();
 
-        handlers.add(classes.handlers);
+        handlers.add(new HandlersWithItemStack(classes.handlers, null));
 
-        return handlers.toArray(new Handlers[0]);
+        return handlers.toArray(new HandlersWithItemStack[0]);
     }
 
     public void refreshStats() {
@@ -287,7 +284,8 @@ public class CustomPlayerDTO {
         if (player == null) return;
 
         Map<Stats, Double> stats = new HashMap<>();
-        long damage = 0;
+
+        List<Stats> sortedStats = Arrays.stream(Stats.values()).sorted((o1, o2) -> o1.index - o2.index).toList();
 
         // Calculate stats
         for (Stats stat : Stats.values()) {
@@ -299,115 +297,116 @@ public class CustomPlayerDTO {
             stats.put(stat, defaultValue);
         }
 
-        damage = Stats.handDamage;
-        damage = HandlersUtils.getValueWithHandlers(this, "calculateHandRawDamage", damage, long.class, new HandlersUtils.Parameter[]{
-                new HandlersUtils.Parameter(player, Player.class)
-        });
-
         PlayerInventory inventory = player.getInventory();
 
         ItemStack mainHandItem = inventory.getItemInMainHand();
-        if (registry.getCustomItemByItemStack(mainHandItem) instanceof DamageItemModel damageItemModel) {
-            CustomItem customItem = registry.getCustomItemByItemStack(mainHandItem);
+        CustomItemStack mainHandCustomItemStack = CustomItemStack.fromItemStack(mainHandItem);
+        if (mainHandCustomItemStack != null) {
+            if (mainHandCustomItemStack.getItem() instanceof StatsItemModel statsItemModel && statsItemModel.validStats(true, false)) {
+                sortedStats.forEach(stat -> {
+                    double value = statsItemModel.getStat(stat, mainHandCustomItemStack);
 
-            long itemDamage = damageItemModel.getDamage();
-            itemDamage = HandlersUtils.getValueWithHandlers(this, "calculateItemRawDamage", itemDamage, long.class, new HandlersUtils.Parameter[]{
-                    new HandlersUtils.Parameter(player, Player.class),
-                    new HandlersUtils.Parameter(customItem, CustomItem.class)
-            });
-            damage += itemDamage;
-        }
-        if (registry.getCustomItemByItemStack(mainHandItem) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(true, false)) {
-            CustomItem customItem = registry.getCustomItemByItemStack(mainHandItem);
-            statsItemModel.getStats().forEach((stat, value) -> {
-                double val = value;
-                val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
-                        new HandlersUtils.Parameter(player, Player.class),
-                        new HandlersUtils.Parameter(customItem, CustomItem.class),
-                        new HandlersUtils.Parameter(stat, Stats.class)
+                    value = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", value, double.class, new HandlersUtils.Parameter[]{
+                            new HandlersUtils.Parameter(player, Player.class),
+                            new HandlersUtils.Parameter(mainHandCustomItemStack, CustomItemStack.class),
+                            new HandlersUtils.Parameter(stat, Stats.class)
+                    });
+
+                    stats.put(stat, stats.get(stat) + value);
                 });
-                stats.put(stat, stats.get(stat) + val);
-            });
+            }
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getHelmet()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
-            CustomItem customItem = registry.getCustomItemByItemStack(inventory.getHelmet());
-            statsItemModel.getStats().forEach((stat, value) -> {
-                double val = value;
-                val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
+        CustomItemStack helmetCustomItemStack = CustomItemStack.fromItemStack(inventory.getHelmet());
+        if (helmetCustomItemStack != null && helmetCustomItemStack.getItem() instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
+            sortedStats.forEach(stat -> {
+                double value = statsItemModel.getStat(stat, helmetCustomItemStack);
+
+                value = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", value, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
-                        new HandlersUtils.Parameter(customItem, CustomItem.class),
+                        new HandlersUtils.Parameter(helmetCustomItemStack, CustomItemStack.class),
                         new HandlersUtils.Parameter(stat, Stats.class)
                 });
-                stats.put(stat, stats.get(stat) + val);
+
+                stats.put(stat, stats.get(stat) + value);
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getChestplate()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
-            CustomItem customItem = registry.getCustomItemByItemStack(inventory.getChestplate());
-            statsItemModel.getStats().forEach((stat, value) -> {
-                double val = value;
-                val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
+        CustomItemStack chestplateCustomItemStack = CustomItemStack.fromItemStack(inventory.getChestplate());
+        if (chestplateCustomItemStack != null && chestplateCustomItemStack.getItem() instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
+            sortedStats.forEach(stat -> {
+                double value = statsItemModel.getStat(stat, chestplateCustomItemStack);
+
+                value = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", value, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
-                        new HandlersUtils.Parameter(customItem, CustomItem.class),
+                        new HandlersUtils.Parameter(chestplateCustomItemStack, CustomItemStack.class),
                         new HandlersUtils.Parameter(stat, Stats.class)
                 });
-                stats.put(stat, stats.get(stat) + val);
+
+                stats.put(stat, stats.get(stat) + value);
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getLeggings()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
-            CustomItem customItem = registry.getCustomItemByItemStack(inventory.getLeggings());
-            statsItemModel.getStats().forEach((stat, value) -> {
-                double val = value;
-                val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
+        CustomItemStack leggingsCustomItemStack = CustomItemStack.fromItemStack(inventory.getLeggings());
+        if (leggingsCustomItemStack != null && leggingsCustomItemStack.getItem() instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
+            sortedStats.forEach(stat -> {
+                double value = statsItemModel.getStat(stat, leggingsCustomItemStack);
+
+                value = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", value, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
-                        new HandlersUtils.Parameter(customItem, CustomItem.class),
+                        new HandlersUtils.Parameter(leggingsCustomItemStack, CustomItemStack.class),
                         new HandlersUtils.Parameter(stat, Stats.class)
                 });
-                stats.put(stat, stats.get(stat) + val);
+
+                stats.put(stat, stats.get(stat) + value);
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getBoots()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
-            CustomItem customItem = registry.getCustomItemByItemStack(inventory.getBoots());
-            statsItemModel.getStats().forEach((stat, value) -> {
-                double val = value;
-                val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
+        CustomItemStack bootsCustomItemStack = CustomItemStack.fromItemStack(inventory.getBoots());
+        if (bootsCustomItemStack != null && bootsCustomItemStack.getItem() instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, true)) {
+            sortedStats.forEach(stat -> {
+                double value = statsItemModel.getStat(stat, bootsCustomItemStack);
+
+                value = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", value, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
-                        new HandlersUtils.Parameter(customItem, CustomItem.class),
+                        new HandlersUtils.Parameter(bootsCustomItemStack, CustomItemStack.class),
                         new HandlersUtils.Parameter(stat, Stats.class)
                 });
-                stats.put(stat, stats.get(stat) + val);
+
+                stats.put(stat, stats.get(stat) + value);
             });
         }
 
-        if (registry.getCustomItemByItemStack(inventory.getItemInOffHand()) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, false)) {
-            CustomItem customItem = registry.getCustomItemByItemStack(inventory.getItemInOffHand());
-            statsItemModel.getStats().forEach((stat, value) -> {
-                double val = value;
-                val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
+        CustomItemStack offHandCustomItemStack = CustomItemStack.fromItemStack(inventory.getItemInOffHand());
+        if (offHandCustomItemStack != null && offHandCustomItemStack.getItem() instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, false)) {
+            sortedStats.forEach(stat -> {
+                double value = statsItemModel.getStat(stat, offHandCustomItemStack);
+
+                value = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", value, double.class, new HandlersUtils.Parameter[]{
                         new HandlersUtils.Parameter(player, Player.class),
-                        new HandlersUtils.Parameter(customItem, CustomItem.class),
+                        new HandlersUtils.Parameter(offHandCustomItemStack, CustomItemStack.class),
                         new HandlersUtils.Parameter(stat, Stats.class)
                 });
-                stats.put(stat, stats.get(stat) + val);
+
+                stats.put(stat, stats.get(stat) + value);
             });
         }
 
         for (int i = 0; i < inventory.getStorageContents().length; i++) {
             ItemStack itemStack = inventory.getStorageContents()[i];
+            CustomItemStack customItemStack = CustomItemStack.fromItemStack(itemStack);
 
-            if (i != inventory.getHeldItemSlot() && registry.getCustomItemByItemStack(itemStack) instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, false)) {
-                CustomItem customItem = registry.getCustomItemByItemStack(itemStack);
-                statsItemModel.getStats().forEach((stat, value) -> {
-                    double val = value;
-                    val = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", val, double.class, new HandlersUtils.Parameter[]{
+            if (i != inventory.getHeldItemSlot() && customItemStack != null && customItemStack.getItem() instanceof StatsItemModel statsItemModel && statsItemModel.validStats(false, false)) {
+                sortedStats.forEach(stat -> {
+                    double value = statsItemModel.getStat(stat, customItemStack);
+
+                    value = HandlersUtils.getValueWithHandlers(this, "calculateItemStat", value, double.class, new HandlersUtils.Parameter[]{
                             new HandlersUtils.Parameter(player, Player.class),
-                            new HandlersUtils.Parameter(customItem, CustomItem.class),
+                            new HandlersUtils.Parameter(customItemStack, CustomItemStack.class),
                             new HandlersUtils.Parameter(stat, Stats.class)
                     });
-                    stats.put(stat, stats.get(stat) + val);
+
+                    stats.put(stat, stats.get(stat) + value);
                 });
             }
         }
@@ -418,10 +417,9 @@ public class CustomPlayerDTO {
             }
         });
 
-        this.damage = damage;
         this.stats.putAll(stats);
 
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(getStat(Stats.HEALTH) / 5 > 40 ? 40 : Math.ceil(getStat(Stats.HEALTH) / 5.0));
+        Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(getStat(Stats.HEALTH) / 5 > 40 ? 40 : Math.ceil(getStat(Stats.HEALTH) / 5.0));
 
         long previousMaxEffectiveHealth = this.maxEffectiveHealth;
         this.maxEffectiveHealth = (long) (getStat(Stats.HEALTH) * (1.0 + getStat(Stats.DEFENSE) / 100.0));
@@ -429,21 +427,8 @@ public class CustomPlayerDTO {
             this.setEffectiveHealth((long) (((double) this.effectiveHealth) / ((double) previousMaxEffectiveHealth) * ((double) this.maxEffectiveHealth)));
         }
 
-        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(100);
+        Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_ATTACK_SPEED)).setBaseValue(100);
         applySpeed();
-    }
-
-    public long getRawDamage() {
-        long damage = this.damage;
-
-        Player player = Bukkit.getPlayer(this.player);
-        if (player != null) {
-            damage = HandlersUtils.getValueWithHandlers(this, "getRawDamage", damage, long.class, new HandlersUtils.Parameter[]{
-                    new HandlersUtils.Parameter(player, Player.class)
-            });
-        }
-
-        return damage;
     }
 
     public void applySpeed() {
@@ -464,13 +449,13 @@ public class CustomPlayerDTO {
     public final double getDamage(boolean critic) {
         double criticalDamage = getStat(Stats.CRITICAL_DAMAGE);
         double strength = getStat(Stats.STRENGTH);
-        long damage = getRawDamage();
+        double damage = getStat(Stats.POWER);
 
         damage *= 1 + strength / 100;
 
         Player player = Bukkit.getPlayer(this.player);
         if (player != null) {
-            damage = HandlersUtils.getValueWithHandlers(this, "getDamage", damage, long.class, new HandlersUtils.Parameter[]{
+            damage = HandlersUtils.getValueWithHandlers(this, "getDamage", damage, double.class, new HandlersUtils.Parameter[]{
                     new HandlersUtils.Parameter(player, Player.class)
             });
         }
@@ -540,7 +525,15 @@ public class CustomPlayerDTO {
         }
 
         if (playerHealth == 0) {
-            GameListeners.handleDeath(player);
+            boolean cancelled = HandlersUtils.getValueWithHandlers(this, "onDeath", false, boolean.class, new HandlersUtils.Parameter[]{
+                    new HandlersUtils.Parameter(player, Player.class)
+            });
+
+            if (cancelled) {
+                this.setEffectiveHealth(1);
+            } else {
+                GameListeners.handleDeath(player);
+            }
         } else {
             player.setHealth(playerHealth);
         }
@@ -619,11 +612,6 @@ public class CustomPlayerDTO {
         Player player = Bukkit.getPlayer(this.player);
         if (player != null) {
             Tab.refreshStatsPartFor(player);
-
-            for (Player playerIn : Bukkit.getOnlinePlayers()) {
-                Tab.refreshPlayerSkinOfFor(player, playerIn);
-                Tab.refreshPlayersInTabFor(playerIn);
-            }
         }
     }
 
@@ -779,12 +767,12 @@ public class CustomPlayerDTO {
 
             int breakingLevel = 0;
             if (customItemStack != null && customItemStack.getItem() instanceof ToolItemModel toolItemModel) {
-                breakingLevel = toolItemModel.getBreakingLevel();
+                breakingLevel = toolItemModel.getBreakingLevel(customItemStack);
             }
 
             List<ToolType> toolTypes = new ArrayList<>(List.of(ToolType.HAND));
             if (customItemStack != null && customItemStack.getItem() instanceof ToolItemModel toolItemModel) {
-                toolTypes.addAll(List.of(toolItemModel.getToolTypes()));
+                toolTypes.addAll(List.of(toolItemModel.getToolTypes(customItemStack)));
             }
 
             boolean hasRequiredTool = false;
@@ -848,4 +836,11 @@ public class CustomPlayerDTO {
         this.chatSpy = chatSpy;
         applyUpdate();
     }
+
+    /**
+     * Represent handlers associated to his item stack
+     * @param handlers handlers
+     * @param itemStack item stack, null for handlers like armor set, classes...
+     */
+    public record HandlersWithItemStack(@NotNull Handlers handlers, @Nullable CustomItemStack itemStack) {}
 }

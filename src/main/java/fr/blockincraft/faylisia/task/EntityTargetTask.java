@@ -3,6 +3,8 @@ package fr.blockincraft.faylisia.task;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.entity.CustomEntity;
+import fr.blockincraft.faylisia.entity.HostileCustomLivingEntity;
+import fr.blockincraft.faylisia.entity.interaction.HostileEntityModel;
 import fr.blockincraft.faylisia.utils.AreaUtils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Mob;
@@ -40,7 +42,7 @@ public class EntityTargetTask extends BukkitRunnable {
                     // target others mobs in GameListeners
                     if (mob.getTarget() instanceof Player player) {
                         // Remove target if player was in creative or spectator
-                        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
+                        if (!(entity instanceof HostileCustomLivingEntity) || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
                             mob.setTarget(null);
                             continue;
                         }

@@ -6,6 +6,7 @@ import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.recipes.CraftingRecipe;
 import fr.blockincraft.faylisia.items.recipes.Recipe;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -44,10 +45,10 @@ public class CraftingMenu extends ChestMenu {
         ItemMeta invalidRecipeMeta = invalidRecipeItem.getItemMeta();
 
         // change display name and lore
-        invalidRecipeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lRecette invalide!"));
+        invalidRecipeMeta.setDisplayName(ColorsUtils.translateAll("&c&lRecette invalide!"));
         invalidRecipeMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Placez des items dans la grille"),
-                ChatColor.translateAlternateColorCodes('&', "&8pour fabriquer un item.")
+                ColorsUtils.translateAll("&8Placez des items dans la grille"),
+                ColorsUtils.translateAll("&8pour fabriquer un item.")
         ));
 
         // Update meta
@@ -308,9 +309,9 @@ public class CraftingMenu extends ChestMenu {
 
         // Add craft footer to lore
         List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m------------------------------"));
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Shift clique pour tous fabriquer"));
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique pour en fabriquer un"));
+        lore.add(ColorsUtils.translateAll("&8&m------------------------------"));
+        lore.add(ColorsUtils.translateAll("&8Shift clique pour tous fabriquer"));
+        lore.add(ColorsUtils.translateAll("&8Clique pour en fabriquer un"));
         meta.setLore(lore);
 
         // If it has a custom item id, remove it

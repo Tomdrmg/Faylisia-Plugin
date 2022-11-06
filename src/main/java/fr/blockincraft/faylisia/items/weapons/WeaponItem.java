@@ -1,9 +1,12 @@
 package fr.blockincraft.faylisia.items.weapons;
 
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.StatsItemModel;
+import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.TextUtils;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,22 +32,20 @@ public class WeaponItem extends CustomItem implements DamageItemModel, StatsItem
      */
     @Override
     @NotNull
-    protected List<String> firstLore() {
-        List<String> lore = new ArrayList<>();
-
-        lore.add(ColorsUtils.translateAll("&7Puissance: &c+" + damage));
-
-        List<Map.Entry<Stats, Double>> sorted = stats.entrySet().stream().sorted((o1, o2) -> o1.getKey().index - o2.getKey().index).toList();
-
-        sorted.forEach(entry -> {
-            lore.add(ColorsUtils.translateAll("&7" + entry.getKey().name + " &" + entry.getKey().color + "+" + entry.getValue()));
-        });
-
-        return lore;
+    protected List<String> firstLore(CustomItemStack customItemStack) {
+        return TextUtils.genStatsLore(customItemStack, this);
     }
 
     @Override
-    public int getDamage() {
+    public int getDamage(CustomItemStack customItemStack) {
+        int damage = this.damage;
+
+        if (this.isEnchantable(customItemStack)) {
+            for (Map.Entry<CustomEnchantments, Integer> entry : customItemStack.getEnchantments().entrySet()) {
+                damage += entry.getKey().damageBonus.itemDamage(customItemStack, entry.getValue());
+            }
+        }
+
         return damage;
     }
 
@@ -67,18 +68,21 @@ public class WeaponItem extends CustomItem implements DamageItemModel, StatsItem
     }
 
     @Override
-    public double getStat(@NotNull Stats stat) {
-        return stats.get(stat);
-    }
+    public double getStat(@NotNull Stats stat, CustomItemStack customItemStack) {
+        double value = stats.containsKey(stat) ? stats.get(stat) : 0;
 
-    @Override
-    public boolean hasStat(@NotNull Stats stat) {
-        return stats.get(stat) != null;
+        if (this.isEnchantable(customItemStack)) {
+            for (Map.Entry<CustomEnchantments, Integer> entry : customItemStack.getEnchantments().entrySet()) {
+                value += entry.getKey().statsBonus.itemStat(customItemStack, stat, entry.getValue());
+            }
+        }
+
+        return value;
     }
 
     @Override
     @NotNull
-    public Map<Stats, Double> getStats() {
+    public Map<Stats, Double> getStats(CustomItemStack customItemStack) {
         return new HashMap<>(stats);
     }
 
@@ -113,7 +117,7 @@ public class WeaponItem extends CustomItem implements DamageItemModel, StatsItem
      */
     @Override
     @NotNull
-    protected String getType() {
+    protected String getType(CustomItemStack customItemStack) {
         return "ARME";
     }
 }

@@ -2,6 +2,7 @@ package fr.blockincraft.faylisia.player;
 
 import fr.blockincraft.faylisia.displays.Skins;
 import fr.blockincraft.faylisia.entity.CustomEntity;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.event.DamageType;
 import fr.blockincraft.faylisia.items.event.Handlers;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -30,13 +32,13 @@ public enum Classes {
             },
             new Handlers() {
                 @Override
-                public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot) {
+                public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                     onHandlerCall();
                     return (long) (damage * 0.9);
                 }
 
                 @Override
-                public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                     onHandlerCall();
                     switch (stat) {
                         case SPEED, MAGICAL_RESERVE -> {
@@ -64,13 +66,13 @@ public enum Classes {
             },
             new Handlers() {
                 @Override
-                public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot) {
+                public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                     onHandlerCall();
                     return (long) (damageType == DamageType.MELEE_DAMAGE ? damage * 1.4 : damage * 0.8);
                 }
 
                 @Override
-                public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                     onHandlerCall();
                     return stat == Stats.STRENGTH ? value * 1.2 : value;
                 }
@@ -89,13 +91,13 @@ public enum Classes {
             },
             new Handlers() {
                 @Override
-                public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot) {
+                public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                     onHandlerCall();
                     return (long) (damageType == DamageType.MAGIC_DAMAGE ? damage * 1.4 : damage * 0.8);
                 }
 
                 @Override
-                public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                     onHandlerCall();
                     switch (stat) {
                         case MAGICAL_RESERVE -> {
@@ -125,13 +127,13 @@ public enum Classes {
             },
             new Handlers() {
                 @Override
-                public long onTakeDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damageTaken, boolean inHand, boolean inArmorSlot) {
+                public long onTakeDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damageTaken, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                     onHandlerCall();
                     return (long) (damageTaken * 0.8);
                 }
 
                 @Override
-                public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
+                public double getStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
                     onHandlerCall();
                     switch (stat) {
                         case STRENGTH, SPEED -> {

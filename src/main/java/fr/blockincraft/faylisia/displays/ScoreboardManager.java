@@ -85,7 +85,7 @@ public class ScoreboardManager {
         }
 
         assert objective != null;
-        objective.setDisplayName(ChatColor.translateAlternateColorCodes('&', title.get()));
+        objective.setDisplayName(ColorsUtils.translateAll(title.get()));
 
         CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
 

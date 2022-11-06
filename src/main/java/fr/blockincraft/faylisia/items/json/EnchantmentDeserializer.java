@@ -33,7 +33,7 @@ public class EnchantmentDeserializer extends JsonDeserializer<Map<CustomEnchantm
             int level = n.get("level").asInt();
 
             for (CustomEnchantments enchant : CustomEnchantments.values()) {
-                if (enchant.name().equals(enchantName)) {
+                if (enchant.name().equalsIgnoreCase(enchantName)) {
                     enchants.put(enchant, level);
                 }
             }

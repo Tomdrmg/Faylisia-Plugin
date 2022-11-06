@@ -40,6 +40,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eclipse.jetty.server.Server;
@@ -51,7 +52,10 @@ import org.hibernate.cfg.Configuration;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -150,7 +154,7 @@ public final class Faylisia extends JavaPlugin {
         // Initialize protocol manager
         protocolManager = ProtocolLibrary.getProtocolManager();
         // Adding packet listener to change skin
-        protocolManager.addPacketListener(new PacketAdapter(this, PacketType.Play.Server.PLAYER_INFO) {
+        /*protocolManager.addPacketListener(new PacketAdapter(this, PacketType.Play.Server.PLAYER_INFO) {
             @Override
             public void onPacketSending(PacketEvent event) {
                 // Get all players
@@ -159,7 +163,7 @@ public final class Faylisia extends JavaPlugin {
                 // If action isn't update latency
                 if (event.getPacket().getPlayerInfoAction().read(0) != EnumWrappers.PlayerInfoAction.UPDATE_LATENCY && players != null) {
                     // For each player info data
-                    for (PlayerInfoData player : players) {
+                    for (PlayerInfoData player : new ArrayList<>(players)) {
                         // Check if name length is superior to 3 because fake player to do beautiful tab are 3 chars names
                         if (player.getProfile().getName().length() > 3) {
                             // Get custom player and classes from uuid
@@ -185,7 +189,7 @@ public final class Faylisia extends JavaPlugin {
                 // Rewrite packet player info data list
                 event.getPacket().getPlayerInfoDataLists().write(0, players);
             }
-        });
+        });*/
         // Adding packet listener to change server player info and MOTD colors
         protocolManager.addPacketListener(new PacketAdapter(this, PacketType.Status.Server.SERVER_INFO) {
             @Override
@@ -350,6 +354,7 @@ public final class Faylisia extends JavaPlugin {
             new NickCommand().register();
             new RanksCommand().register();
             new SpawnCommand().register();
+            new SummonCommand().register();
         } catch (Command.CommandException e) {
             e.printStackTrace();
             // In case of error, stop the plugin
@@ -371,12 +376,14 @@ public final class Faylisia extends JavaPlugin {
         // Make plugin initialized to true
         initialized = true;
 
-        if (false) {
+        /*if (false) {
             try {
+                int progression = 3;
+
                 World world = Bukkit.getWorlds().get(0);
                 BlockData blockData = Material.BEDROCK.createBlockData();
 
-                for (int x = 0; x < borderImage.getWidth(); x++) {
+                for (int x = 3400 * progression; x < borderImage.getWidth() && x < 3400 * (progression + 1); x++) {
                     for (int z = 0; z < borderImage.getHeight(); z++) {
                         int color = borderImage.getRGB(x, z);
                         if (color == 0xFF000000) {
@@ -385,7 +392,7 @@ public final class Faylisia extends JavaPlugin {
                     }
 
                     if (x % 10 == 0) {
-                        System.out.println("Width: " + x + "/" + borderImage.getWidth() + " (" + (Math.round(100.0 / borderImage.getWidth() * x * 100) / 100) + "%)");
+                        System.out.println("Width: " + x + "/" + borderImage.getWidth() + " (" + (Math.round(100.0 / borderImage.getWidth() * x * 100) / 100) + "%) (" + (Math.round(100.0 / 3400.0 * (x - progression * 3400) * 100) / 100) + "%)");
                     }
                 }
 
@@ -395,7 +402,7 @@ public final class Faylisia extends JavaPlugin {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }*/
 
         DiscordListeners.doWhenReady(() -> {
             TextChannel chatInGame = discordBot.getTextChannelById(DiscordData.chatInGameId);

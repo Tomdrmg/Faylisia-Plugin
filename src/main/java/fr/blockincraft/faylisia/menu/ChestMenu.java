@@ -1,6 +1,8 @@
 package fr.blockincraft.faylisia.menu;
 
 import fr.blockincraft.faylisia.listeners.MenuListener;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.TextUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -38,7 +40,7 @@ public abstract class ChestMenu {
      * @param lines The number of lines to initialize
      */
     public ChestMenu(@NotNull String title, int lines) {
-        this.title = ChatColor.translateAlternateColorCodes('&', title);
+        this.title = ColorsUtils.translateAll(title);
         this.clickable = false;
         this.emptyClickable = true;
         this.items = new ArrayList<>();

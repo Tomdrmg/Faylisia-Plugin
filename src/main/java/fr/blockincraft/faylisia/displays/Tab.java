@@ -63,7 +63,7 @@ public class Tab {
         wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", Skins.LIME.value, Skins.LIME.signature));
 
         PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, 0, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(
-                ChatColor.translateAlternateColorCodes('&', "           &aJoueurs " + onlinePlayers)
+                ColorsUtils.translateAll("           &aJoueurs " + onlinePlayers)
         ));
 
         return playerInfoData;
@@ -121,7 +121,7 @@ public class Tab {
         List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers()).stream().sorted((Comparator<Player>) (o1, o2) -> {
             CustomPlayerDTO p1 = registry.getOrRegisterPlayer(o1.getUniqueId());
             CustomPlayerDTO p2 = registry.getOrRegisterPlayer(o2.getUniqueId());
-            return p2.getRank().index - p1.getRank().index;
+            return p1.getRank().index - p2.getRank().index;
         }).collect(Collectors.toList());
 
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
@@ -162,7 +162,7 @@ public class Tab {
         for (Player pl : onlinePlayers) {
             CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(pl.getUniqueId());
 
-            WrappedGameProfile gameProfile = new WrappedGameProfile(pl.getUniqueId(), customPlayer.getNameToUse());
+            WrappedGameProfile gameProfile = new WrappedGameProfile(pl.getUniqueId(), pl.getName());
             PlayerInfoData playerInfoData = new PlayerInfoData(gameProfile, pl.getPing(), EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromLegacyText(
                     ColorsUtils.translateAll(customPlayer.getRank().playerName.replace("%player_name%", customPlayer.getNameToUse()))
             ));
@@ -175,27 +175,7 @@ public class Tab {
 
         try {
             protocolManager.sendServerPacket(player, packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        players = new ArrayList<>();
-
-        for (Player pl : onlinePlayers) {
-            CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(pl.getUniqueId());
-
-            WrappedGameProfile gameProfile = new WrappedGameProfile(pl.getUniqueId(), customPlayer.getNameToUse());
-            PlayerInfoData playerInfoData = new PlayerInfoData(gameProfile, pl.getPing(), EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromLegacyText(
-                    ColorsUtils.translateAll(customPlayer.getRank().playerName.replace("%player_name%", customPlayer.getNameToUse()))
-            ));
-
-            players.add(playerInfoData);
-        }
-
-        packet.getPlayerInfoDataLists().write(0, players);
-        packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.ADD_PLAYER);
-
-        try {
+            packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.ADD_PLAYER);
             protocolManager.sendServerPacket(player, packet);
         } catch (Exception e) {
             e.printStackTrace();
@@ -207,7 +187,11 @@ public class Tab {
      * @param player player to update her tab
      */
     public static void refreshPlayersInTabFor(@NotNull Player player) {
-        List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
+        List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers()).stream().sorted((Comparator<Player>) (o1, o2) -> {
+            CustomPlayerDTO p1 = registry.getOrRegisterPlayer(o1.getUniqueId());
+            CustomPlayerDTO p2 = registry.getOrRegisterPlayer(o2.getUniqueId());
+            return p1.getRank().index - p2.getRank().index;
+        }).collect(Collectors.toList());
 
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
         List<PlayerInfoData> players = new ArrayList<>();
@@ -238,78 +222,6 @@ public class Tab {
     }
 
     /**
-     * Update player skin of a player to another player <br/>
-     * Todo: remove player entity, respawn it and then link player client to new entity
-     * @param of player to update skin
-     * @param player player which will receive the changes
-     */
-    public static void refreshPlayerSkinOfFor(@NotNull Player of, @NotNull Player player) {
-        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.PLAYER_INFO);
-        List<PlayerInfoData> players = new ArrayList<>();
-
-        WrappedGameProfile wrappedGameProfile = new WrappedGameProfile(of.getUniqueId(), of.getName());
-        Classes classes = registry.getOrRegisterPlayer(of.getUniqueId()).getClasses();
-
-        PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, of.getPing(), EnumWrappers.NativeGameMode.CREATIVE,
-                WrappedChatComponent.fromText(of.getName())
-        );
-
-        players.add(playerInfoData);
-
-        packet.getPlayerInfoDataLists().write(0, players);
-        packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.REMOVE_PLAYER);
-
-        try {
-            protocolManager.sendServerPacket(player, packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        wrappedGameProfile.getProperties().removeAll("textures");
-        wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", classes.skin.value, classes.skin.signature));
-
-        playerInfoData = new PlayerInfoData(wrappedGameProfile, of.getPing(), EnumWrappers.NativeGameMode.CREATIVE,
-                WrappedChatComponent.fromText(of.getName())
-        );
-
-        players.clear();
-        players.add(playerInfoData);
-
-        packet.getPlayerInfoDataLists().write(0, players);
-        packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.ADD_PLAYER);
-
-        try {
-            protocolManager.sendServerPacket(player, packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        /*packet = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-
-        packet.getIntLists().write(0, Arrays.asList(of.getEntityId()));
-
-        try {
-            protocolManager.sendServerPacket(player, packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        packet = protocolManager.createPacket(PacketType.Play.Server.NAMED_ENTITY_SPAWN);
-
-        packet.getIntegers().write(0, of.getEntityId());
-        packet.getUUIDs().write(0, of.getUniqueId());
-        packet.getDoubles().write(0, of.getLocation().getX());
-        packet.getDoubles().write(1, of.getLocation().getY());
-        packet.getDoubles().write(2, of.getLocation().getZ());
-
-        try {
-            protocolManager.sendServerPacket(player, packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-    }
-
-    /**
      * Get fake player info data to display the stats header
      * @param slot slot to display it
      * @return fake player info data
@@ -323,7 +235,7 @@ public class Tab {
         wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", Skins.GOLD.value, Skins.GOLD.signature));
 
         PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, 0, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(
-                ChatColor.translateAlternateColorCodes('&', "             &6Stats")
+                ColorsUtils.translateAll("             &6Stats")
         ));
 
         return playerInfoData;
@@ -365,7 +277,7 @@ public class Tab {
         wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", Skins.GRAY.value, Skins.GRAY.signature));
 
         PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, 0, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(
-                ChatColor.translateAlternateColorCodes('&', " &eClass: &" + classes.color + classes.name)
+                ColorsUtils.translateAll(" &eClass: &" + classes.color + classes.name)
         ));
 
         return playerInfoData;
@@ -386,7 +298,7 @@ public class Tab {
         wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", Skins.GRAY.value, Skins.GRAY.signature));
 
         PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, 0, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(
-                ChatColor.translateAlternateColorCodes('&', "&f\uE000&c Puissance: " + value)
+                ColorsUtils.translateAll("&f\uE000&c Puissance: " + value)
         ));
 
         return playerInfoData;
@@ -408,7 +320,7 @@ public class Tab {
         wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", Skins.GRAY.value, Skins.GRAY.signature));
 
         PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, 0, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(
-                ChatColor.translateAlternateColorCodes('&', "&f" + stat.icon + " &" + stat.color + stat.name + ": " + value)
+                ColorsUtils.translateAll("&f" + stat.icon + " " + stat.color + stat.name + ": " + value)
         ));
 
         return playerInfoData;
@@ -451,12 +363,10 @@ public class Tab {
         players.add(getRankElement(42, customPlayer.getRank()));
         players.add(getClassesElement(43, customPlayer.getClasses()));
 
-        players.add(getDamageElement(45, customPlayer.getRawDamage()));
-
         List<Stats> stats = Arrays.stream(Stats.values()).sorted((o1, o2) -> o1.index - o2.index).toList();
 
         for (int i = 0; i < stats.size(); i++) {
-            int slot = 46 + i;
+            int slot = 45 + i;
             Stats stat = stats.get(i);
             long value = Math.round(customPlayer.getStat(stat));
 
@@ -487,7 +397,7 @@ public class Tab {
         wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", Skins.AQUA.value, Skins.AQUA.signature));
 
         PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, 0, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(
-                ChatColor.translateAlternateColorCodes('&', "             &bGuild")
+                ColorsUtils.translateAll("             &bGuild")
         ));
 
         return playerInfoData;
@@ -507,7 +417,7 @@ public class Tab {
         wrappedGameProfile.getProperties().put("textures", WrappedSignedProperty.fromValues("textures", Skins.GRAY.value, Skins.GRAY.signature));
 
         PlayerInfoData playerInfoData = new PlayerInfoData(wrappedGameProfile, 0, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(
-                ChatColor.translateAlternateColorCodes('&', " &8Prochainement")
+                ColorsUtils.translateAll(" &8Prochainement")
         ));
 
         return playerInfoData;
@@ -601,13 +511,13 @@ public class Tab {
         StringBuilder headerSb = new StringBuilder();
         for (int i = 0; i < header.length; i++) {
             if (i != 0) headerSb.append("\n");
-            headerSb.append(ChatColor.translateAlternateColorCodes('&', header[i].get()));
+            headerSb.append(ColorsUtils.translateAll(header[i].get()));
         }
 
         StringBuilder footerSb = new StringBuilder();
         for (int i = 0; i < footer.length; i++) {
             if (i != 0) footerSb.append("\n");
-            footerSb.append(ChatColor.translateAlternateColorCodes('&', footer[i].get()
+            footerSb.append(ColorsUtils.translateAll(footer[i].get()
                     .replace("%ping%", String.valueOf(player.getPing()))));
         }
 

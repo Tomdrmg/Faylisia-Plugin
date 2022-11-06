@@ -1,20 +1,15 @@
 package fr.blockincraft.faylisia.items;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
-import fr.blockincraft.faylisia.api.serializer.CustomItemStackSerializer;
 import fr.blockincraft.faylisia.items.enchantment.BaseEnchantedItemModel;
 import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
+import fr.blockincraft.faylisia.items.level.LevelableItemModel;
 import fr.blockincraft.faylisia.items.specificitems.EnchantmentLacrymaItem;
 import fr.blockincraft.faylisia.items.json.EnchantmentDeserializer;
 import fr.blockincraft.faylisia.items.json.EnchantmentSerializer;
-import fr.blockincraft.faylisia.utils.ColorsUtils;
-import fr.blockincraft.faylisia.utils.TextUtils;
 import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -28,13 +23,14 @@ import java.util.*;
  * You can convert it to an {@link ItemStack} using {@link CustomItemStack#getAsItemStack()} <br/>
  * When create a custom item stack using {@link CustomItemStack#fromItemStack(ItemStack)}, modifications will not be applied to the item stack
  */
-@JsonSerialize(using = CustomItemStackSerializer.class)
 public class CustomItemStack implements Cloneable {
     public static final NamespacedKey enchantsKey = new NamespacedKey(Faylisia.getInstance(), "custom-enchants");
     public static final NamespacedKey storedEnchantsKey = new NamespacedKey(Faylisia.getInstance(), "custom-stored-enchants");
+    public static final NamespacedKey itemExperienceKey = new NamespacedKey(Faylisia.getInstance(), "item-experience");
 
     private final Map<CustomEnchantments, Integer> enchantments = new HashMap<>();
     private final Map<CustomEnchantments, Integer> storedEnchantments = new HashMap<>();
+    private long experience = 0L;
     private final CustomItem item;
     private int amount;
 
@@ -52,7 +48,7 @@ public class CustomItemStack implements Cloneable {
 
         // Apply enchantments if item has base enchantments
         if (item instanceof BaseEnchantedItemModel enchantedItem) {
-            enchantments.putAll(enchantedItem.getEnchantments());
+            enchantments.putAll(enchantedItem.getEnchantments(this));
         }
     }
 
@@ -61,7 +57,7 @@ public class CustomItemStack implements Cloneable {
     public CustomItemStack clone() {
         CustomItemStack customItemStack = new CustomItemStack(item, amount);
 
-        if (item.isEnchantable()) {
+        if (item.isEnchantable(this)) {
             enchantments.forEach(customItemStack::addEnchantment);
         }
 
@@ -103,7 +99,7 @@ public class CustomItemStack implements Cloneable {
      */
     @NotNull
     public Map<CustomEnchantments, Integer> getEnchantments() {
-        if (!item.isEnchantable()) throw new NonEnchantableException();
+        if (!item.isEnchantable(this)) throw new NonEnchantableException();
 
         return new HashMap<>(enchantments);
     }
@@ -112,7 +108,7 @@ public class CustomItemStack implements Cloneable {
      * @param enchantment enchantment to remove
      */
     public void removeEnchantment(@NotNull CustomEnchantments enchantment) {
-        if (!item.isEnchantable()) throw new NonEnchantableException();
+        if (!item.isEnchantable(this)) throw new NonEnchantableException();
 
         enchantments.remove(enchantment);
     }
@@ -121,7 +117,7 @@ public class CustomItemStack implements Cloneable {
      * Remove all enchantments
      */
     public void clearEnchantment() {
-        if (!item.isEnchantable()) throw new NonEnchantableException();
+        if (!item.isEnchantable(this)) throw new NonEnchantableException();
 
         enchantments.clear();
     }
@@ -132,7 +128,7 @@ public class CustomItemStack implements Cloneable {
      * @param level level of the enchantment
      */
     public void addEnchantment(@NotNull CustomEnchantments enchant, int level) {
-        if (!item.isEnchantable()) throw new NonEnchantableException();
+        if (!item.isEnchantable(this)) throw new NonEnchantableException();
 
         enchantments.put(enchant, level);
     }
@@ -143,7 +139,7 @@ public class CustomItemStack implements Cloneable {
      * @return if stack have enchantment
      */
     public boolean hasEnchantment(@NotNull CustomEnchantments enchant) {
-        if (!item.isEnchantable()) throw new NonEnchantableException();
+        if (!item.isEnchantable(this)) throw new NonEnchantableException();
 
         return enchantments.containsKey(enchant);
     }
@@ -154,7 +150,7 @@ public class CustomItemStack implements Cloneable {
      * @return level of enchantment
      */
     public int getEnchantmentLevel(@NotNull CustomEnchantments enchant) {
-        if (!item.isEnchantable()) throw new NonEnchantableException();
+        if (!item.isEnchantable(this)) throw new NonEnchantableException();
 
         return enchantments.get(enchant);
     }
@@ -221,6 +217,40 @@ public class CustomItemStack implements Cloneable {
         return storedEnchantments.get(enchant);
     }
 
+    public long getExperience() {
+        if (!(item instanceof LevelableItemModel)) throw new NonLevelableException();
+
+        return experience;
+    }
+
+    public void removeExperience(long experience) {
+        if (!(item instanceof LevelableItemModel)) throw new NonLevelableException();
+
+        this.experience = Math.max(this.experience - experience, 0);
+    }
+
+    public void addExperience(long experience) {
+        if (!(item instanceof LevelableItemModel)) throw new NonLevelableException();
+
+        this.experience += experience;
+    }
+
+    public void setExperience(long experience) {
+        if (!(item instanceof LevelableItemModel)) throw new NonLevelableException();
+
+        this.experience = Math.max(experience, 0);
+    }
+
+    public void updateItemStack(ItemStack itemStack) {
+        ItemStack model = this.getAsItemStack();
+
+        if (model.getType() != itemStack.getType()) {
+            itemStack.setType(model.getType());
+        }
+
+        itemStack.setItemMeta(model.getItemMeta());
+    }
+
     /**
      * Create a custom item stack from an item stack
      * @param model model item stack
@@ -238,7 +268,7 @@ public class CustomItemStack implements Cloneable {
         CustomItemStack customItemStack = new CustomItemStack(item, amount);
 
         // If custom item is enchantable and has enchantments data
-        if (item.isEnchantable() && model.getItemMeta() != null && model.getItemMeta().getPersistentDataContainer().has(enchantsKey, PersistentDataType.STRING)) {
+        if (item.isEnchantable(customItemStack) && model.getItemMeta() != null && model.getItemMeta().getPersistentDataContainer().has(enchantsKey, PersistentDataType.STRING)) {
             // Then parse data
             String json = model.getItemMeta().getPersistentDataContainer().get(enchantsKey, PersistentDataType.STRING);
 
@@ -281,6 +311,14 @@ public class CustomItemStack implements Cloneable {
             }
         }
 
+        if (item instanceof LevelableItemModel && model.getItemMeta() != null && model.getItemMeta().getPersistentDataContainer().has(itemExperienceKey, PersistentDataType.LONG)) {
+            Long experience = model.getItemMeta().getPersistentDataContainer().get(itemExperienceKey, PersistentDataType.LONG);
+
+            if (experience != null) {
+                customItemStack.setExperience(experience);
+            }
+        }
+
         // Return it
         return customItemStack;
     }
@@ -308,9 +346,9 @@ public class CustomItemStack implements Cloneable {
                 }
 
                 // Check enchantments
-                if (!item.isEnchantable() && !customItemStack.item.isEnchantable()) {
+                if (!item.isEnchantable(this) && !customItemStack.item.isEnchantable(this)) {
                     return true;
-                } else if (!item.isEnchantable() || !customItemStack.item.isEnchantable()) {
+                } else if (!item.isEnchantable(this) || !customItemStack.item.isEnchantable(this)) {
                     return false;
                 } else {
                     for (Map.Entry<CustomEnchantments, Integer> entry : enchantments.entrySet()) {
@@ -345,9 +383,9 @@ public class CustomItemStack implements Cloneable {
             }
 
             // Check enchantments
-            if (!item.isEnchantable() && !customItemStack.item.isEnchantable()) {
+            if (!item.isEnchantable(this) && !customItemStack.item.isEnchantable(this)) {
                 return true;
-            } else if (!item.isEnchantable() || !customItemStack.item.isEnchantable()) {
+            } else if (!item.isEnchantable(this) || !customItemStack.item.isEnchantable(this)) {
                 return false;
             } else {
                 for (Map.Entry<CustomEnchantments, Integer> entry : enchantments.entrySet()) {
@@ -382,18 +420,24 @@ public class CustomItemStack implements Cloneable {
                 }
 
                 // Check enchants
-                if (!item.isEnchantable() && !customItemStack.item.isEnchantable()) {
+                if (!item.isEnchantable(this) && !customItemStack.item.isEnchantable(this)) {
                     return true;
-                } else if (!item.isEnchantable() || !customItemStack.item.isEnchantable()) {
+                } else if (!item.isEnchantable(this) || !customItemStack.item.isEnchantable(this)) {
                     return false;
                 } else {
                     for (Map.Entry<CustomEnchantments, Integer> entry : enchantments.entrySet()) {
                         if (!customItemStack.hasEnchantment(entry.getKey())) return false;
                         if (customItemStack.getEnchantmentLevel(entry.getKey()) != entry.getValue()) return false;
                     }
-
-                    return true;
                 }
+
+                if (item instanceof LevelableItemModel && (!(customItemStack.item instanceof LevelableItemModel) || customItemStack.getExperience() != this.getExperience())) {
+                    return false;
+                } else if (!(item instanceof LevelableItemModel) && customItemStack.item instanceof LevelableItemModel) {
+                    return false;
+                }
+
+                return true;
             }
         }
         return false;
@@ -406,60 +450,11 @@ public class CustomItemStack implements Cloneable {
     @NotNull
     public ItemStack getAsItemStack() {
         // Create item stack and set amount
-        ItemStack itemStack = item.getAsItemStack();
+        ItemStack itemStack = item.getAsItemStack(this);
         itemStack.setAmount(amount);
 
         // Apply enchantments
-        if (item.isEnchantable()) {
-            // If it has one or more enchants, add a Bukkit enchantment to make enchanted effect on item
-            if (enchantments.size() > 0) {
-                itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
-
-                ItemMeta meta = itemStack.getItemMeta();
-                if (meta != null) {
-                    // Add item flag
-                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-
-                    // Add enchantments lore
-                    List<String> lore = meta.getLore();
-                    if (lore != null) {
-                        int index = item.getLore().length + item.firstLore().size();
-                        if (item.firstLore().size() > 0 && item.getLore().length > 0) index++;
-
-                        if (index > 0) {
-                            lore.add(index, "");
-                            index++;
-                        }
-
-                        List<Map.Entry<CustomEnchantments, Integer>> enchants = enchantments.entrySet().stream().sorted(
-                                (o1, o2) -> o1.getKey().index - o2.getKey().index
-                        ).toList();
-
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < enchants.size(); i++) {
-                            CustomEnchantments enchant = enchants.get(i).getKey();
-                            int level = enchants.get(i).getValue();
-
-                            if (i % 2 == 0) {
-                                sb = new StringBuilder("&7" + enchant.nameDependingOfLevel.getName(level, enchant.name) + " " + TextUtils.intToRoman(level));
-                                if (i == enchants.size() - 1) {
-                                    lore.add(index, ColorsUtils.translateAll(sb.toString()));
-                                    index++;
-                                }
-                            } else {
-                                sb.append("&7, ").append(enchant.nameDependingOfLevel.getName(level, enchant.name)).append(" ").append(TextUtils.intToRoman(level));
-                                lore.add(index, ColorsUtils.translateAll(sb.toString()));
-                                index++;
-                            }
-                        }
-
-                        meta.setLore(lore);
-                    }
-
-                    itemStack.setItemMeta(meta);
-                }
-            }
-
+        if (item.isEnchantable(this)) {
             // Serialize and write enchantments data
             ObjectMapper mapper = new ObjectMapper();
             SimpleModule module = new SimpleModule();
@@ -483,55 +478,6 @@ public class CustomItemStack implements Cloneable {
 
         // Add lore and stored enchantments if item is an enchantment lacryma
         if (item instanceof EnchantmentLacrymaItem) {
-            // If it has one or more enchants, add a Bukkit enchantment to make enchanted effect on item
-            if (storedEnchantments.size() > 0) {
-                itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
-
-                ItemMeta meta = itemStack.getItemMeta();
-                if (meta != null) {
-                    // Add item flag
-                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-
-                    // Add enchantments lore
-                    List<String> lore = meta.getLore();
-                    if (lore != null) {
-                        int index = item.getLore().length + item.firstLore().size();
-                        if (item.firstLore().size() > 0 && item.getLore().length > 0) index++;
-
-                        if (index > 0) {
-                            lore.add(index, "");
-                            index++;
-                        }
-
-                        List<Map.Entry<CustomEnchantments, Integer>> enchants = storedEnchantments.entrySet().stream().sorted(
-                                (o1, o2) -> o1.getKey().index - o2.getKey().index
-                        ).toList();
-
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < enchants.size(); i++) {
-                            CustomEnchantments enchant = enchants.get(i).getKey();
-                            int level = enchants.get(i).getValue();
-
-                            if (i % 2 == 0) {
-                                sb = new StringBuilder("&7" + enchant.nameDependingOfLevel.getName(level, enchant.name) + " " + TextUtils.intToRoman(level));
-                                if (i == enchants.size() - 1) {
-                                    lore.add(index, ColorsUtils.translateAll(sb.toString()));
-                                    index++;
-                                }
-                            } else {
-                                sb.append("&7, ").append(enchant.nameDependingOfLevel.getName(level, enchant.name)).append(" ").append(TextUtils.intToRoman(level));
-                                lore.add(index, ColorsUtils.translateAll(sb.toString()));
-                                index++;
-                            }
-                        }
-
-                        meta.setLore(lore);
-                    }
-
-                    itemStack.setItemMeta(meta);
-                }
-            }
-
             // Serialize and write enchantments data
             ObjectMapper mapper = new ObjectMapper();
             SimpleModule module = new SimpleModule();
@@ -550,6 +496,16 @@ public class CustomItemStack implements Cloneable {
                 }
             } catch (Exception ignored) {
 
+            }
+        }
+
+        if (item instanceof LevelableItemModel) {
+            ItemMeta meta = itemStack.getItemMeta();
+
+            if (meta != null) {
+                meta.getPersistentDataContainer().set(itemExperienceKey, PersistentDataType.LONG, experience);
+
+                itemStack.setItemMeta(meta);
             }
         }
 
@@ -573,6 +529,12 @@ public class CustomItemStack implements Cloneable {
     public static class NonEnchantmentLacrymaException extends RuntimeException {
         public NonEnchantmentLacrymaException() {
             super("You cannot use stored enchantments on an item which is not an enchantment lacryma!");
+        }
+    }
+
+    public static class NonLevelableException extends RuntimeException {
+        public NonLevelableException() {
+            super("You cannot use experiences methods on an non levelable item");
         }
     }
 }

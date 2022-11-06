@@ -1,31 +1,19 @@
 package fr.blockincraft.faylisia.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
-import fr.blockincraft.faylisia.api.deserializer.CustomItemStackDeserializer;
 import fr.blockincraft.faylisia.api.objects.Response;
 import fr.blockincraft.faylisia.api.objects.State;
-import fr.blockincraft.faylisia.api.serializer.PlayerInventorySerializer;
-import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
-import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.utils.FileUtils;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
 
 import java.io.*;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
 
 public class RequestHandler extends HandlerWrapper {
     private static final Registry registry = Faylisia.getInstance().getRegistry();
@@ -50,7 +38,7 @@ public class RequestHandler extends HandlerWrapper {
             return;
         }
 
-        if (uri.startsWith("/player/") && uri.length() > 8) {
+        /*if (uri.startsWith("/player/") && uri.length() > 8) {
             returnPlayer(outputStream, response, uri.substring(8));
             return;
         }
@@ -79,7 +67,7 @@ public class RequestHandler extends HandlerWrapper {
         if (uri.equals("/entity_types")) {
             returnEntityTypes(outputStream, response);
             return;
-        }
+        }*/
 
         if (uri.equals("/state")) {
             response.setStatus(HttpServletResponse.SC_OK);
@@ -92,7 +80,7 @@ public class RequestHandler extends HandlerWrapper {
         outputStream.flush();
     }
 
-    public void returnPlayer(ServletOutputStream outputStream, HttpServletResponse response, String uuidAsString) throws IOException {
+    /*public void returnPlayer(ServletOutputStream outputStream, HttpServletResponse response, String uuidAsString) throws IOException {
         try {
             UUID uuid = UUID.fromString(uuidAsString);
 
@@ -288,5 +276,5 @@ public class RequestHandler extends HandlerWrapper {
         public String[] getLore() {
             return lore;
         }
-    }
+    }*/
 }

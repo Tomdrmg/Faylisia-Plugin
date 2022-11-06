@@ -3,6 +3,7 @@ package fr.blockincraft.faylisia.menu.viewer;
 import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.menu.ChestMenu;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -89,10 +90,10 @@ public class ItemsViewerMenu extends ChestMenu {
         ItemStack wiki = new ItemStack(Material.BOOK);
         ItemMeta wikiMeta = wiki.getItemMeta();
 
-        wikiMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&dWiki"));
+        wikiMeta.setDisplayName(ColorsUtils.translateAll("&dWiki"));
         wikiMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Clique pour accéder"),
-                ChatColor.translateAlternateColorCodes('&', "&8au wiki")
+                ColorsUtils.translateAll("&8Clique pour accéder"),
+                ColorsUtils.translateAll("&8au wiki")
         ));
 
         wiki.setItemMeta(wikiMeta);
@@ -109,9 +110,9 @@ public class ItemsViewerMenu extends ChestMenu {
         ItemStack previousPage = new ItemStack(Material.PAPER);
         ItemMeta previousPageMeta = previousPage.getItemMeta();
 
-        previousPageMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&dPage Précédente"));
+        previousPageMeta.setDisplayName(ColorsUtils.translateAll("&dPage Précédente"));
         previousPageMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Page &7" + (currentPage + 1) + "&8/&7" + totalPage)
+                ColorsUtils.translateAll("&8Page &7" + (currentPage + 1) + "&8/&7" + totalPage)
         ));
 
         previousPage.setItemMeta(previousPageMeta);
@@ -128,10 +129,10 @@ public class ItemsViewerMenu extends ChestMenu {
             ItemStack returnItem = new ItemStack(Material.BARRIER);
             ItemMeta returnItemMeta = returnItem.getItemMeta();
 
-            returnItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&cRetour"));
+            returnItemMeta.setDisplayName(ColorsUtils.translateAll("&cRetour"));
             returnItemMeta.setLore(Arrays.asList(
-                    ChatColor.translateAlternateColorCodes('&', "&8Clique pour retourner"),
-                    ChatColor.translateAlternateColorCodes('&', "&8en arrière.")
+                    ColorsUtils.translateAll("&8Clique pour retourner"),
+                    ColorsUtils.translateAll("&8en arrière.")
             ));
 
             returnItem.setItemMeta(returnItemMeta);
@@ -147,10 +148,10 @@ public class ItemsViewerMenu extends ChestMenu {
             ItemStack closeItem = new ItemStack(Material.BARRIER);
             ItemMeta closeItemMeta = closeItem.getItemMeta();
 
-            closeItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&cFermer"));
+            closeItemMeta.setDisplayName(ColorsUtils.translateAll("&cFermer"));
             closeItemMeta.setLore(Arrays.asList(
-                    ChatColor.translateAlternateColorCodes('&', "&8Clique pour fermer"),
-                    ChatColor.translateAlternateColorCodes('&', "&8le menu.")
+                    ColorsUtils.translateAll("&8Clique pour fermer"),
+                    ColorsUtils.translateAll("&8le menu.")
             ));
 
             closeItem.setItemMeta(closeItemMeta);
@@ -166,9 +167,9 @@ public class ItemsViewerMenu extends ChestMenu {
         ItemStack nextPage = new ItemStack(Material.PAPER);
         ItemMeta nextPageMeta = nextPage.getItemMeta();
 
-        nextPageMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&dPage Suivante"));
+        nextPageMeta.setDisplayName(ColorsUtils.translateAll("&dPage Suivante"));
         nextPageMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Page &7" + (currentPage + 1) + "&8/&7" + totalPage)
+                ColorsUtils.translateAll("&8Page &7" + (currentPage + 1) + "&8/&7" + totalPage)
         ));
 
         nextPage.setItemMeta(nextPageMeta);

@@ -1,5 +1,6 @@
 package fr.blockincraft.faylisia.items.weapons;
 
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +25,7 @@ public class WeaponAbilityItem extends WeaponItem implements AbilityItemModel {
      */
     @Override
     @NotNull
-    protected List<String> moreLore() {
+    protected List<String> moreLore(CustomItemStack customItemStack) {
         List<String> lore = new ArrayList<>();
 
         lore.add("");
@@ -101,26 +102,31 @@ public class WeaponAbilityItem extends WeaponItem implements AbilityItemModel {
         return this;
     }
 
+    @Override
     @NotNull
-    public Ability getAbility() {
+    public Ability getAbility(CustomItemStack customItemStack) {
         return ability;
     }
 
+    @Override
     @NotNull
-    public String getAbilityName() {
+    public String getAbilityName(CustomItemStack customItemStack) {
         return abilityName;
     }
 
+    @Override
     @NotNull
-    public String[] getAbilityDesc() {
+    public String[] getAbilityDesc(CustomItemStack customItemStack) {
         return abilityDesc;
     }
 
-    public long getUseCost() {
+    @Override
+    public long getUseCost(CustomItemStack customItemStack) {
         return useCost;
     }
 
-    public int getCooldown() {
+    @Override
+    public int getCooldown(CustomItemStack customItemStack) {
         return cooldown;
     }
 
@@ -130,7 +136,7 @@ public class WeaponAbilityItem extends WeaponItem implements AbilityItemModel {
      */
     @Override
     @NotNull
-    protected String getType() {
+    protected String getType(CustomItemStack customItemStack) {
         return "ARME MAGIQUE";
     }
 }

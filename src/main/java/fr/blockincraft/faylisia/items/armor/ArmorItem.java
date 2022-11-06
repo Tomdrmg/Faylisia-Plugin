@@ -1,9 +1,12 @@
 package fr.blockincraft.faylisia.items.armor;
 
 import fr.blockincraft.faylisia.items.CustomItem;
+import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.StatsItemModel;
+import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 import fr.blockincraft.faylisia.player.Stats;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.TextUtils;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,21 +60,21 @@ public class ArmorItem extends CustomItem implements StatsItemModel {
 
     @Override
     @NotNull
-    public List<String> firstLore() {
-        List<String> lore = new ArrayList<>();
+    public List<String> firstLore(CustomItemStack customItemStack) {
+        /*List<String> lore = new ArrayList<>();
 
         List<Map.Entry<Stats, Double>> sorted = stats.entrySet().stream().sorted((o1, o2) -> o1.getKey().index - o2.getKey().index).toList();
 
         sorted.forEach(entry -> {
             lore.add(ColorsUtils.translateAll("&7" + entry.getKey().name + " &" + entry.getKey().color + "+" + entry.getValue()));
-        });
+        });*/
 
-        return lore;
+        return TextUtils.genStatsLore(customItemStack, this);
     }
 
     @Override
     @NotNull
-    protected List<String> moreLore() {
+    protected List<String> moreLore(CustomItemStack customItemStack) {
         List<String> lore = new ArrayList<>();
 
         if (this.armorSet != null) {
@@ -115,13 +118,16 @@ public class ArmorItem extends CustomItem implements StatsItemModel {
     }
 
     @Override
-    public double getStat(@NotNull Stats stat) {
-        return stats.get(stat);
-    }
+    public double getStat(@NotNull Stats stat, CustomItemStack customItemStack) {
+        double value = stats.containsKey(stat) ? stats.get(stat) : 0;
 
-    @Override
-    public boolean hasStat(@NotNull Stats stat) {
-        return stats.get(stat) != null;
+        if (this.isEnchantable(customItemStack)) {
+            for (Map.Entry<CustomEnchantments, Integer> entry : customItemStack.getEnchantments().entrySet()) {
+                value += entry.getKey().statsBonus.itemStat(customItemStack, stat, entry.getValue());
+            }
+        }
+
+        return value;
     }
 
     /**
@@ -149,13 +155,13 @@ public class ArmorItem extends CustomItem implements StatsItemModel {
 
     @Override
     @NotNull
-    public Map<Stats, Double> getStats() {
+    public Map<Stats, Double> getStats(CustomItemStack customItemStack) {
         return new HashMap<>(stats);
     }
 
     @Override
     @NotNull
-    protected String getType() {
+    protected String getType(CustomItemStack customItemStack) {
         return "PIECE D'ARMURE";
     }
 }

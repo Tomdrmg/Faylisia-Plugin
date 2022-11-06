@@ -1,16 +1,17 @@
 package fr.blockincraft.faylisia.items;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.Registry;
-import fr.blockincraft.faylisia.api.serializer.CustomItemSerializer;
+import fr.blockincraft.faylisia.items.enchantment.CustomEnchantments;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.items.recipes.Recipe;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.TextUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,13 +21,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
  * A custom item, similar to a {@link Material} but custom
  */
-@JsonSerialize(using = CustomItemSerializer.class)
 public class CustomItem {
     public static final NamespacedKey idKey = new NamespacedKey(Faylisia.getInstance(), "custom-id");
     private static final Pattern idPattern = Pattern.compile("[a-z\\d_-]+");
@@ -60,7 +62,7 @@ public class CustomItem {
      * @return created item stack
      */
     @NotNull
-    public ItemStack getAsItemStack() {
+    public ItemStack getAsItemStack(CustomItemStack customItemStack) {
         if (!registered) return null;
 
         ItemStack itemStack = new ItemStack(material);
@@ -73,22 +75,69 @@ public class CustomItem {
 
         meta.getPersistentDataContainer().set(idKey, PersistentDataType.STRING, id);
 
-        List<String> lore = new ArrayList<>(firstLore());
+        List<String> lore = new ArrayList<>(firstLore(customItemStack));
         if (this.lore.length > 0 && lore.size() > 0) lore.add("");
         for (String l : this.lore) {
             lore.add(ColorsUtils.translateAll(l));
         }
-        lore.addAll(buildLore());
+
+        if (this.hasEnchants(customItemStack)) {
+            itemStack.setItemMeta(meta);
+            itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
+            meta = itemStack.getItemMeta();
+            if (lore.size() > 0) lore.add("");
+
+            lore.addAll(this.enchantsLore(customItemStack));
+        }
+
+        lore.addAll(buildLore(customItemStack));
 
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_DYE);
         meta.setUnbreakable(true);
         meta.setCustomModelData(customModelData <= 0 ? null : customModelData);
         meta.setLore(lore);
-        meta.setDisplayName(ChatColor.getByChar(rarity.getColorChar()) + ChatColor.BOLD.toString() + name);
+        meta.setDisplayName(ColorsUtils.translateAll(rarity.colorChar + "&l" + name));
 
         itemStack.setItemMeta(meta);
 
         return itemStack;
+    }
+
+    @NotNull
+    protected List<String> enchantsLore(CustomItemStack customItemStack) {
+        List<String> lore = new ArrayList<>();
+
+        List<Map.Entry<CustomEnchantments, Integer>> enchants = this.getEnchants(customItemStack).entrySet().stream().sorted(
+               (o1, o2) -> o1.getKey().index - o2.getKey().index
+        ).toList();
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < enchants.size(); i++) {
+            CustomEnchantments enchant = enchants.get(i).getKey();
+            int level = enchants.get(i).getValue();
+
+            if (i % 2 == 0) {
+                sb = new StringBuilder("&7" + enchant.nameDependingOfLevel.getName(level, enchant.name) + " " + TextUtils.intToRoman(level));
+                if (i == enchants.size() - 1) {
+                    lore.add(ColorsUtils.translateAll(sb.toString()));
+                }
+            } else {
+                sb.append("&7, ").append(enchant.nameDependingOfLevel.getName(level, enchant.name)).append(" ").append(TextUtils.intToRoman(level));
+                lore.add(ColorsUtils.translateAll(sb.toString()));
+            }
+        }
+
+        return lore;
+    }
+
+    protected boolean hasEnchants(CustomItemStack customItemStack) {
+        return this.enchantable && customItemStack.getEnchantments().size() > 0;
+    }
+
+    protected Map<CustomEnchantments, Integer> getEnchants(CustomItemStack customItemStack) {
+        if (!hasEnchants(customItemStack)) return new HashMap<>();
+
+        return customItemStack.getEnchantments();
     }
 
     /**
@@ -96,7 +145,7 @@ public class CustomItem {
      * @return text to display
      */
     @NotNull
-    protected List<String> firstLore() {
+    protected List<String> firstLore(CustomItemStack customItemStack) {
         return new ArrayList<>();
     }
 
@@ -105,27 +154,27 @@ public class CustomItem {
      * @return text to display
      */
     @NotNull
-    protected List<String> buildLore() {
+    protected List<String> buildLore(CustomItemStack customItemStack) {
         // Get other lore part to display before rarity
-        List<String> lore = new ArrayList<>(moreLore());
+        List<String> lore = new ArrayList<>(moreLore(customItemStack));
 
         lore.add("");
-        lore.add(rarity.magicalChars() ?
-                ChatColor.getByChar(rarity.getColorChar()).toString() + ChatColor.BOLD + ChatColor.MAGIC + "۞ " + ChatColor.RESET + ChatColor.getByChar(rarity.getColorChar()) + ChatColor.BOLD + getType() + " " + rarity.getName() + ChatColor.MAGIC + " ۞"
+        lore.add(ColorsUtils.translateAll(rarity.magicalChars ?
+                rarity.colorChar + "&l&k۞ &r" + rarity.colorChar + "&l" + getType(customItemStack) + " " + rarity.name + " &k۞"
                 :
-                ChatColor.getByChar(rarity.getColorChar()).toString() + ChatColor.BOLD + "۞ " + getType() + " " + rarity.getName() + " ۞"
-        );
+                rarity.colorChar + "&l۞ " + getType(customItemStack) + " " + rarity.name + " ۞"
+        ));
 
         return lore;
     }
 
     /**
-     * Second lore part, this is lore which will be displayed after {@link CustomItem#lore} but before {@link CustomItem#buildLore()} <br/>
+     * Second lore part, this is lore which will be displayed after {@link CustomItem#lore} but before {@link CustomItem#buildLore(CustomItemStack)} <br/>
      * This is util for subclasses
      * @return text to display
      */
     @NotNull
-    protected List<String> moreLore() {
+    protected List<String> moreLore(CustomItemStack customItemStack) {
         return new ArrayList<>();
     }
 
@@ -246,34 +295,34 @@ public class CustomItem {
         return id;
     }
 
-    public int getCustomModelData() {
+    public int getCustomModelData(CustomItemStack customItemStack) {
         return customModelData;
     }
 
-    public int getColor() {
+    public int getColor(CustomItemStack customItemStack) {
         return color;
     }
 
     @Nullable
-    public String getName() {
+    public String getName(CustomItemStack customItemStack) {
         return name;
     }
 
     @NotNull
-    public String[] getLore() {
+    public String[] getLore(CustomItemStack customItemStack) {
         return lore;
     }
 
-    public boolean isEnchantable() {
+    public boolean isEnchantable(CustomItemStack customItemStack) {
         return enchantable;
     }
 
-    public boolean isDisenchantable() {
+    public boolean isDisenchantable(CustomItemStack customItemStack) {
         return disenchantable;
     }
 
     @NotNull
-    public Rarity getRarity() {
+    public Rarity getRarity(CustomItemStack customItemStack) {
         return rarity;
     }
 
@@ -311,11 +360,11 @@ public class CustomItem {
 
     /**
      * Get the object type like object, weapon, armor..., to override in subclasses <br/>
-     * Principally used to build lore {@link CustomItem#buildLore()}
+     * Principally used to build lore {@link CustomItem#buildLore(CustomItemStack)}
      * @return item type
      */
     @NotNull
-    protected String getType() {
+    protected String getType(CustomItemStack customItemStack) {
         return "OBJET";
     }
 

@@ -30,14 +30,14 @@ public class ActionBar {
         CustomPlayerDTO customPlayer = registry.getOrRegisterPlayer(player.getUniqueId());
 
         WrappedChatComponent chat =  WrappedChatComponent.fromLegacyText(ColorsUtils.translateAll(format
-                .replace("%health_color%", "&" + Stats.HEALTH.color)
+                .replace("%health_color%", Stats.HEALTH.color)
                 .replace("%health%", TextUtils.valueWithCommas(customPlayer.getHealth()))
                 .replace("%max_health%", TextUtils.valueWithCommas((long) Math.floor(customPlayer.getStat(Stats.HEALTH))))
                 .replace("%health_icon%", String.valueOf(Stats.HEALTH.bigIcon))
-                .replace("%defense_color%", "&" + Stats.DEFENSE.color)
+                .replace("%defense_color%", Stats.DEFENSE.color)
                 .replace("%defense%", customPlayer.getStat(Stats.DEFENSE) < 10.0 ? "\\_" + TextUtils.valueWithCommas((long) customPlayer.getStat(Stats.DEFENSE)) : TextUtils.valueWithCommas((long) customPlayer.getStat(Stats.DEFENSE)))
                 .replace("%defense_icon%", String.valueOf(Stats.DEFENSE.bigIcon))
-                .replace("%magical_reserve_color%", "&" + Stats.MAGICAL_RESERVE.color)
+                .replace("%magical_reserve_color%", Stats.MAGICAL_RESERVE.color)
                 .replace("%magical_reserve%", TextUtils.valueWithCommas(customPlayer.getMagicalReserve()))
                 .replace("%max_magical_reserve%", TextUtils.valueWithCommas((long) Math.floor(customPlayer.getStat(Stats.MAGICAL_RESERVE))))
                 .replace("%magical_reserve_icon%", String.valueOf(Stats.MAGICAL_RESERVE.bigIcon))

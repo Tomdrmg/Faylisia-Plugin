@@ -5,6 +5,7 @@ import fr.blockincraft.faylisia.configurable.Messages;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
 import fr.blockincraft.faylisia.core.entity.CustomPlayer;
 import fr.blockincraft.faylisia.player.Classes;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -50,10 +51,10 @@ public class ClassMenu extends ChestMenu {
             ItemMeta returnItemMeta = returnItem.getItemMeta();
 
             // Change display name and lore
-            returnItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&cRetour"));
+            returnItemMeta.setDisplayName(ColorsUtils.translateAll("&cRetour"));
             returnItemMeta.setLore(Arrays.asList(
-                    ChatColor.translateAlternateColorCodes('&', "&8Clique pour retourner"),
-                    ChatColor.translateAlternateColorCodes('&', "&8en arrière.")
+                    ColorsUtils.translateAll("&8Clique pour retourner"),
+                    ColorsUtils.translateAll("&8en arrière.")
             ));
 
             // Update meta and change item
@@ -72,10 +73,10 @@ public class ClassMenu extends ChestMenu {
             ItemMeta closeItemMeta = closeItem.getItemMeta();
 
             // Change display name and lore
-            closeItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&cFermer"));
+            closeItemMeta.setDisplayName(ColorsUtils.translateAll("&cFermer"));
             closeItemMeta.setLore(Arrays.asList(
-                    ChatColor.translateAlternateColorCodes('&', "&8Clique pour fermer"),
-                    ChatColor.translateAlternateColorCodes('&', "&8le menu.")
+                    ColorsUtils.translateAll("&8Clique pour fermer"),
+                    ColorsUtils.translateAll("&8le menu.")
             ));
 
             // Update meta and change item

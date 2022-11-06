@@ -10,6 +10,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.Date;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Task that will be activated all two seconds to respawn {@link CustomEntity} when they are leaved their {@link Region}
@@ -33,7 +36,7 @@ public class EntityQuitRegionTask extends BukkitRunnable {
         // Retrieve all custom entities
         for (CustomEntity entity : registry.getEntities()) {
             // Only respawn if they aren't be hit in the last five seconds
-            if (entity.getEntityType().getRegion() != registry.getRegionAt(entity.getEntity().getLocation()) && (!(entity instanceof CustomLivingEntity living) || Date.from(Instant.now()).getTime() - living.getLastDamage() > 5000)) {
+            if (!List.of(Objects.requireNonNull(registry.getRegionsAt(entity.getEntity().getLocation()))).contains(entity.getEntityType().getRegion()) && (!(entity instanceof CustomLivingEntity living) || Date.from(Instant.now()).getTime() - living.getLastDamage() > 5000)) {
                 entity.teleportToSpawn();
             }
         }

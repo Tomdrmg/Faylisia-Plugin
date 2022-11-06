@@ -52,7 +52,7 @@ public class ItemsCommand extends Command {
             CustomPlayerDTO target = Faylisia.getInstance().getRegistry().getOrRegisterPlayer(players[0].getUniqueId());
 
             Map<String, String> parameters = new HashMap<>();
-            parameters.put("%item%", itemStack.getItem().getName());
+            parameters.put("%item%", itemStack.getItem().getName(itemStack));
             parameters.put("%amount%", String.valueOf(amount));
 
             if (player != null && target.getPlayer().equals(player.getPlayer())) {
@@ -67,7 +67,7 @@ public class ItemsCommand extends Command {
         } else {
             Map<String, String> parameters = new HashMap<>();
 
-            parameters.put("%item%", itemStack.getItem().getName());
+            parameters.put("%item%", itemStack.getItem().getName(itemStack));
             parameters.put("%player_name%", player == null ? "La Console" : player.getNameToUse());
             parameters.put("%amount%", String.valueOf(amount));
 

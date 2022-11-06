@@ -5,6 +5,7 @@ import fr.blockincraft.faylisia.Registry;
 import fr.blockincraft.faylisia.entity.interaction.MobEntityType;
 import fr.blockincraft.faylisia.entity.loot.Loot;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
+import fr.blockincraft.faylisia.utils.HandlersUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
@@ -50,6 +51,12 @@ public class CustomLivingEntity extends CustomEntity {
         registry.removeEntity(this);
 
         if (killer != null) {
+            HandlersUtils.callHandlers(registry.getOrRegisterPlayer(killer.getUniqueId()), "killMob", new HandlersUtils.Parameter[]{
+                    new HandlersUtils.Parameter(killer, Player.class),
+                    new HandlersUtils.Parameter(this, CustomLivingEntity.class),
+                    new HandlersUtils.Parameter(this.getEntityType(), MobEntityType.class)
+            });
+
             for (Loot loot : getEntityType().getLoots()) {
                 for (ItemStack stack : loot.generateFor(killer)) {
                     PlayerUtils.giveOrDrop(killer, stack);

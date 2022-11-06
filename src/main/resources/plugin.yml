@@ -52,6 +52,9 @@ commands:
   flyspeed:
     description: Command to change fly speed
     permission: faylisia.command.flyspeed
+  summon:
+    description: Command to summon entities
+    permission: faylisia.command.summon
 permissions:
   faylisia.command.break:
     default: op
@@ -131,3 +134,7 @@ permissions:
     default: true
   faylisia.items.recipe:
     default: true
+  faylisia.command.summon:
+    default: op
+  faylisia.summon:
+    default: op

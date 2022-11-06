@@ -2,7 +2,6 @@ package fr.blockincraft.faylisia.items.enchantment;
 
 import fr.blockincraft.faylisia.Faylisia;
 import fr.blockincraft.faylisia.core.dto.CustomPlayerDTO;
-import fr.blockincraft.faylisia.core.entity.CustomPlayer;
 import fr.blockincraft.faylisia.entity.CustomEntity;
 import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
@@ -15,6 +14,7 @@ import fr.blockincraft.faylisia.player.Stats;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -24,29 +24,27 @@ import java.util.Arrays;
  * Custom entchantments contain a {@link Handlers} which is called with others player handlers
  */
 public enum CustomEnchantments {
-    PROTECTION(0, "Protection", new EnchantmentHandlersIn(-1) {
-        @Override
-        public double getDefaultStat(@NotNull Player player, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
-            return inArmorSlot && stat == Stats.DEFENSE ? value + 25 * level : value;
+    PROTECTION(0, "Protection", (customItemStack, stat, enchantLevel) -> {
+        if (stat == Stats.DEFENSE) {
+            return 25 * enchantLevel;
         }
 
+        return 0;
+    }, new EnchantmentHandlersIn(-1), (customItemStack, enchantLevel) -> 0, 4, 4, new Class[]{ArmorItem.class}, new CustomEnchantments[0]),
+    ABSORPTION(1, "Absorption", (customItemStack, stat, enchantLevel) -> 0, new EnchantmentHandlersIn(-1) {
         @Override
-        public double calculateItemStat(@NotNull Player player, @NotNull CustomItem customItem, @NotNull Stats stat, double value, boolean inHand, boolean inArmorSlot) {
-            return inArmorSlot && stat == Stats.DEFENSE ? value + 25 * level : value;
-        }
-    }, 4, 4, new Class[]{ArmorItem.class}, new CustomEnchantments[0]),
-    ABSORPTION(1, "Absorption", new EnchantmentHandlersIn(-1) {
-        @Override
-        public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot) {
+        public long onDamage(@NotNull Player player, @NotNull CustomEntity customEntity, @NotNull DamageType damageType, long damage, boolean inHand, boolean inArmorSlot, @Nullable CustomItemStack thisItemStack) {
             CustomPlayerDTO custom = Faylisia.getInstance().getRegistry().getOrRegisterPlayer(player.getUniqueId());
             custom.setEffectiveHealth((long) (custom.getEffectiveHealth() + custom.getEffectiveHealth() * 0.0015 * level));
             return damage;
         }
-    }, 5, 5, new Class[]{DamageItemModel.class}, new CustomEnchantments[0]);
+    }, (customItemStack, enchantLevel) -> 0, 5, 5, new Class[]{DamageItemModel.class}, new CustomEnchantments[0]);
 
     public final int index;
     public final String name;
+    public final StatsBonus statsBonus;
     public final EnchantmentHandlers handlers;
+    public final DamageBonus damageBonus;
     public final int maxLevel;
     public final int maxFusionLevel;
     public final Class<? extends CustomItem>[] itemTypes;
@@ -57,22 +55,24 @@ public enum CustomEnchantments {
     /**
      * Constructor without more validation and custom level name
      */
-    CustomEnchantments(int index, @NotNull String name, @NotNull EnchantmentHandlers handlers, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts) {
-        this(index, name, handlers, maxLevel, maxFusionLevel, itemTypes, conflicts, item -> true);
+    CustomEnchantments(int index, @NotNull String name, @NotNull CustomEnchantments.StatsBonus statsBonus, @NotNull EnchantmentHandlers handlers, @NotNull DamageBonus damageBonus, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts) {
+        this(index, name, statsBonus, handlers, damageBonus, maxLevel, maxFusionLevel, itemTypes, conflicts, item -> true);
     }
 
     /**
      * Constructor without custom level name
      */
-    CustomEnchantments(int index, @NotNull String name, @NotNull EnchantmentHandlers handlers, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts, @NotNull ValidateEnchantability validate) {
-        this(index, name, handlers, maxLevel, maxFusionLevel, itemTypes, conflicts, validate, (level, nameIn) -> nameIn);
+    CustomEnchantments(int index, @NotNull String name, @NotNull CustomEnchantments.StatsBonus statsBonus, @NotNull EnchantmentHandlers handlers, @NotNull DamageBonus damageBonus, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts, @NotNull ValidateEnchantability validate) {
+        this(index, name, statsBonus, handlers, damageBonus, maxLevel, maxFusionLevel, itemTypes, conflicts, validate, (level, nameIn) -> nameIn);
     }
 
     /**
      * Full constructor
      * @param index index used to sort enchantments on rendering them
      * @param name display name of enchantment
+     * @param statsBonus stats to add to item
      * @param handlers handlers to make enchantment functions
+     * @param damageBonus damage bonus to add to item
      * @param maxLevel maximum level obtaining
      * @param maxFusionLevel maximum level obtaining by fusion of enchantment lacryma
      * @param itemTypes types of item which can have this
@@ -80,10 +80,12 @@ public enum CustomEnchantments {
      * @param validate more validation function
      * @param nameDependingOfLevel different name depending on enchantment level function
      */
-    CustomEnchantments(int index, @NotNull String name, @NotNull EnchantmentHandlers handlers, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts, @NotNull ValidateEnchantability validate, @NotNull NameDependingOfLevel nameDependingOfLevel) {
+    CustomEnchantments(int index, @NotNull String name, @NotNull CustomEnchantments.StatsBonus statsBonus, @NotNull EnchantmentHandlers handlers, @NotNull DamageBonus damageBonus, int maxLevel, int maxFusionLevel, @NotNull Class<? extends CustomItem>[] itemTypes, @NotNull CustomEnchantments[] conflicts, @NotNull ValidateEnchantability validate, @NotNull NameDependingOfLevel nameDependingOfLevel) {
         this.index = index;
         this.name = name;
+        this.statsBonus = statsBonus;
         this.handlers = handlers;
+        this.damageBonus = damageBonus;
         this.maxLevel = maxLevel;
         this.maxFusionLevel = maxFusionLevel;
         this.itemTypes = itemTypes;
@@ -99,7 +101,7 @@ public enum CustomEnchantments {
      */
     public boolean canBeApplyOn(@NotNull CustomItem on) {
         // Check if item is enchantable
-        if (!on.isEnchantable()) {
+        if (!on.isEnchantable(new CustomItemStack(on, 1))) {
             return false;
         }
 
@@ -140,9 +142,19 @@ public enum CustomEnchantments {
     }
 
     @FunctionalInterface
+    public interface StatsBonus {
+        double itemStat(CustomItemStack customItemStack, Stats stat, int enchantLevel);
+    }
+
+    @FunctionalInterface
+    public interface DamageBonus {
+        int itemDamage(CustomItemStack customItemStack, int enchantLevel);
+    }
+
+    @FunctionalInterface
     public interface ValidateEnchantability {
         /**
-         * Function called to validate if an item can be enchanted, before calling this, we have already check {@link CustomItem#isEnchantable()} and
+         * Function called to validate if an item can be enchanted, before calling this, we have already check {@link CustomItem#isEnchantable(CustomItemStack)} and
          * conflicts. This can be util to make enchantment only usable on specific {@link Material}
          * @param item item to check
          * @return if enchant can be applied on this item

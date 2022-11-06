@@ -5,6 +5,7 @@ import fr.blockincraft.faylisia.items.CustomItem;
 import fr.blockincraft.faylisia.items.CustomItemStack;
 import fr.blockincraft.faylisia.items.management.Categories;
 import fr.blockincraft.faylisia.menu.ChestMenu;
+import fr.blockincraft.faylisia.utils.ColorsUtils;
 import fr.blockincraft.faylisia.utils.PlayerUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -37,7 +38,7 @@ public class CategoryViewerMenu extends ChestMenu {
      * @param withGive if player can give him custom items
      */
     public CategoryViewerMenu(ChestMenu from, Categories category, boolean withGive) {
-        super("&8&lItems &d&l> &8&l" + ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', category.name)), 6);
+        super("&8&lItems &d&l> &8&l" + net.md_5.bungee.api.ChatColor.stripColor(ColorsUtils.translateAll(category.name)), 6);
 
         this.from = from;
         this.category = category;
@@ -114,10 +115,10 @@ public class CategoryViewerMenu extends ChestMenu {
         ItemStack wiki = new ItemStack(Material.BOOK);
         ItemMeta wikiMeta = wiki.getItemMeta();
 
-        wikiMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&dWiki"));
+        wikiMeta.setDisplayName(ColorsUtils.translateAll("&dWiki"));
         wikiMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Clique pour accéder"),
-                ChatColor.translateAlternateColorCodes('&', "&8au wiki")
+                ColorsUtils.translateAll("&8Clique pour accéder"),
+                ColorsUtils.translateAll("&8au wiki")
         ));
 
         wiki.setItemMeta(wikiMeta);
@@ -134,9 +135,9 @@ public class CategoryViewerMenu extends ChestMenu {
         ItemStack previousPage = new ItemStack(Material.PAPER);
         ItemMeta previousPageMeta = previousPage.getItemMeta();
 
-        previousPageMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&dPage Précédente"));
+        previousPageMeta.setDisplayName(ColorsUtils.translateAll("&dPage Précédente"));
         previousPageMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Page &7" + (currentPage + 1) + "&8/&7" + totalPage)
+                ColorsUtils.translateAll("&8Page &7" + (currentPage + 1) + "&8/&7" + totalPage)
         ));
 
         previousPage.setItemMeta(previousPageMeta);
@@ -153,10 +154,10 @@ public class CategoryViewerMenu extends ChestMenu {
             ItemStack returnItem = new ItemStack(Material.BARRIER);
             ItemMeta returnItemMeta = returnItem.getItemMeta();
 
-            returnItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&cRetour"));
+            returnItemMeta.setDisplayName(ColorsUtils.translateAll("&cRetour"));
             returnItemMeta.setLore(Arrays.asList(
-                    ChatColor.translateAlternateColorCodes('&', "&8Clique pour retourner"),
-                    ChatColor.translateAlternateColorCodes('&', "&8en arrière.")
+                    ColorsUtils.translateAll("&8Clique pour retourner"),
+                    ColorsUtils.translateAll("&8en arrière.")
             ));
 
             returnItem.setItemMeta(returnItemMeta);
@@ -172,10 +173,10 @@ public class CategoryViewerMenu extends ChestMenu {
             ItemStack closeItem = new ItemStack(Material.BARRIER);
             ItemMeta closeItemMeta = closeItem.getItemMeta();
 
-            closeItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&cFermer"));
+            closeItemMeta.setDisplayName(ColorsUtils.translateAll("&cFermer"));
             closeItemMeta.setLore(Arrays.asList(
-                    ChatColor.translateAlternateColorCodes('&', "&8Clique pour fermer"),
-                    ChatColor.translateAlternateColorCodes('&', "&8le menu.")
+                    ColorsUtils.translateAll("&8Clique pour fermer"),
+                    ColorsUtils.translateAll("&8le menu.")
             ));
 
             closeItem.setItemMeta(closeItemMeta);
@@ -191,9 +192,9 @@ public class CategoryViewerMenu extends ChestMenu {
         ItemStack nextPage = new ItemStack(Material.PAPER);
         ItemMeta nextPageMeta = nextPage.getItemMeta();
 
-        nextPageMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&dPage Suivante"));
+        nextPageMeta.setDisplayName(ColorsUtils.translateAll("&dPage Suivante"));
         nextPageMeta.setLore(Arrays.asList(
-                ChatColor.translateAlternateColorCodes('&', "&8Page &7" + (currentPage + 1) + "&8/&7" + totalPage)
+                ColorsUtils.translateAll("&8Page &7" + (currentPage + 1) + "&8/&7" + totalPage)
         ));
 
         nextPage.setItemMeta(nextPageMeta);
@@ -225,9 +226,9 @@ public class CategoryViewerMenu extends ChestMenu {
         List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
 
         // Add click indications
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8&m--------------------------"));
-        lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique pour voir les crafts"));
-        if (withGive) lore.add(ChatColor.translateAlternateColorCodes('&', "&8Clique molette pour l'obtenir"));
+        lore.add(ColorsUtils.translateAll("&8&m--------------------------"));
+        lore.add(ColorsUtils.translateAll("&8Clique pour voir les crafts"));
+        if (withGive) lore.add(ColorsUtils.translateAll("&8Clique molette pour l'obtenir"));
 
         // Apply new lore
         meta.setLore(lore);

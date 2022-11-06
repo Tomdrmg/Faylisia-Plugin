@@ -85,15 +85,10 @@ public class MobEntityType extends CustomEntityType implements DifficultyEntityM
     }
 
     @Override
-    @Nullable
-    public CustomLivingEntity spawn(int x, int y, int z) {
+    @NotNull
+    public CustomLivingEntity spawn(int x, int y, int z, @NotNull World world) {
         if (!isRegistered()) throw new RuntimeException("CANNOT SPAWN AN NON REGISTERED ENTITY!");
 
-        World world = Bukkit.getWorld("world");
-        if (world == null) return null;
-
-        CustomLivingEntity customEntity = new CustomLivingEntity(this, world, x, y, z);
-
-        return customEntity;
+        return new CustomLivingEntity(this, world, x, y, z);
     }
 }

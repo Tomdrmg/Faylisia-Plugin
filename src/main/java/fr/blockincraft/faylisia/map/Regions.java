@@ -1,6 +1,7 @@
 package fr.blockincraft.faylisia.map;
 
 import fr.blockincraft.faylisia.Faylisia;
+import fr.blockincraft.faylisia.map.shapes.Rectangle;
 import fr.blockincraft.faylisia.utils.ColorsUtils;
 
 /**
@@ -8,154 +9,158 @@ import fr.blockincraft.faylisia.utils.ColorsUtils;
  */
 public class Regions {
     // Create regions
-    public static final Region WILDERNESS = new ShapedRegion("wilderness", "&7Wilderness"); // Default region is everywhere, so we don't need to specify an area
-    public static final ColorRegion R1 = (ColorRegion) new ColorRegion("r1", "#9eeaffRégion 1")
+    public static final Region WILDERNESS = new ShapedRegion("wilderness", "#636363None"); // Default region is everywhere, so we don't need to specify an area
+    public static final Region OCEAN = new ShapedRegion("ocean", "#046fe0Océan")
+            .addArea(new Rectangle(-6820, -4290, 6820, 4290))
+            .setParent(Regions.WILDERNESS)
+            .setLeaveAction((player, previousRegions, newRegions, thisRegion) -> false);
+    public static final ColorRegion HILIPIA = (ColorRegion) new ColorRegion("hilipia", "#9eeaffHilipia")
             .setColor(0xff9eeaff)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R2 = (ColorRegion) new ColorRegion("r2", "#fc7cffRégion 2")
+    public static final ColorRegion LANORE = (ColorRegion) new ColorRegion("lanore", "#fc7cffLanore")
             .setColor(0xfffc7cff)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R3 = (ColorRegion) new ColorRegion("r3", "#edffc9Région 3")
+    public static final ColorRegion PROVINCE_DE_SUGIS = (ColorRegion) new ColorRegion("province_de_sugis", "#edffc9Province De Sûgis")
             .setColor(0xffedffc9)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R4 = (ColorRegion) new ColorRegion("r4", "#ff837aRégion 4")
+    public static final ColorRegion ROYAUME_DHOSEG = (ColorRegion) new ColorRegion("royaume_dhoseg", "#ff837aRoyaume D'Hoseg")
             .setColor(0xffff837a)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion ORMON_EMPIRE = (ColorRegion) new ColorRegion("ormon_empire", "#ff00d4Empire d'Ormon")
+    public static final ColorRegion EMPIRE_DORMON = (ColorRegion) new ColorRegion("empire_dormon", "#ff00d4Empire D'Ormon")
             .setColor(0xffff00d4)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R6 = (ColorRegion) new ColorRegion("r6", "#00ff90Région 6")
+    public static final ColorRegion PAYS_DE_NEMEE = (ColorRegion) new ColorRegion("pays_de_nemee", "#00ff90Pays De Némée")
             .setColor(0xff00ff90)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R7 = (ColorRegion) new ColorRegion("r7", "#ffe68cRégion 7")
+    public static final ColorRegion ROYAUME_DE_MESTA = (ColorRegion) new ColorRegion("royaume_de_mesta", "#ffe68cRoyaume De Meste")
             .setColor(0xffffe68c)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R8 = (ColorRegion) new ColorRegion("r8", "#b7ffa3Région 8")
+    public static final ColorRegion TERRE_DE_SOVA = (ColorRegion) new ColorRegion("terre_de_sova", "#b7ffa3Terre De Sova")
             .setColor(0xffb7ffa3)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R9 = (ColorRegion) new ColorRegion("r9", "#aa00ffRégion 9")
+    public static final ColorRegion ROYAUME_DE_LA_LUEUR = (ColorRegion) new ColorRegion("royaume_de_la_lueur", "#aa00ffRoyaume De La Lueur")
             .setColor(0xffaa00ff)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R10 = (ColorRegion) new ColorRegion("r10", "#aab4ffRégion 10")
+    public static final ColorRegion ROYAUME_INTERDIT = (ColorRegion) new ColorRegion("royaume_interdit", "#aab4ffRoyaume Interdit")
             .setColor(0xffaab4ff)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R11 = (ColorRegion) new ColorRegion("r11", "#00fff6Région 11")
+    public static final ColorRegion TERRE_DE_LA_CONFLAGRATION = (ColorRegion) new ColorRegion("terre_de_la_conflagration", "#00fff6Terre De La Conflagration")
             .setColor(0xff00fff6)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R12 = (ColorRegion) new ColorRegion("r12", "#ffc9c9Région 12")
+    public static final ColorRegion LA_VERDURE_DE_CLIDEDRIA = (ColorRegion) new ColorRegion("la_verdure_de_clideria", "#ffc9c9La Verdure De Clidéria")
             .setColor(0xffffc9c9)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R13 = (ColorRegion) new ColorRegion("r13", "#00ff19Région 13")
+    public static final ColorRegion CONTREE_DE_BRESIA = (ColorRegion) new ColorRegion("contree_de_bresia", "#00ff19Contrée De Brésia")
             .setColor(0xff00ff19)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R14 = (ColorRegion) new ColorRegion("r14", "#aaffd3Région 14")
+    public static final ColorRegion LA_CONTREE_ENCHANTEE = (ColorRegion) new ColorRegion("la_contree_enchantee", "#aaffd3La Contrée Enchantée")
             .setColor(0xffaaffd3)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R15 = (ColorRegion) new ColorRegion("r15", "#ff0043Région 15")
+    public static final ColorRegion BIGARRIUM = (ColorRegion) new ColorRegion("bigarrium", "#ff0043Bigarrium")
             .setColor(0xffff0043)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R16 = (ColorRegion) new ColorRegion("r16", "#e3a3ffRégion 16")
+    public static final ColorRegion ROYAUME_CORROMPU = (ColorRegion) new ColorRegion("royaume_corrompu", "#e3a3ffRoyaume Corrompu")
             .setColor(0xffe3a3ff)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R17 = (ColorRegion) new ColorRegion("r17", "#9dff00Région 17")
+    public static final ColorRegion ROYAUME_DE_NEHMA = (ColorRegion) new ColorRegion("royaume_de_nehma", "#9dff00Royaume De Néhma")
             .setColor(0xff9dff00)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R18 = (ColorRegion) new ColorRegion("r18", "#ffe100Région 18")
+    public static final ColorRegion JADIA = (ColorRegion) new ColorRegion("jadia", "#ffe100Jadia")
             .setColor(0xffffe100)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
                 return true;
             });
-    public static final ColorRegion R19 = (ColorRegion) new ColorRegion("r19", "#ff6e00Région 19")
+    public static final ColorRegion TERRE_DE_NOSTRA = (ColorRegion) new ColorRegion("terre_de_nostra", "#ff6e00Terre De Nostra")
             .setColor(0xffff6e00)
-            .setParent(Regions.WILDERNESS)
+            .setParent(Regions.OCEAN)
             .setEnterAction((player, previousRegions, newRegions, thisRegion) -> {
                 player.resetTitle();
                 player.sendTitle(ColorsUtils.translateAll(thisRegion.getName()), "", 10, 70, 20);
@@ -166,25 +171,27 @@ public class Regions {
     static {
         WILDERNESS.register();
 
-        R1.register();
-        R2.register();
-        R3.register();
-        R4.register();
-        ORMON_EMPIRE.register();
-        R6.register();
-        R7.register();
-        R8.register();
-        R9.register();
-        R10.register();
-        R11.register();
-        R12.register();
-        R13.register();
-        R14.register();
-        R15.register();
-        R16.register();
-        R17.register();
-        R18.register();
-        R19.register();
+        OCEAN.register();
+
+        HILIPIA.register();
+        LANORE.register();
+        PROVINCE_DE_SUGIS.register();
+        ROYAUME_DHOSEG.register();
+        EMPIRE_DORMON.register();
+        PAYS_DE_NEMEE.register();
+        ROYAUME_DE_MESTA.register();
+        TERRE_DE_SOVA.register();
+        ROYAUME_DE_LA_LUEUR.register();
+        ROYAUME_INTERDIT.register();
+        TERRE_DE_LA_CONFLAGRATION.register();
+        LA_VERDURE_DE_CLIDEDRIA.register();
+        CONTREE_DE_BRESIA.register();
+        LA_CONTREE_ENCHANTEE.register();
+        BIGARRIUM.register();
+        ROYAUME_CORROMPU.register();
+        ROYAUME_DE_NEHMA.register();
+        JADIA.register();
+        TERRE_DE_NOSTRA.register();
 
         Faylisia.getInstance().getRegistry().setDefaultRegion(WILDERNESS);
     }

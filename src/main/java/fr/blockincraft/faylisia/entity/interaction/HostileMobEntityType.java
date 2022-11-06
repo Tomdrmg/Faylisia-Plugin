@@ -56,15 +56,10 @@ public class HostileMobEntityType extends MobEntityType implements HostileEntity
     }
 
     @Override
-    @Nullable
-    public HostileCustomLivingEntity spawn(int x, int y, int z) {
+    @NotNull
+    public HostileCustomLivingEntity spawn(int x, int y, int z, @NotNull World world) {
         if (!isRegistered()) throw new RuntimeException("CANNOT SPAWN AN NON REGISTERED ENTITY!");
 
-        World world = Bukkit.getWorld("world");
-        if (world == null) return null;
-
-        HostileCustomLivingEntity customEntity = new HostileCustomLivingEntity(this, world, x, y, z);
-
-        return customEntity;
+        return new HostileCustomLivingEntity(this, world, x, y, z);
     }
 }
