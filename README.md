@@ -1,7 +1,7 @@
 # Faylisia Core Plugin
 Plugin utilisé pour créer le serveur Faylisia
 
-> Le plugin est conçu de manière à rendre la création d'objets, d'entités et d'enchantements **rapide** est **facile**.
+> Le plugin est conçu de manière à rendre la création d'objets, d'entités et d'enchantements **rapide** et **facile**.
 >> Lors de la création de contenue dans le plugin veuillez mettre des commentaires en **anglais** pour décrire les actions faites
 
 > Si vous avez besoin d'aide / une suggestion / besoin de plus de méthodes pour rendre le code facile : me mp sur discord ou aller faire un ticket sur le serveur discord
