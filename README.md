@@ -1,4 +1,4 @@
-> Projet archivé, abandonné pour manque de temps
+> Projet archivé, abandonné par manque de temps
 
 # Faylisia Core Plugin
 Plugin utilisé pour créer le serveur Faylisia
